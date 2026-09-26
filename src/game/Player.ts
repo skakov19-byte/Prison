@@ -58,7 +58,7 @@ export class Player {
       meleeDamage: 20,
       rangedDamage: 15,
       moveSpeed: 200,
-      jumpForce: 400,
+      jumpForce: 480,
       maxAmmo: 12,
       currentAmmo: 12,
       reloadTime: 1.5,
@@ -144,7 +144,12 @@ export class Player {
     }
   }
 
-  update(dt: number, input: InputState, platforms: Platform[], ladders: { x: number; y: number; width: number; height: number }[]): void {
+  levelWidth: number = 2000;
+  levelHeight: number = 740;
+
+  update(dt: number, input: InputState, platforms: Platform[], ladders: { x: number; y: number; width: number; height: number }[], levelWidth?: number, levelHeight?: number): void {
+    if (levelWidth) this.levelWidth = levelWidth;
+    if (levelHeight) this.levelHeight = levelHeight;
     if (this.meleeTimer > 0) this.meleeTimer -= dt;
     if (this.shootTimer > 0) this.shootTimer -= dt;
     if (this.reloadTimer > 0) this.reloadTimer -= dt;
@@ -174,11 +179,11 @@ export class Player {
     this.checkLadders(ladders, input);
 
     if (this.x < 20) this.x = 20;
-    if (this.x + this.width > 2380) this.x = 2380 - this.width;
-    if (this.y > 600) {
+    if (this.x + this.width > this.levelWidth - 20) this.x = this.levelWidth - 20 - this.width;
+    if (this.y > this.levelHeight) {
       this.takeDamage(20);
-      this.x = 60;
-      this.y = 500;
+      this.x = this.levelWidth > 200 ? 50 : 50;
+      this.y = this.levelHeight - 100;
       this.vx = 0;
       this.vy = 0;
     }

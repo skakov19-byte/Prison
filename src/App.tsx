@@ -27,6 +27,8 @@ export default function App() {
   const [currentWeapon, setCurrentWeapon] = useState<WeaponType>(WeaponType.MELEE);
   const [playerState, setPlayerState] = useState<PlayerState>(PlayerState.IDLE);
   const [kills, setKills] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [levelName, setLevelName] = useState('');
 
   const [shopItems, setShopItems] = useState<ShopItem[]>([
     { id: 'health', name: 'Макс. здоровье', description: '+25 к максимальному здоровью', cost: 30, icon: '❤️', maxLevel: 5, currentLevel: 0 },
@@ -43,6 +45,7 @@ export default function App() {
     setMaxAmmo(12);
     setGold(0);
     setKills(0);
+    setCurrentLevel(1);
     setScreen('playing');
   }, []);
 
@@ -68,9 +71,10 @@ export default function App() {
           onDeath: () => setScreen('dead'),
           onLevelComplete: () => setScreen('victory'),
           onEnemyKill: () => setKills(k => k + 1),
-        });
+        }, currentLevel);
 
         engineRef.current = engine;
+        setLevelName(engine.getLevelName());
         engine.start();
         console.log('Game engine started successfully');
       } catch (error) {
@@ -85,10 +89,19 @@ export default function App() {
         engineRef.current = null;
       }
     };
-  }, [screen]);
+  }, [screen, currentLevel]);
 
   const openShop = () => setScreen('shop');
   const closeShop = () => setScreen('playing');
+  
+  const goToNextLevel = () => {
+    if (engineRef.current) {
+      engineRef.current.nextLevel();
+      setCurrentLevel(engineRef.current.getCurrentLevelNumber());
+      setLevelName(engineRef.current.getLevelName());
+      setScreen('playing');
+    }
+  };
 
   const buyItem = (itemId: string) => {
     const item = shopItems.find(i => i.id === itemId);
@@ -142,6 +155,8 @@ export default function App() {
             <p><span className="text-gray-300">Q / Tab</span> — Смена оружия</p>
             <p><span className="text-gray-300">R</span> — Перезарядка</p>
             <p><span className="text-gray-300">S</span> — Падение сквозь платформу</p>
+            <p className="mt-4 text-emerald-400">🎮 3 уникальных уровня с вертикальным дизайном!</p>
+            <p className="text-xs text-gray-600">Используйте лестницы чтобы добраться до вершины</p>
           </div>
         </div>
       </div>
@@ -235,8 +250,9 @@ export default function App() {
 
         {/* HUD - Верхняя панель */}
         <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start pointer-events-none">
-          {/* Здоровье */}
+          {/* Здоровье и название уровня */}
           <div className="bg-black/70 rounded-lg p-2">
+            <p className="text-emerald-400 text-xs font-bold mb-1">Уровень {currentLevel}: {levelName}</p>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-red-400 text-sm">❤️</span>
               <div className="w-32 h-3 bg-gray-800 rounded-full overflow-hidden">
@@ -315,6 +331,7 @@ export default function App() {
         {screen === 'victory' && (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-lg">
             <h2 className="text-4xl font-bold text-emerald-400 mb-4">🎉 УРОВЕНЬ ПРОЙДЕН!</h2>
+            <p className="text-gray-300 mb-1">Уровень {currentLevel}: {levelName}</p>
             <p className="text-gray-400 mb-2">Убийств: {kills} | Золото: {gold}</p>
             <div className="flex gap-4 mt-4">
               <button
@@ -323,12 +340,21 @@ export default function App() {
               >
                 🛒 Магазин
               </button>
-              <button
-                onClick={() => { engineRef.current?.reset(); setScreen('playing'); }}
-                className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all cursor-pointer"
-              >
-                ▶ Следующий уровень
-              </button>
+              {currentLevel < 3 ? (
+                <button
+                  onClick={goToNextLevel}
+                  className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+                >
+                  ▶ Следующий уровень
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setCurrentLevel(1); engineRef.current?.reset(); setScreen('playing'); }}
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+                >
+                  🏆 Начать заново
+                </button>
+              )}
             </div>
           </div>
         )}

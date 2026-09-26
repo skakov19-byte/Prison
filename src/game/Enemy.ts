@@ -56,7 +56,10 @@ export class Enemy {
     return { x: 0, y: 0, width: 0, height: 0 };
   }
 
-  update(dt: number, playerX: number, playerY: number, platforms: Platform[]): void {
+  levelHeight: number = 740;
+
+  update(dt: number, playerX: number, playerY: number, platforms: Platform[], levelHeight?: number): void {
+    if (levelHeight) this.levelHeight = levelHeight;
     if (this.isDead) {
       this.deathTimer -= dt;
       this.updateParticles(dt);
@@ -122,8 +125,8 @@ export class Enemy {
 
     this.handleCollisions(platforms);
 
-    if (this.y > 600) {
-      this.y = 500;
+    if (this.y > this.levelHeight) {
+      this.y = this.levelHeight - 100;
       this.vy = 0;
     }
   }

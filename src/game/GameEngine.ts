@@ -7,7 +7,7 @@ import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { ObjectPool } from './ObjectPool';
 import { Renderer } from './Renderer';
-import { LevelData, createLevel1 } from './Level';
+import { LevelData, getLevel } from './Level';
 
 export interface GameCallbacks {
   onHealthChange: (health: number, maxHealth: number) => void;
@@ -28,6 +28,7 @@ export class GameEngine {
   private enemies: Enemy[] = [];
   private bulletPool: ObjectPool;
   private level: LevelData;
+  private currentLevelNumber: number;
   private input: InputState;
   private callbacks: GameCallbacks;
 
@@ -43,7 +44,7 @@ export class GameEngine {
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private keyupHandler: ((e: KeyboardEvent) => void) | null = null;
 
-  constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks) {
+  constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks, startLevel: number = 1) {
     this.canvas = canvas;
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -56,7 +57,8 @@ export class GameEngine {
     this.canvasHeight = canvas.height;
 
     this.bulletPool = new ObjectPool(100);
-    this.level = createLevel1();
+    this.currentLevelNumber = startLevel;
+    this.level = getLevel(startLevel);
 
     this.renderer = new Renderer(
       this.ctx,
@@ -185,10 +187,10 @@ export class GameEngine {
   private update(dt: number): void {
     this.readInput();
 
-    this.player.update(dt, this.input, this.level.platforms, this.level.ladders);
+    this.player.update(dt, this.input, this.level.platforms, this.level.ladders, this.level.width, this.level.height);
 
     for (const enemy of this.enemies) {
-      enemy.update(dt, this.player.x, this.player.y, this.level.platforms);
+      enemy.update(dt, this.player.x, this.player.y, this.level.platforms, this.level.height);
     }
 
     this.updateBullets(dt);
@@ -340,7 +342,7 @@ export class GameEngine {
 
   reset(): void {
     this.bulletPool.releaseAll();
-    this.level = createLevel1();
+    this.level = getLevel(this.currentLevelNumber);
     this.player = new Player(
       this.level.playerSpawn.x,
       this.level.playerSpawn.y,
@@ -351,5 +353,29 @@ export class GameEngine {
     this.player.onGoldChange = this.callbacks.onGoldChange;
     this.player.onDeath = this.callbacks.onDeath;
     this.spawnEnemies();
+  }
+
+  nextLevel(): void {
+    this.currentLevelNumber++;
+    this.bulletPool.releaseAll();
+    this.level = getLevel(this.currentLevelNumber);
+    this.player = new Player(
+      this.level.playerSpawn.x,
+      this.level.playerSpawn.y,
+      this.bulletPool
+    );
+    this.player.onHealthChange = this.callbacks.onHealthChange;
+    this.player.onAmmoChange = this.callbacks.onAmmoChange;
+    this.player.onGoldChange = this.callbacks.onGoldChange;
+    this.player.onDeath = this.callbacks.onDeath;
+    this.spawnEnemies();
+  }
+
+  getLevelName(): string {
+    return this.level.name;
+  }
+
+  getCurrentLevelNumber(): number {
+    return this.currentLevelNumber;
   }
 }
