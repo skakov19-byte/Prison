@@ -51,6 +51,7 @@ export class Renderer {
     if (level.doors) this.renderDoors(level.doors);
     if (level.pickupZones) this.renderPickupZones(level.pickupZones, enemies);
     if (level.decorations) this.renderDecorations(level.decorations);
+    if (level.exitDirection) this.renderExitIndicator(level.exitDirection, level.width, level.height);
     for (const enemy of enemies) this.renderEnemy(enemy);
     this.renderBullets(bullets);
     this.renderPlayer(player);
@@ -687,78 +688,45 @@ export class Renderer {
     }
   }
 
-  private renderExitDoor(door: { x: number; y: number; width: number; height: number }): void {
+  private renderExitIndicator(direction: 'left' | 'right', levelWidth: number, levelHeight: number): void {
     const ctx = this.ctx;
     const pulse = Math.sin(Date.now() * 0.005) * 0.3 + 0.7;
-
-    // Внешнее свечение
-    const outerGlow = ctx.createRadialGradient(
-      door.x + door.width / 2, door.y + door.height / 2, 0,
-      door.x + door.width / 2, door.y + door.height / 2, door.height
+    
+    // Позиция индикатора
+    const indicatorX = direction === 'right' ? levelWidth - 30 : 30;
+    const indicatorY = levelHeight - 150;
+    
+    // Свечение
+    const glowGradient = ctx.createRadialGradient(
+      indicatorX, indicatorY, 0,
+      indicatorX, indicatorY, 50
     );
-    outerGlow.addColorStop(0, `rgba(170, 68, 255, ${pulse * 0.5})`);
-    outerGlow.addColorStop(0.5, `rgba(170, 68, 255, ${pulse * 0.3})`);
-    outerGlow.addColorStop(1, 'rgba(170, 68, 255, 0)');
-    ctx.fillStyle = outerGlow;
-    ctx.fillRect(door.x - door.height / 2, door.y - door.height / 2, door.width + door.height, door.height * 2);
-
-    // Рама
-    ctx.fillStyle = '#2a0055';
-    ctx.fillRect(door.x - 4, door.y - 4, door.width + 8, door.height + 8);
-
-    // Дверь с градиентом
-    const gradient = ctx.createLinearGradient(door.x, door.y, door.x + door.width, door.y + door.height);
-    gradient.addColorStop(0, '#6a00cc');
-    gradient.addColorStop(0.5, '#4a0088');
-    gradient.addColorStop(1, '#220044');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(door.x, door.y, door.width, door.height);
-
-    // Внутреннее свечение
-    const innerGlow = ctx.createRadialGradient(
-      door.x + door.width / 2, door.y + door.height / 2, 0,
-      door.x + door.width / 2, door.y + door.height / 2, door.width
-    );
-    innerGlow.addColorStop(0, `rgba(200, 100, 255, ${pulse * 0.7})`);
-    innerGlow.addColorStop(0.5, `rgba(170, 68, 255, ${pulse * 0.4})`);
-    innerGlow.addColorStop(1, 'rgba(100, 0, 200, 0)');
-    ctx.fillStyle = innerGlow;
-    ctx.fillRect(door.x, door.y, door.width, door.height);
-
-    // Декоративные элементы
-    ctx.strokeStyle = '#aa44ff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(door.x + 2, door.y + 2, door.width - 4, door.height - 4);
-
-    // Углы
-    ctx.fillStyle = '#cc66ff';
-    ctx.fillRect(door.x, door.y, 5, 5);
-    ctx.fillRect(door.x + door.width - 5, door.y, 5, 5);
-    ctx.fillRect(door.x, door.y + door.height - 5, 5, 5);
-    ctx.fillRect(door.x + door.width - 5, door.y + door.height - 5, 5, 5);
-
-    // Вращающийся символ
-    ctx.save();
-    ctx.translate(door.x + door.width / 2, door.y + door.height / 2);
-    ctx.rotate(Date.now() * 0.002);
-    ctx.strokeStyle = `rgba(255, 255, 255, ${pulse})`;
-    ctx.lineWidth = 2;
+    glowGradient.addColorStop(0, `rgba(0, 255, 100, ${pulse * 0.5})`);
+    glowGradient.addColorStop(0.5, `rgba(0, 255, 100, ${pulse * 0.3})`);
+    glowGradient.addColorStop(1, 'rgba(0, 255, 100, 0)');
+    ctx.fillStyle = glowGradient;
+    ctx.fillRect(indicatorX - 50, indicatorY - 50, 100, 100);
+    
+    // Стрелка
+    ctx.fillStyle = `rgba(0, 255, 100, ${pulse})`;
     ctx.beginPath();
-    ctx.arc(0, 0, 12, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(-10, 0);
-    ctx.lineTo(10, 0);
-    ctx.moveTo(0, -10);
-    ctx.lineTo(0, 10);
-    ctx.stroke();
-    ctx.restore();
-
-    // Текст
+    if (direction === 'right') {
+      ctx.moveTo(indicatorX - 10, indicatorY - 15);
+      ctx.lineTo(indicatorX + 10, indicatorY);
+      ctx.lineTo(indicatorX - 10, indicatorY + 15);
+    } else {
+      ctx.moveTo(indicatorX + 10, indicatorY - 15);
+      ctx.lineTo(indicatorX - 10, indicatorY);
+      ctx.lineTo(indicatorX + 10, indicatorY + 15);
+    }
+    ctx.closePath();
+    ctx.fill();
+    
+    // Текст "EXIT"
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 12px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('EXIT', door.x + door.width / 2, door.y - 10);
+    ctx.fillText('EXIT', indicatorX, indicatorY - 25);
   }
 
   private renderPlayer(player: Player): void {

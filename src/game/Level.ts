@@ -68,7 +68,7 @@ export function createLevel1(): LevelData {
     { rect: { x: 0, y: 700, width: 2400, height: 40 } },
     
     // Тюремная камера (старт) - органичные стены
-    { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена
+    { rect: { x: 0, y: 0, width: 40, height: 600 } }, // Толстая левая стена (с проходом внизу)
     { rect: { x: 150, y: 0, width: 40, height: 620 } }, // Правая стена камеры (до перегородки)
     { rect: { x: 150, y: 700, width: 40, height: 40 } }, // Правая стена камеры (после двери)
     { rect: { x: 150, y: 620, width: 40, height: 28 } }, // Перегородка над дверью (чуть выше верха двери)
@@ -99,7 +99,7 @@ export function createLevel1(): LevelData {
     { rect: { x: 1600, y: 250, width: 350, height: 25 } },
     
     // Стены
-    { rect: { x: 2360, y: 0, width: 40, height: 740 } }, // Толстая правая стена
+    { rect: { x: 2360, y: 0, width: 40, height: 600 } }, // Толстая правая стена (с проходом внизу)
     { rect: { x: 0, y: 0, width: 2400, height: 30 } }, // Потолок
     
     // Проходные платформы
@@ -221,8 +221,8 @@ export function createLevel2(): LevelData {
     // Пол
     { rect: { x: 0, y: 700, width: 2400, height: 40 } },
     
-    // Старт справа - органичная стена
-    { rect: { x: 2360, y: 0, width: 40, height: 740 } },
+    // Старт справа - органичная стена (с проходом внизу)
+    { rect: { x: 2360, y: 0, width: 40, height: 600 } },
     
     // === СТАРТОВАЯ ОБЛАСТЬ (справа) ===
     // Платформы для подъёма от пола
@@ -289,7 +289,7 @@ export function createLevel2(): LevelData {
     { rect: { x: 100, y: 500, width: 120, height: 25 } },
     
     // Стены
-    { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена
+    { rect: { x: 0, y: 0, width: 40, height: 600 } }, // Толстая левая стена (с проходом внизу)
     { rect: { x: 0, y: 0, width: 2400, height: 30 } }, // Потолок
     
     // Проходные платформы
@@ -444,8 +444,8 @@ export function createLevel3(): LevelData {
     { rect: { x: 2600, y: 400, width: 180, height: 25 } },
     
     // Стены
-    { rect: { x: 0, y: 0, width: 40, height: 840 } },
-    { rect: { x: 2760, y: 0, width: 40, height: 840 } },
+    { rect: { x: 0, y: 0, width: 40, height: 700 } }, // Левая стена (с проходом внизу)
+    { rect: { x: 2760, y: 0, width: 40, height: 700 } }, // Правая стена (с проходом внизу)
     { rect: { x: 0, y: 0, width: 2800, height: 30 } },
     
     // Проходные платформы
@@ -601,8 +601,8 @@ export function createLevel4(): LevelData {
     { rect: { x: 1850, y: 300, width: 150, height: 20 } },
     
     // Стены
-    { rect: { x: 0, y: 0, width: 20, height: 740 } },
-    { rect: { x: 1980, y: 0, width: 20, height: 740 } },
+    { rect: { x: 0, y: 0, width: 20, height: 600 } }, // Левая стена (с проходом внизу)
+    { rect: { x: 1980, y: 0, width: 20, height: 600 } }, // Правая стена (с проходом внизу)
     
     // Проходные платформы
     { rect: { x: 450, y: 600, width: 80, height: 15 }, isPassThrough: true },
@@ -706,8 +706,8 @@ export function createLevel5(): LevelData {
     { rect: { x: 2130, y: 250, width: 80, height: 20 } },
     
     // Стены
-    { rect: { x: 0, y: 0, width: 20, height: 840 } },
-    { rect: { x: 2280, y: 0, width: 20, height: 840 } },
+    { rect: { x: 0, y: 0, width: 20, height: 700 } }, // Левая стена (с проходом внизу)
+    { rect: { x: 2280, y: 0, width: 20, height: 700 } }, // Правая стена (с проходом внизу)
     
     // Проходные платформы
     { rect: { x: 200, y: 750, width: 80, height: 15 }, isPassThrough: true },
@@ -831,8 +831,8 @@ export function createLevel6(): LevelData {
     { rect: { x: 0, y: 700, width: 3000, height: 40 } },
     
     // Здания на заднем плане (декоративные стены)
-    { rect: { x: 0, y: 0, width: 40, height: 740 } },
-    { rect: { x: 2960, y: 0, width: 40, height: 740 } },
+    { rect: { x: 0, y: 0, width: 40, height: 600 } }, // Левая стена (с проходом внизу)
+    { rect: { x: 2960, y: 0, width: 40, height: 600 } }, // Правая стена (с проходом внизу)
     { rect: { x: 0, y: 0, width: 3000, height: 30 } },
     
     // Здания (препятствия) - уменьшена высота
