@@ -149,11 +149,17 @@ export function createLevel2(): LevelData {
     // Старт справа - органичная стена
     { rect: { x: 2360, y: 0, width: 40, height: 740 } },
     
+    // === СТАРТОВАЯ ОБЛАСТЬ (справа) ===
+    // Платформы для подъёма от пола
+    { rect: { x: 2250, y: 600, width: 100, height: 25 } },
+    { rect: { x: 2200, y: 500, width: 100, height: 25 } },
+    { rect: { x: 2250, y: 400, width: 100, height: 25 } },
+    
     // Стена 1 - органичная с деталями
     { rect: { x: 2100, y: 250, width: 50, height: 450 } },
     { rect: { x: 2080, y: 250, width: 90, height: 30 } }, // Верхушка
-    { rect: { x: 2000, y: 400, width: 100, height: 25 } }, // Платформа для обхода
-    { rect: { x: 2160, y: 350, width: 100, height: 25 } },
+    { rect: { x: 2000, y: 400, width: 100, height: 25 } }, // Платформа для обхода (слева от стены)
+    { rect: { x: 2160, y: 350, width: 100, height: 25 } }, // Платформа для обхода (справа от стены)
     
     // Подъём 45° (ступеньки)
     { rect: { x: 1800, y: 650, width: 70, height: 20 } },
@@ -201,8 +207,12 @@ export function createLevel2(): LevelData {
   ];
 
   const ladders = [
+    // Лестница в стартовой области (справа) для подъёма
+    { x: 2280, y: 400, width: 30, height: 300 },
+    
     // Лестницы для обхода стен
-    { x: 2050, y: 300, width: 30, height: 400 },
+    { x: 2180, y: 350, width: 30, height: 350 }, // Справа от стены 1
+    { x: 2020, y: 300, width: 30, height: 400 }, // Слева от стены 1
     { x: 1400, y: 220, width: 30, height: 480 },
     { x: 850, y: 350, width: 30, height: 350 },
     { x: 300, y: 270, width: 30, height: 430 },
