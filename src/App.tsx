@@ -30,6 +30,7 @@ export default function App() {
   const jetpackSceneRef = useRef<JetpackScene | null>(null);
   const lockpickSceneRef = useRef<LockpickScene | null>(null);
   const isTransitioningRef = useRef(false);
+  const isPausedForMinigameRef = useRef(false);
 
   const [screen, setScreen] = useState<GameScreen>('menu');
   const [health, setHealth] = useState(100);
@@ -145,6 +146,12 @@ export default function App() {
     
     // Если мы в процессе перехода между уровнями, не создаём новый движок
     if (isTransitioningRef.current) return;
+    
+    // Если движок уже существует, просто возобновляем его
+    if (engineRef.current) {
+      engineRef.current.resume();
+      return;
+    }
 
     // Небольшая задержка чтобы canvas успел отрисоваться
     const timer = setTimeout(() => {
@@ -193,6 +200,7 @@ export default function App() {
             if (engineRef.current) {
               engineRef.current.pause();
             }
+            isPausedForMinigameRef.current = true;
             setScreen('lockpick_scene');
           },
         }, currentLevel, inventory, gold);
@@ -214,8 +222,8 @@ export default function App() {
 
     return () => {
       clearTimeout(timer);
-      // Не останавливаем движок если мы в процессе перехода между уровнями
-      if (engineRef.current && !isTransitioningRef.current) {
+      // Не останавливаем движок если мы в процессе перехода между уровнями или мини-игрой
+      if (engineRef.current && !isTransitioningRef.current && !isPausedForMinigameRef.current) {
         engineRef.current.stop();
         engineRef.current = null;
       }
@@ -523,8 +531,10 @@ export default function App() {
           // Открываем дверь
           if (engineRef.current) {
             engineRef.current.unlockDoor();
-            engineRef.current.resume();
           }
+          
+          // Сбрасываем флаг перед переходом
+          isPausedForMinigameRef.current = false;
           setScreen('playing');
           return;
         }
