@@ -333,10 +333,15 @@ export class GameEngine {
     const playerHitbox = this.player.getHitbox();
 
     for (const door of this.level.doors) {
-      // Проверяем, находится ли игрок рядом с дверью
-      const doorHitbox = { x: door.x, y: door.y, width: door.width, height: door.height };
+      // Расширенная зона взаимодействия вокруг двери (на 30px в каждую сторону)
+      const interactZone = { 
+        x: door.x - 30, 
+        y: door.y - 10, 
+        width: door.width + 60, 
+        height: door.height + 20 
+      };
       
-      if (this.rectsOverlap(playerHitbox, doorHitbox)) {
+      if (this.rectsOverlap(playerHitbox, interactZone)) {
         // Если дверь заблокирована и игрок нажал E
         if (door.locked && door.requiresLockpick && this.input.interactPressed) {
           // Проверяем наличие отмычки в инвентаре

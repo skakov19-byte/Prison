@@ -464,9 +464,10 @@ export class Renderer {
         ctx.fillStyle = doorGradient;
         ctx.fillRect(door.x, door.y, door.width, door.height);
 
-        // Решётка на двери
+        // Решётка на двери (адаптивная под размер)
         ctx.strokeStyle = '#555555';
         ctx.lineWidth = 2;
+        // Вертикальные прутья
         for (let i = 1; i < 4; i++) {
           const barX = door.x + (door.width / 4) * i;
           ctx.beginPath();
@@ -474,29 +475,32 @@ export class Renderer {
           ctx.lineTo(barX, door.y + door.height);
           ctx.stroke();
         }
-        for (let i = 1; i < 6; i++) {
-          const barY = door.y + (door.height / 6) * i;
+        // Горизонтальные прутья (адаптивные)
+        const horizontalBars = Math.max(2, Math.floor(door.height / 15));
+        for (let i = 1; i <= horizontalBars; i++) {
+          const barY = door.y + (door.height / (horizontalBars + 1)) * i;
           ctx.beginPath();
           ctx.moveTo(door.x, barY);
           ctx.lineTo(door.x + door.width, barY);
           ctx.stroke();
         }
 
-        // Замок
+        // Замок (адаптивный)
+        const lockSize = Math.min(door.width, door.height) * 0.2;
         ctx.fillStyle = '#888888';
-        ctx.fillRect(door.x + door.width / 2 - 5, door.y + door.height / 2 - 8, 10, 16);
+        ctx.fillRect(door.x + door.width / 2 - lockSize / 2, door.y + door.height / 2 - lockSize, lockSize, lockSize * 1.5);
         ctx.fillStyle = '#333333';
         ctx.beginPath();
-        ctx.arc(door.x + door.width / 2, door.y + door.height / 2, 3, 0, Math.PI * 2);
+        ctx.arc(door.x + door.width / 2, door.y + door.height / 2 - lockSize / 2, lockSize * 0.3, 0, Math.PI * 2);
         ctx.fill();
 
         // Подсказка "Нажмите E"
         ctx.fillStyle = 'rgba(255, 255, 100, 0.9)';
         ctx.font = 'bold 10px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('[E] Открыть', door.x + door.width / 2, door.y - 8);
+        ctx.fillText('[E]', door.x + door.width / 2, door.y - 8);
       } else {
-        // Открытая дверь - светлая, открытая
+        // Открытая дверь - светлая
         const doorGradient = ctx.createLinearGradient(door.x, door.y, door.x + door.width, door.y);
         doorGradient.addColorStop(0, '#5a4a38');
         doorGradient.addColorStop(0.5, '#6d5a48');
@@ -510,11 +514,13 @@ export class Renderer {
         ctx.arc(door.x + door.width - 8, door.y + door.height / 2, 3, 0, Math.PI * 2);
         ctx.fill();
 
-        // Панели на двери
+        // Панели на двери (адаптивные)
         ctx.strokeStyle = '#4a3a28';
         ctx.lineWidth = 1;
-        ctx.strokeRect(door.x + 5, door.y + 10, door.width - 10, door.height / 3 - 15);
-        ctx.strokeRect(door.x + 5, door.y + door.height / 2 + 5, door.width - 10, door.height / 3 - 15);
+        if (door.height > 30) {
+          ctx.strokeRect(door.x + 5, door.y + 5, door.width - 10, door.height / 2 - 8);
+          ctx.strokeRect(door.x + 5, door.y + door.height / 2 + 3, door.width - 10, door.height / 2 - 8);
+        }
       }
     }
   }

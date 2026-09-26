@@ -61,8 +61,9 @@ export function createLevel1(): LevelData {
     
     // Тюремная камера (старт) - органичные стены
     { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена
-    { rect: { x: 150, y: 350, width: 40, height: 350 } }, // Правая стена камеры с проёмом
-    { rect: { x: 0, y: 350, width: 150, height: 30 } }, // Потолок камеры
+    { rect: { x: 150, y: 0, width: 40, height: 648 } }, // Правая стена камеры (до двери)
+    { rect: { x: 150, y: 700, width: 40, height: 40 } }, // Правая стена камеры (после двери)
+    { rect: { x: 0, y: 0, width: 190, height: 30 } }, // Потолок камеры
     
     // Коридор после камеры - подъём 45°
     { rect: { x: 250, y: 650, width: 60, height: 20 } },
@@ -106,12 +107,12 @@ export function createLevel1(): LevelData {
   ];
 
   const doors: Door[] = [
-    // Дверь камеры (требует отмычку)
+    // Дверь камеры (требует отмычку) - по росту человека
     {
       x: 150,
-      y: 500,
+      y: 648,
       width: 40,
-      height: 200,
+      height: 52,
       locked: true,
       requiresLockpick: true,
       message: 'Открыто отмычкой',
@@ -167,10 +168,10 @@ export function createLevel1(): LevelData {
 
   const pickupZones: PickupZone[] = [
     {
-      x: 20,
-      y: 500,
-      width: 40,
-      height: 100,
+      x: 10,
+      y: 620,
+      width: 50,
+      height: 80,
       item: {
         type: 'LOCKPICK',
         name: 'Отмычка',
