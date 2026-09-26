@@ -89,18 +89,53 @@ export default function App() {
         engineRef.current = null;
       }
     };
-  }, [screen, currentLevel]);
+  }, [screen]); // Убираем currentLevel из зависимостей
 
   const openShop = () => setScreen('shop');
   const closeShop = () => setScreen('playing');
   
   const goToNextLevel = () => {
+    // Останавливаем текущий движок
     if (engineRef.current) {
-      engineRef.current.nextLevel();
-      setCurrentLevel(engineRef.current.getCurrentLevelNumber());
-      setLevelName(engineRef.current.getLevelName());
-      setScreen('playing');
+      engineRef.current.stop();
+      engineRef.current = null;
     }
+    
+    // Увеличиваем уровень
+    const nextLevel = currentLevel + 1;
+    setCurrentLevel(nextLevel);
+    
+    // Сбрасываем здоровье и патроны
+    setHealth(100);
+    setMaxHealth(100);
+    setAmmo(12);
+    setMaxAmmo(12);
+    setKills(0);
+    
+    // Создаем новый движок с новым уровнем
+    setTimeout(() => {
+      if (!canvasRef.current) return;
+      
+      try {
+        const canvas = canvasRef.current;
+        const engine = new GameEngine(canvas, {
+          onHealthChange: (h: number, mh: number) => { setHealth(h); setMaxHealth(mh); },
+          onAmmoChange: (a: number, ma: number) => { setAmmo(a); setMaxAmmo(ma); },
+          onGoldChange: (g: number) => setGold(g),
+          onWeaponChange: (w: WeaponType) => setCurrentWeapon(w),
+          onStateChange: (s: PlayerState) => setPlayerState(s),
+          onDeath: () => setScreen('dead'),
+          onLevelComplete: () => setScreen('victory'),
+          onEnemyKill: () => setKills(k => k + 1),
+        }, nextLevel);
+
+        engineRef.current = engine;
+        setLevelName(engine.getLevelName());
+        engine.start();
+      } catch (error) {
+        console.error('Failed to start next level:', error);
+      }
+    }, 100);
   };
 
   const buyItem = (itemId: string) => {

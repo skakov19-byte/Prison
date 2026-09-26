@@ -58,7 +58,7 @@ export class Player {
       meleeDamage: 20,
       rangedDamage: 15,
       moveSpeed: 200,
-      jumpForce: 480,
+      jumpForce: 580,
       maxAmmo: 12,
       currentAmmo: 12,
       reloadTime: 1.5,
@@ -255,11 +255,11 @@ export class Player {
     if (input.jumpPressed && this.isGrounded) {
       this.vy = -this.stats.jumpForce;
       this.isGrounded = false;
-      this.canDoubleJump = true;
+      this.canDoubleJump = true; // Разрешаем двойной прыжок после первого
       this.isDropping = false;
     } else if (input.jumpPressed && !this.isGrounded && this.canDoubleJump) {
-      this.vy = -this.stats.jumpForce * 0.8;
-      this.canDoubleJump = false;
+      this.vy = -this.stats.jumpForce * 0.85; // Двойной прыжок чуть слабее
+      this.canDoubleJump = false; // Больше нельзя прыгать
     }
 
     if (input.down && this.isGrounded) {
