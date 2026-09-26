@@ -37,6 +37,7 @@ export enum WeaponType {
 export enum ItemType {
   LOCKPICK = 'LOCKPICK',
   BATON = 'BATON',
+  KEY = 'KEY',
 }
 
 export interface InventoryItem {

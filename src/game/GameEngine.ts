@@ -93,6 +93,8 @@ export class GameEngine {
         } else if (item.type === ItemType.BATON) {
           this.player.hasBaton = true;
           this.player.stats.meleeDamage = 25;
+        } else if (item.type === ItemType.KEY) {
+          this.player.hasKey = true;
         }
       }
     }
@@ -474,6 +476,11 @@ export class GameEngine {
     const playerHitbox = this.player.getHitbox();
 
     if (this.rectsOverlap(playerHitbox, door)) {
+      // На третьем уровне нужен ключ для завершения
+      if (this.currentLevelNumber === 3 && !this.player.hasItem(ItemType.KEY)) {
+        this.callbacks.onDoorMessage('Нужно найти ключ от выхода!');
+        return;
+      }
       this.callbacks.onLevelComplete();
     }
   }

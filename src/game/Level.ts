@@ -28,7 +28,7 @@ export interface PickupZone {
   width: number;
   height: number;
   item: {
-    type: 'LOCKPICK' | 'BATON';
+    type: 'LOCKPICK' | 'BATON' | 'KEY';
     name: string;
     icon: string;
     description: string;
@@ -563,12 +563,30 @@ export function createLevel3(): LevelData {
     { x: 2650, y: 800, width: 100, height: 40, damage: 60 },
   ];
 
+  const pickupZones: PickupZone[] = [
+    {
+      x: 150,
+      y: 650,
+      width: 40,
+      height: 40,
+      item: {
+        type: 'KEY',
+        name: 'Ключ от выхода',
+        icon: '🗝️',
+        description: 'Открывает выход из тюрьмы',
+      },
+      triggerOnAttack: false,
+      triggerOnKill: false,
+    },
+  ];
+
   return {
     platforms,
     ladders,
     enemies,
     playerSpawn: { x: 1100, y: 750 }, // В центре
     exitDoor: { x: 2650, y: 340, width: 40, height: 60 }, // Выход справа-сверху
+    pickupZones,
     pits,
     width: 2800,
     height: 840,

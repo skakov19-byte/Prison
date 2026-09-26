@@ -37,6 +37,7 @@ export class Player {
   inventory: InventoryItem[] = [];
   hasLockpick: boolean = false;
   hasBaton: boolean = false;
+  hasKey: boolean = false;
   
   // Колбэки для инвентаря
   onItemPickup: (item: InventoryItem) => void = () => {};
@@ -495,6 +496,8 @@ export class Player {
       this.hasBaton = true;
       // Дубинка заменяет кулаки
       this.stats.meleeDamage = 25; // Урон дубинки больше кулаков
+    } else if (item.type === ItemType.KEY) {
+      this.hasKey = true;
     }
     
     this.onItemPickup(item);
@@ -510,6 +513,8 @@ export class Player {
       } else if (itemType === ItemType.BATON) {
         this.hasBaton = false;
         this.stats.meleeDamage = 10; // Возвращаем урон кулаков
+      } else if (itemType === ItemType.KEY) {
+        this.hasKey = false;
       }
       
       this.onItemUsed(itemType);
@@ -526,6 +531,7 @@ export class Player {
     this.inventory = [];
     this.hasLockpick = false;
     this.hasBaton = false;
+    this.hasKey = false;
     this.stats.meleeDamage = 10;
   }
 

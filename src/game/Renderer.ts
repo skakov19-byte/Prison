@@ -533,13 +533,21 @@ export class Renderer {
       // Мигающая подсветка
       const alpha = (Math.sin(time) * 0.3 + 0.5);
       
+      // Определяем цвет свечения в зависимости от типа предмета
+      let glowColor = '255, 215, 0'; // Золотой по умолчанию
+      if (zone.item.type === 'KEY') {
+        glowColor = '192, 192, 192'; // Серебряный для ключа
+      } else if (zone.item.type === 'LOCKPICK') {
+        glowColor = '100, 200, 255'; // Голубой для отмычки
+      }
+      
       // Свечение
       const glowGradient = ctx.createRadialGradient(
         zone.x + zone.width / 2, zone.y + zone.height / 2, 0,
         zone.x + zone.width / 2, zone.y + zone.height / 2, zone.width
       );
-      glowGradient.addColorStop(0, `rgba(255, 215, 0, ${alpha * 0.4})`);
-      glowGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      glowGradient.addColorStop(0, `rgba(${glowColor}, ${alpha * 0.4})`);
+      glowGradient.addColorStop(1, `rgba(${glowColor}, 0)`);
       ctx.fillStyle = glowGradient;
       ctx.fillRect(zone.x - 10, zone.y - 10, zone.width + 20, zone.height + 20);
 
@@ -553,6 +561,11 @@ export class Renderer {
         ctx.fillStyle = `rgba(255, 255, 100, ${alpha})`;
         ctx.font = 'bold 9px Arial';
         ctx.fillText('[J] Ударить', zone.x + zone.width / 2, zone.y - 5);
+      } else if (zone.item.type === 'KEY') {
+        // Подсказка для ключа
+        ctx.fillStyle = `rgba(192, 192, 192, ${alpha})`;
+        ctx.font = 'bold 9px Arial';
+        ctx.fillText('Ключ', zone.x + zone.width / 2, zone.y - 5);
       }
     }
   }
