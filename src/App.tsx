@@ -3,8 +3,9 @@ import { GameEngine } from './game/GameEngine';
 import { PlayerState, WeaponType, InventoryItem, ItemType } from './game/types';
 import { IntroRenderer } from './game/IntroScene';
 import { Act2IntroRenderer } from './game/Act2Intro';
+import { Act3IntroRenderer } from './game/Act3Intro';
 
-type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro';
+type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro' | 'act3_intro';
 
 interface ShopItem {
   id: string;
@@ -21,6 +22,7 @@ export default function App() {
   const engineRef = useRef<GameEngine | null>(null);
   const introRendererRef = useRef<IntroRenderer | null>(null);
   const act2IntroRendererRef = useRef<Act2IntroRenderer | null>(null);
+  const act3IntroRendererRef = useRef<Act3IntroRenderer | null>(null);
   const isTransitioningRef = useRef(false);
 
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -168,6 +170,8 @@ export default function App() {
             // После 3 уровня запускаем ролик Акта 2
             if (currentLevel === 3) {
               setScreen('act2_intro');
+            } else if (currentLevel === 6) {
+              setScreen('act3_intro');
             } else {
               setScreen('victory');
             }
@@ -176,7 +180,7 @@ export default function App() {
           onDoorMessage: (msg: string) => showDoorMessage(msg),
           onItemPickup: (item: InventoryItem) => handleItemPickup(item),
           onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
-        }, currentLevel, inventory);
+        }, currentLevel, inventory, gold);
 
         // Применяем улучшения из магазина
         const upgrades = getUpgrades();
@@ -318,6 +322,67 @@ export default function App() {
     };
   }, [screen]);
 
+  // Рендеринг ролика Акта 3 (реактивный ранец)
+  useEffect(() => {
+    if (screen !== 'act3_intro') return;
+
+    const timer = setTimeout(() => {
+      if (!canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const act3Renderer = new Act3IntroRenderer(ctx, canvas.width, canvas.height);
+      act3Renderer.start();
+      act3IntroRendererRef.current = act3Renderer;
+
+      let lastTime = performance.now();
+      let animFrameId: number;
+
+      const renderLoop = (timestamp: number) => {
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        const isFinished = act3Renderer.update(dt);
+        act3Renderer.render();
+
+        if (isFinished) {
+          // Ролик завершён, переходим к 7 уровню
+          const savedInventory = inventory;
+          const savedGold = gold;
+          setCurrentLevel(7);
+          setInventory(savedInventory);
+          setGold(savedGold);
+          setScreen('playing');
+          return;
+        }
+
+        animFrameId = requestAnimationFrame(renderLoop);
+      };
+
+      animFrameId = requestAnimationFrame(renderLoop);
+
+      // Возможность пропустить ролик по клику
+      const skipIntro = () => {
+        cancelAnimationFrame(animFrameId);
+        setCurrentLevel(7);
+        setScreen('playing');
+      };
+
+      canvas.addEventListener('click', skipIntro);
+
+      return () => {
+        cancelAnimationFrame(animFrameId);
+        canvas.removeEventListener('click', skipIntro);
+      };
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [screen]);
+
   // Обработка Escape для паузы и пропуска интро
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -335,6 +400,11 @@ export default function App() {
       // Пропуск ролика Акта 2 по Space или Enter
       if (screen === 'act2_intro' && (e.code === 'Space' || e.code === 'Enter')) {
         setCurrentLevel(4);
+        setScreen('playing');
+      }
+      // Пропуск ролика Акта 3 по Space или Enter
+      if (screen === 'act3_intro' && (e.code === 'Space' || e.code === 'Enter')) {
+        setCurrentLevel(7);
         setScreen('playing');
       }
     };
@@ -379,8 +449,9 @@ export default function App() {
     // Устанавливаем флаг перехода
     isTransitioningRef.current = true;
     
-    // Сохраняем текущий инвентарь перед переходом
+    // Сохраняем текущий инвентарь и золото перед переходом
     const savedInventory = [...inventory];
+    const savedGold = gold;
     
     // Останавливаем текущий движок
     if (engineRef.current) {
@@ -392,18 +463,18 @@ export default function App() {
     const nextLevel = currentLevel + 1;
     setCurrentLevel(nextLevel);
     
-    // Сбрасываем здоровье и патроны, но сохраняем инвентарь
+    // Сбрасываем здоровье и патроны, но сохраняем инвентарь и золото
     setHealth(100);
     setMaxHealth(100);
     setAmmo(12);
     setMaxAmmo(12);
     setKills(0);
-    // Инвентарь НЕ сбрасываем - он сохраняется между уровнями
+    // Инвентарь и золото НЕ сбрасываем - они сохраняются между уровнями
     
     // Меняем screen чтобы меню victory пропало
     setScreen('playing');
     
-    // Создаем новый движок с новым уровнем и сохранённым инвентарём
+    // Создаем новый движок с новым уровнем и сохранённым инвентарём/золотом
     setTimeout(() => {
       if (!canvasRef.current) return;
       
@@ -429,6 +500,8 @@ export default function App() {
             // После 3 уровня запускаем ролик Акта 2
             if (nextLevel === 3) {
               setScreen('act2_intro');
+            } else if (nextLevel === 6) {
+              setScreen('act3_intro');
             } else {
               setScreen('victory');
             }
@@ -437,7 +510,7 @@ export default function App() {
           onDoorMessage: (msg: string) => showDoorMessage(msg),
           onItemPickup: (item: InventoryItem) => handleItemPickup(item),
           onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
-        }, nextLevel, savedInventory);
+        }, nextLevel, savedInventory, savedGold);
 
         // Применяем улучшения из магазина
         const upgrades = getUpgrades();

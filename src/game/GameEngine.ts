@@ -47,7 +47,7 @@ export class GameEngine {
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private keyupHandler: ((e: KeyboardEvent) => void) | null = null;
 
-  constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks, startLevel: number = 1, savedInventory: InventoryItem[] = []) {
+  constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks, startLevel: number = 1, savedInventory: InventoryItem[] = [], savedGold: number = 0) {
     this.canvas = canvas;
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -96,6 +96,14 @@ export class GameEngine {
         } else if (item.type === ItemType.KEY) {
           this.player.hasKey = true;
         }
+      }
+    }
+
+    // Восстанавливаем золото из сохранённого состояния
+    if (savedGold > 0) {
+      this.player.stats.gold = savedGold;
+      if (this.callbacks.onGoldChange) {
+        this.callbacks.onGoldChange(savedGold);
       }
     }
 
@@ -547,6 +555,9 @@ export class GameEngine {
   }
 
   reset(): void {
+    const savedGold = this.player.stats.gold;
+    const savedInventory = [...this.player.inventory];
+    
     this.bulletPool.releaseAll();
     this.level = getLevel(this.currentLevelNumber);
     this.renderer.setLevelNumber(this.currentLevelNumber);
@@ -560,6 +571,21 @@ export class GameEngine {
     if (!this.player.hasRangedWeapon) {
       this.player.currentWeapon = WeaponType.MELEE;
     }
+    
+    // Восстанавливаем инвентарь и золото
+    for (const item of savedInventory) {
+      this.player.inventory.push(item);
+      if (item.type === ItemType.LOCKPICK) {
+        this.player.hasLockpick = true;
+      } else if (item.type === ItemType.BATON) {
+        this.player.hasBaton = true;
+        this.player.stats.meleeDamage = 25;
+      } else if (item.type === ItemType.KEY) {
+        this.player.hasKey = true;
+      }
+    }
+    this.player.stats.gold = savedGold;
+    
     this.player.onHealthChange = this.callbacks.onHealthChange;
     this.player.onAmmoChange = this.callbacks.onAmmoChange;
     this.player.onGoldChange = this.callbacks.onGoldChange;
@@ -568,6 +594,9 @@ export class GameEngine {
   }
 
   nextLevel(): void {
+    const savedGold = this.player.stats.gold;
+    const savedInventory = [...this.player.inventory];
+    
     this.currentLevelNumber++;
     this.bulletPool.releaseAll();
     this.level = getLevel(this.currentLevelNumber);
@@ -582,6 +611,21 @@ export class GameEngine {
     if (!this.player.hasRangedWeapon) {
       this.player.currentWeapon = WeaponType.MELEE;
     }
+    
+    // Восстанавливаем инвентарь и золото
+    for (const item of savedInventory) {
+      this.player.inventory.push(item);
+      if (item.type === ItemType.LOCKPICK) {
+        this.player.hasLockpick = true;
+      } else if (item.type === ItemType.BATON) {
+        this.player.hasBaton = true;
+        this.player.stats.meleeDamage = 25;
+      } else if (item.type === ItemType.KEY) {
+        this.player.hasKey = true;
+      }
+    }
+    this.player.stats.gold = savedGold;
+    
     this.player.onHealthChange = this.callbacks.onHealthChange;
     this.player.onAmmoChange = this.callbacks.onAmmoChange;
     this.player.onGoldChange = this.callbacks.onGoldChange;

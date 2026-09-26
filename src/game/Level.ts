@@ -678,9 +678,6 @@ export function createLevel4(): LevelData {
     playerSpawn: { x: 50, y: 650 },
     exitDoor: { x: 1900, y: 240, width: 40, height: 60 },
     pits,
-    decorations: [
-      { type: 'burning_car', x: 100, y: 650 }
-    ],
     width: 2000,
     height: 740,
     bgColor: '#0a1a2a',
@@ -836,45 +833,49 @@ export function createLevel5(): LevelData {
   };
 }
 
-// Уровень 6: Финальная битва - Крыша небоскрёба
+// Уровень 6: Финальная битва - Городские улицы
 export function createLevel6(): LevelData {
   const platforms: Platform[] = [
-    // Основная платформа крыши
+    // Основная улица
     { rect: { x: 0, y: 700, width: 3000, height: 40 } },
     
-    // Стены по краям
+    // Здания на заднем плане (декоративные стены)
     { rect: { x: 0, y: 0, width: 40, height: 740 } },
     { rect: { x: 2960, y: 0, width: 40, height: 740 } },
     { rect: { x: 0, y: 0, width: 3000, height: 30 } },
     
-    // Препятствия на крыше
-    { rect: { x: 400, y: 600, width: 150, height: 100 } },
-    { rect: { x: 800, y: 550, width: 200, height: 150 } },
-    { rect: { x: 1200, y: 600, width: 150, height: 100 } },
-    { rect: { x: 1600, y: 500, width: 200, height: 200 } },
-    { rect: { x: 2000, y: 600, width: 150, height: 100 } },
-    { rect: { x: 2400, y: 550, width: 200, height: 150 } },
+    // Здания (препятствия)
+    { rect: { x: 300, y: 500, width: 150, height: 200 } },
+    { rect: { x: 600, y: 450, width: 200, height: 250 } },
+    { rect: { x: 1000, y: 500, width: 150, height: 200 } },
+    { rect: { x: 1400, y: 400, width: 200, height: 300 } },
+    { rect: { x: 1800, y: 500, width: 150, height: 200 } },
+    { rect: { x: 2200, y: 450, width: 200, height: 250 } },
     
-    // Платформы для маневрирования
-    { rect: { x: 600, y: 500, width: 100, height: 20 } },
-    { rect: { x: 1050, y: 450, width: 100, height: 20 } },
-    { rect: { x: 1450, y: 400, width: 100, height: 20 } },
-    { rect: { x: 1850, y: 450, width: 100, height: 20 } },
-    { rect: { x: 2250, y: 400, width: 100, height: 20 } },
+    // Платформы на крышах зданий
+    { rect: { x: 300, y: 480, width: 150, height: 20 } },
+    { rect: { x: 600, y: 430, width: 200, height: 20 } },
+    { rect: { x: 1000, y: 480, width: 150, height: 20 } },
+    { rect: { x: 1400, y: 380, width: 200, height: 20 } },
+    { rect: { x: 1800, y: 480, width: 150, height: 20 } },
+    { rect: { x: 2200, y: 430, width: 200, height: 20 } },
     
     // Проходные платформы
-    { rect: { x: 500, y: 650, width: 80, height: 15 }, isPassThrough: true },
-    { rect: { x: 1100, y: 650, width: 80, height: 15 }, isPassThrough: true },
-    { rect: { x: 1700, y: 650, width: 80, height: 15 }, isPassThrough: true },
-    { rect: { x: 2300, y: 650, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 450, y: 600, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 850, y: 600, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 1250, y: 600, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 1650, y: 600, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 2050, y: 600, width: 80, height: 15 }, isPassThrough: true },
   ];
 
   const ladders = [
-    { x: 700, y: 500, width: 30, height: 200 },
-    { x: 1150, y: 450, width: 30, height: 250 },
-    { x: 1550, y: 400, width: 30, height: 300 },
-    { x: 1950, y: 450, width: 30, height: 250 },
-    { x: 2350, y: 400, width: 30, height: 300 },
+    // Лестницы на здания
+    { x: 350, y: 480, width: 30, height: 220 },
+    { x: 650, y: 430, width: 30, height: 270 },
+    { x: 1050, y: 480, width: 30, height: 220 },
+    { x: 1450, y: 380, width: 30, height: 320 },
+    { x: 1850, y: 480, width: 30, height: 220 },
+    { x: 2250, y: 430, width: 30, height: 270 },
   ];
 
   const enemies: EnemyStats[] = [
@@ -1044,7 +1045,76 @@ export function createLevel6(): LevelData {
     width: 3000,
     height: 740,
     bgColor: '#0a0a2a',
-    name: 'Крыша Небоскрёба',
+    name: 'Городские Улицы',
+  };
+}
+
+// Уровень 7: Полет на реактивном ранце
+export function createLevel7(): LevelData {
+  // Для уровня 7 используем специальную механику полета
+  // Платформы не используются, игрок летит
+  const platforms: Platform[] = [
+    // Пол (граница снизу)
+    { rect: { x: 0, y: 700, width: 4000, height: 40 } },
+    // Потолок (граница сверху)
+    { rect: { x: 0, y: 0, width: 4000, height: 30 } },
+  ];
+
+  const ladders: { x: number; y: number; width: number; height: number }[] = [];
+
+  const enemies: EnemyStats[] = [
+    // Враги летят справа налево
+    {
+      maxHealth: 20,
+      health: 20,
+      damage: 15,
+      moveSpeed: 200,
+      detectionRange: 800,
+      attackRange: 600,
+      attackCooldown: 1.0,
+      patrolPoints: [{ x: 3500, y: 200 }, { x: 3800, y: 200 }],
+      type: EnemyType.FLYING,
+      goldDrop: 20,
+    },
+    {
+      maxHealth: 20,
+      health: 20,
+      damage: 15,
+      moveSpeed: 200,
+      detectionRange: 800,
+      attackRange: 600,
+      attackCooldown: 1.0,
+      patrolPoints: [{ x: 3500, y: 400 }, { x: 3800, y: 400 }],
+      type: EnemyType.FLYING,
+      goldDrop: 20,
+    },
+    {
+      maxHealth: 25,
+      health: 25,
+      damage: 18,
+      moveSpeed: 220,
+      detectionRange: 800,
+      attackRange: 600,
+      attackCooldown: 0.8,
+      patrolPoints: [{ x: 3500, y: 300 }, { x: 3800, y: 300 }],
+      type: EnemyType.FLYING,
+      goldDrop: 25,
+    },
+  ];
+
+  const pits: Pit[] = [];
+
+  return {
+    platforms,
+    ladders,
+    enemies,
+    playerSpawn: { x: 100, y: 400 },
+    exitDoor: { x: 3900, y: 350, width: 40, height: 60 },
+    pits,
+    width: 4000,
+    height: 740,
+    bgColor: '#0a0a3a',
+    name: 'Полет на Небоскрёб',
   };
 }
 
@@ -1063,6 +1133,8 @@ export function getLevel(levelNumber: number): LevelData {
       return createLevel5();
     case 6:
       return createLevel6();
+    case 7:
+      return createLevel7();
     default:
       return createLevel1();
   }
