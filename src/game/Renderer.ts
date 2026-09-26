@@ -481,11 +481,11 @@ export class Renderer {
     ctx.ellipse(x + width / 2, y + height + 2, width / 2, 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Тело с градиентом и деталями
+    // Тело с градиентом и деталями (оранжевая роба заключённого)
     const bodyGradient = ctx.createLinearGradient(x, y, x, y + height);
-    bodyGradient.addColorStop(0, '#00eebb');
-    bodyGradient.addColorStop(0.5, '#00cc88');
-    bodyGradient.addColorStop(1, '#006644');
+    bodyGradient.addColorStop(0, '#ff9933');
+    bodyGradient.addColorStop(0.5, '#ff7700');
+    bodyGradient.addColorStop(1, '#cc5500');
     ctx.fillStyle = bodyGradient;
     
     // Основное тело с закруглёнными углами
@@ -493,44 +493,44 @@ export class Renderer {
     ctx.roundRect(x + 4, y + 10, width - 8, height - 14, 3);
     ctx.fill();
     
-    // Детали брони
-    ctx.fillStyle = '#00aa77';
+    // Детали робы (полосы)
+    ctx.fillStyle = '#cc5500';
     ctx.fillRect(x + 6, y + 15, width - 12, 3);
     ctx.fillRect(x + 6, y + 25, width - 12, 2);
+    
+    // Номер заключённого на груди
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 6px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('#247', x + width / 2, y + 22);
 
     // Голова
     const headGradient = ctx.createRadialGradient(x + width / 2, y + 5, 2, x + width / 2, y + 5, 8);
-    headGradient.addColorStop(0, '#00ffcc');
-    headGradient.addColorStop(1, '#00bb99');
+    headGradient.addColorStop(0, '#ffcc99');
+    headGradient.addColorStop(1, '#cc9966');
     ctx.fillStyle = headGradient;
     ctx.beginPath();
     ctx.roundRect(x + 5, y, width - 10, 14, 4);
     ctx.fill();
     
-    // Визор/шлем
-    ctx.fillStyle = '#003322';
-    ctx.fillRect(x + 6, y + 2, width - 12, 6);
+    // Волосы (короткая стрижка)
+    ctx.fillStyle = '#332211';
+    ctx.fillRect(x + 6, y + 1, width - 12, 4);
 
-    // Глаза (светящиеся)
-    const eyeGlow = ctx.createRadialGradient(
-      facingRight ? x + width - 10 : x + 10, y + 4, 0,
-      facingRight ? x + width - 10 : x + 10, y + 4, 4
-    );
-    eyeGlow.addColorStop(0, '#ffffff');
-    eyeGlow.addColorStop(0.5, '#00ffff');
-    eyeGlow.addColorStop(1, 'rgba(0, 255, 255, 0)');
-    ctx.fillStyle = eyeGlow;
-    ctx.fillRect(facingRight ? x + width - 13 : x + 7, y + 2, 6, 5);
+    // Глаза (обычные)
+    ctx.fillStyle = '#ffffff';
+    const eyeX = facingRight ? x + width - 12 : x + 6;
+    ctx.fillRect(eyeX, y + 5, 5, 4);
     
     // Зрачки
     ctx.fillStyle = '#000000';
-    const pupilX = facingRight ? x + width - 11 : x + 9;
-    ctx.fillRect(pupilX, y + 3, 2, 3);
+    const pupilX = facingRight ? eyeX + 2 : eyeX;
+    ctx.fillRect(pupilX, y + 6, 2, 2);
 
-    // Ноги с анимацией
+    // Ноги с анимацией (штаны)
     const legGradient = ctx.createLinearGradient(x, y + height - 10, x, y + height);
-    legGradient.addColorStop(0, '#007755');
-    legGradient.addColorStop(1, '#004433');
+    legGradient.addColorStop(0, '#554433');
+    legGradient.addColorStop(1, '#332211');
     ctx.fillStyle = legGradient;
     
     if (player.fsm.getCurrentState() === PlayerState.RUN) {

@@ -312,12 +312,16 @@ export default function App() {
     return (
       <div className="w-full h-screen bg-gray-900 flex flex-col items-center justify-center overflow-hidden">
         <div className="text-center">
-          <h1 className="text-5xl font-bold text-emerald-400 mb-4 tracking-wider"
-              style={{ textShadow: '0 0 20px rgba(16, 185, 129, 0.5)' }}>
-            ⚔️ DARK DUNGEON ⚔️
+          <h1 className="text-5xl font-bold text-orange-500 mb-4 tracking-wider"
+              style={{ textShadow: '0 0 20px rgba(249, 115, 22, 0.5)' }}>
+            ⛓️ PRISON BREAK ⛓️
           </h1>
           <p className="text-gray-400 mb-2 text-lg">2D Action-Platformer / Metroidvania</p>
-          <p className="text-gray-500 mb-8 text-sm">Мрачное киберпанк-подземелье</p>
+          <p className="text-gray-500 mb-4 text-sm">Побег из тюрьмы</p>
+          <div className="text-gray-600 text-xs mb-8 max-w-md mx-auto">
+            <p className="italic">"Вы просыпаетесь в тюремной камере. Единственный шанс на свободу - бежать. 
+            Сражайтесь с охранниками, преодолевайте препятствия и найдите выход..."</p>
+          </div>
 
           <button
             onClick={startGame}
@@ -329,14 +333,14 @@ export default function App() {
           <div className="mt-8 text-gray-500 text-sm space-y-1">
             <p><span className="text-gray-300">WASD / Стрелки</span> — Движение</p>
             <p><span className="text-gray-300">Space</span> — Прыжок (двойной)</p>
-            <p><span className="text-gray-300">J / Z</span> — Атака</p>
-            <p><span className="text-gray-300">Q / Tab</span> — Смена оружия</p>
+            <p><span className="text-gray-300">J / Z</span> — Атака (кулаки/оружие)</p>
+            <p><span className="text-gray-300">Q / Tab</span> — Смена оружия (после 3 уровня)</p>
             <p><span className="text-gray-300">R</span> — Перезарядка</p>
             <p><span className="text-gray-300">W</span> — Стрелять вверх (с пистолетом)</p>
             <p><span className="text-gray-300">S</span> — Падение сквозь платформу</p>
             <p><span className="text-gray-300">ESC</span> — Пауза</p>
-            <p className="mt-4 text-emerald-400">🎮 5 уникальных уровней с вертикальным дизайном!</p>
-            <p className="text-xs text-gray-600">Избегайте ям, сражайтесь с летающими врагами!</p>
+            <p className="mt-4 text-orange-400">🎮 5 уровней: 3 уровня тюрьмы + 2 уровня свободы!</p>
+            <p className="text-xs text-gray-600">Первые 3 уровня - только ближний бой. Огнестрел найдёте позже!</p>
           </div>
         </div>
       </div>
@@ -469,10 +473,10 @@ export default function App() {
           <div className="bg-black/70 rounded-lg p-2">
             <div className="flex items-center gap-2">
               <span className="text-lg">
-                {currentWeapon === WeaponType.MELEE ? '⚔️' : '🔫'}
+                {currentLevel <= 3 ? '👊' : (currentWeapon === WeaponType.MELEE ? '⚔️' : '🔫')}
               </span>
               <span className="text-white text-xs font-bold">
-                {currentWeapon === WeaponType.MELEE ? 'МЕЧ' : 'ПИСТОЛЕТ'}
+                {currentLevel <= 3 ? 'КУЛАКИ' : (currentWeapon === WeaponType.MELEE ? 'МЕЧ' : 'ПИСТОЛЕТ')}
               </span>
             </div>
             <p className="text-gray-400 text-xs mt-1">{getStateText(playerState)}</p>
@@ -480,9 +484,15 @@ export default function App() {
 
           {/* Подсказки */}
           <div className="bg-black/70 rounded-lg p-2">
-            <p className="text-gray-400 text-xs">[Q] Сменить оружие</p>
-            <p className="text-gray-400 text-xs">[R] Перезарядка</p>
-            <p className="text-gray-400 text-xs">[W] Стрелять вверх</p>
+            {currentLevel > 3 ? (
+              <>
+                <p className="text-gray-400 text-xs">[Q] Сменить оружие</p>
+                <p className="text-gray-400 text-xs">[R] Перезарядка</p>
+                <p className="text-gray-400 text-xs">[W] Стрелять вверх</p>
+              </>
+            ) : (
+              <p className="text-orange-400 text-xs">🔒 Огнестрел недоступен</p>
+            )}
             <p className="text-gray-400 text-xs">[ESC] Пауза</p>
           </div>
         </div>

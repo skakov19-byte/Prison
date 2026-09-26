@@ -74,6 +74,12 @@ export class GameEngine {
       this.bulletPool
     );
 
+    // На первых 3 уровнях (тюрьма) нет огнестрельного оружия
+    this.player.hasRangedWeapon = this.currentLevelNumber > 3;
+    if (!this.player.hasRangedWeapon) {
+      this.player.currentWeapon = WeaponType.MELEE;
+    }
+
     this.player.onHealthChange = callbacks.onHealthChange;
     this.player.onAmmoChange = callbacks.onAmmoChange;
     this.player.onGoldChange = callbacks.onGoldChange;
@@ -395,6 +401,11 @@ export class GameEngine {
       this.level.playerSpawn.y,
       this.bulletPool
     );
+    // На первых 3 уровнях (тюрьма) нет огнестрельного оружия
+    this.player.hasRangedWeapon = this.currentLevelNumber > 3;
+    if (!this.player.hasRangedWeapon) {
+      this.player.currentWeapon = WeaponType.MELEE;
+    }
     this.player.onHealthChange = this.callbacks.onHealthChange;
     this.player.onAmmoChange = this.callbacks.onAmmoChange;
     this.player.onGoldChange = this.callbacks.onGoldChange;
@@ -411,6 +422,11 @@ export class GameEngine {
       this.level.playerSpawn.y,
       this.bulletPool
     );
+    // На первых 3 уровнях (тюрьма) нет огнестрельного оружия
+    this.player.hasRangedWeapon = this.currentLevelNumber > 3;
+    if (!this.player.hasRangedWeapon) {
+      this.player.currentWeapon = WeaponType.MELEE;
+    }
     this.player.onHealthChange = this.callbacks.onHealthChange;
     this.player.onAmmoChange = this.callbacks.onAmmoChange;
     this.player.onGoldChange = this.callbacks.onGoldChange;

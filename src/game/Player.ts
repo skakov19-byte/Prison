@@ -24,13 +24,14 @@ export class Player {
   canDoubleJump: boolean = true;
   isDropping: boolean = false;
 
-  currentWeapon: WeaponType = WeaponType.RANGED;
+  currentWeapon: WeaponType = WeaponType.MELEE;
   meleeTimer: number = 0;
   shootTimer: number = 0;
   reloadTimer: number = 0;
   isReloading: boolean = false;
   isAttacking: boolean = false;
   aimingUp: boolean = false;
+  hasRangedWeapon: boolean = false; // Есть ли у игрока огнестрел
   attackFrame: number = 0;
   comboCount: number = 0;
   comboTimer: number = 0;
@@ -199,12 +200,13 @@ export class Player {
   }
 
   private handleInput(dt: number, input: InputState, state: PlayerState): void {
-    if (input.switchWeaponPressed) {
-      this.currentWeapon = this.currentWeapon === WeaponType.MELEE ? WeaponType.RANGED : WeaponType.MELEE;
-    }
-
     // Прицеливание вверх (только для дальнего боя)
     this.aimingUp = input.up && this.currentWeapon === WeaponType.RANGED;
+
+    // Переключение оружия (только если есть огнестрел)
+    if (input.switchWeaponPressed && this.hasRangedWeapon) {
+      this.currentWeapon = this.currentWeapon === WeaponType.MELEE ? WeaponType.RANGED : WeaponType.MELEE;
+    }
 
     // Перезарядка запускается только через reload() из GameEngine
     // Не устанавливаем reloadTimer здесь, чтобы reload() мог сработать
