@@ -2,7 +2,7 @@
 // PLAYER - Контроллер игрока с FSM
 // ============================================
 
-import { PlayerState, WeaponType, InputState, PlayerStats, Vector2, Rect, Particle, Platform } from './types';
+import { PlayerState, WeaponType, InputState, PlayerStats, Vector2, Rect, Particle, Platform, ItemType, InventoryItem } from './types';
 import { StateMachine } from './StateMachine';
 import { ObjectPool } from './ObjectPool';
 
@@ -32,6 +32,15 @@ export class Player {
   isAttacking: boolean = false;
   aimingUp: boolean = false;
   hasRangedWeapon: boolean = false; // Есть ли у игрока огнестрел
+  
+  // Инвентарь
+  inventory: InventoryItem[] = [];
+  hasLockpick: boolean = false;
+  hasBaton: boolean = false;
+  
+  // Колбэки для инвентаря
+  onItemPickup: (item: InventoryItem) => void = () => {};
+  onItemUsed: (itemType: ItemType) => void = () => {};
   attackFrame: number = 0;
   comboCount: number = 0;
   comboTimer: number = 0;
@@ -474,6 +483,50 @@ export class Player {
   addGold(amount: number): void {
     this.stats.gold += amount;
     if (this.onGoldChange) this.onGoldChange(this.stats.gold);
+  }
+
+  // Методы инвентаря
+  addItem(item: InventoryItem): void {
+    this.inventory.push(item);
+    
+    if (item.type === ItemType.LOCKPICK) {
+      this.hasLockpick = true;
+    } else if (item.type === ItemType.BATON) {
+      this.hasBaton = true;
+      // Дубинка заменяет кулаки
+      this.stats.meleeDamage = 25; // Урон дубинки больше кулаков
+    }
+    
+    this.onItemPickup(item);
+  }
+
+  removeItem(itemType: ItemType): boolean {
+    const index = this.inventory.findIndex(i => i.type === itemType);
+    if (index !== -1) {
+      this.inventory.splice(index, 1);
+      
+      if (itemType === ItemType.LOCKPICK) {
+        this.hasLockpick = false;
+      } else if (itemType === ItemType.BATON) {
+        this.hasBaton = false;
+        this.stats.meleeDamage = 10; // Возвращаем урон кулаков
+      }
+      
+      this.onItemUsed(itemType);
+      return true;
+    }
+    return false;
+  }
+
+  hasItem(itemType: ItemType): boolean {
+    return this.inventory.some(i => i.type === itemType);
+  }
+
+  clearInventory(): void {
+    this.inventory = [];
+    this.hasLockpick = false;
+    this.hasBaton = false;
+    this.stats.meleeDamage = 10;
   }
 
   reload(): void {

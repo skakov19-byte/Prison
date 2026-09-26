@@ -22,6 +22,22 @@ export interface Door {
   message?: string;
 }
 
+export interface PickupZone {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  item: {
+    type: 'LOCKPICK' | 'BATON';
+    name: string;
+    icon: string;
+    description: string;
+  };
+  triggerOnAttack?: boolean; // Активируется при ударе
+  triggerOnKill?: boolean; // Активируется при убийстве врага
+  enemyIndex?: number; // Индекс врага для triggerOnKill
+}
+
 export interface LevelData {
   platforms: Platform[];
   ladders: { x: number; y: number; width: number; height: number }[];
@@ -29,6 +45,7 @@ export interface LevelData {
   playerSpawn: Vector2;
   exitDoor?: { x: number; y: number; width: number; height: number };
   doors?: Door[];
+  pickupZones?: PickupZone[];
   pits: Pit[];
   width: number;
   height: number;
@@ -148,6 +165,36 @@ export function createLevel1(): LevelData {
     { x: 1100, y: 700, width: 100, height: 40, damage: 40 },
   ];
 
+  const pickupZones: PickupZone[] = [
+    {
+      x: 20,
+      y: 500,
+      width: 40,
+      height: 100,
+      item: {
+        type: 'LOCKPICK',
+        name: 'Отмычка',
+        icon: '🔑',
+        description: 'Может открыть замок',
+      },
+      triggerOnAttack: true, // Активируется при ударе по стене
+    },
+    {
+      x: 350,
+      y: 656,
+      width: 40,
+      height: 40,
+      item: {
+        type: 'BATON',
+        name: 'Дубинка',
+        icon: '🏏',
+        description: 'Улучшает ближний бой',
+      },
+      triggerOnKill: true, // Активируется при убийстве врага
+      enemyIndex: 0, // Первый охранник
+    },
+  ];
+
   return {
     platforms,
     ladders,
@@ -155,6 +202,7 @@ export function createLevel1(): LevelData {
     playerSpawn: { x: 60, y: 650 }, // В камере
     exitDoor: { x: 1850, y: 190, width: 40, height: 60 },
     doors,
+    pickupZones,
     pits,
     width: 2400,
     height: 740,

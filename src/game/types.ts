@@ -34,6 +34,18 @@ export enum WeaponType {
   RANGED = 'RANGED',
 }
 
+export enum ItemType {
+  LOCKPICK = 'LOCKPICK',
+  BATON = 'BATON',
+}
+
+export interface InventoryItem {
+  type: ItemType;
+  name: string;
+  icon: string;
+  description: string;
+}
+
 export interface Vector2 {
   x: number;
   y: number;

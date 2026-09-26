@@ -2,12 +2,12 @@
 // GAME ENGINE - Главный игровой цикл
 // ============================================
 
-import { InputState, PlayerState, WeaponType, EnemyType, EnemyState } from './types';
+import { InputState, PlayerState, WeaponType, EnemyType, EnemyState, ItemType, InventoryItem } from './types';
 import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { ObjectPool } from './ObjectPool';
 import { Renderer } from './Renderer';
-import { LevelData, getLevel, Door } from './Level';
+import { LevelData, getLevel, Door, PickupZone } from './Level';
 
 export interface GameCallbacks {
   onHealthChange: (health: number, maxHealth: number) => void;
@@ -19,6 +19,8 @@ export interface GameCallbacks {
   onLevelComplete: () => void;
   onEnemyKill: () => void;
   onDoorMessage: (message: string) => void;
+  onItemPickup: (item: InventoryItem) => void;
+  onInventoryChange: (inventory: InventoryItem[]) => void;
 }
 
 export class GameEngine {
@@ -86,6 +88,15 @@ export class GameEngine {
     this.player.onAmmoChange = callbacks.onAmmoChange;
     this.player.onGoldChange = callbacks.onGoldChange;
     this.player.onDeath = callbacks.onDeath;
+    
+    // Подключаем колбэки инвентаря
+    this.player.onItemPickup = (item: InventoryItem) => {
+      callbacks.onItemPickup(item);
+      callbacks.onInventoryChange([...this.player.inventory]);
+    };
+    this.player.onItemUsed = () => {
+      callbacks.onInventoryChange([...this.player.inventory]);
+    };
 
     this.spawnEnemies();
 
@@ -222,6 +233,7 @@ export class GameEngine {
     this.checkPits();
     this.checkDoors();
     this.handleDoorCollisions();
+    this.checkPickupZones();
 
     this.callbacks.onStateChange(this.player.fsm.getCurrentState());
     this.callbacks.onWeaponChange(this.player.currentWeapon);
@@ -231,6 +243,49 @@ export class GameEngine {
     }
 
     this.enemies = this.enemies.filter(e => !e.isDead || e.deathTimer > 0);
+  }
+
+  private checkPickupZones(): void {
+    if (!this.level.pickupZones || this.level.pickupZones.length === 0) return;
+
+    const playerHitbox = this.player.getHitbox();
+
+    for (const zone of this.level.pickupZones) {
+      const zoneHitbox = { x: zone.x, y: zone.y, width: zone.width, height: zone.height };
+      
+      if (this.rectsOverlap(playerHitbox, zoneHitbox)) {
+        // Проверяем триггеры
+        if (zone.triggerOnAttack && this.player.isAttacking) {
+          this.pickupItem(zone);
+        } else if (zone.triggerOnKill && zone.enemyIndex !== undefined) {
+          // Проверяем, был ли убит соответствующий враг
+          const enemy = this.enemies[zone.enemyIndex];
+          if (enemy && enemy.isDead) {
+            this.pickupItem(zone);
+          }
+        } else if (!zone.triggerOnAttack && !zone.triggerOnKill) {
+          // Обычный подбор при касании
+          this.pickupItem(zone);
+        }
+      }
+    }
+  }
+
+  private pickupItem(zone: PickupZone): void {
+    const item = {
+      type: zone.item.type as ItemType,
+      name: zone.item.name,
+      icon: zone.item.icon,
+      description: zone.item.description,
+    };
+    
+    this.player.addItem(item);
+    
+    // Удаляем зону чтобы предмет не подбирался повторно
+    const index = this.level.pickupZones!.indexOf(zone);
+    if (index !== -1) {
+      this.level.pickupZones!.splice(index, 1);
+    }
   }
 
   private handleDoorCollisions(): void {
@@ -284,14 +339,17 @@ export class GameEngine {
       if (this.rectsOverlap(playerHitbox, doorHitbox)) {
         // Если дверь заблокирована и игрок нажал E
         if (door.locked && door.requiresLockpick && this.input.interactPressed) {
-          door.locked = false;
-          if (door.message) {
-            this.callbacks.onDoorMessage(door.message);
+          // Проверяем наличие отмычки в инвентаре
+          if (this.player.hasItem(ItemType.LOCKPICK)) {
+            door.locked = false;
+            this.player.removeItem(ItemType.LOCKPICK); // Отмычка исчезает
+            if (door.message) {
+              this.callbacks.onDoorMessage(door.message);
+            }
+          } else {
+            this.callbacks.onDoorMessage('Нужна отмычка!');
           }
         }
-        
-        // Если дверь открыта, убираем её как препятствие (не блокирует игрока)
-        // Это реализовано через проверку locked в коллизиях
       }
     }
   }

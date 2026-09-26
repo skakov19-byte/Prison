@@ -5,7 +5,7 @@
 import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { Bullet, Particle, Platform, PlayerState, WeaponType, EnemyType } from './types';
-import { LevelData, Pit, Door } from './Level';
+import { LevelData, Pit, Door, PickupZone } from './Level';
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
@@ -60,6 +60,10 @@ export class Renderer {
 
     if (level.doors) {
       this.renderDoors(level.doors);
+    }
+
+    if (level.pickupZones) {
+      this.renderPickupZones(level.pickupZones);
     }
 
     if (level.exitDoor) {
@@ -515,6 +519,38 @@ export class Renderer {
     }
   }
 
+  private renderPickupZones(zones: PickupZone[]): void {
+    const ctx = this.ctx;
+    const time = Date.now() * 0.003;
+
+    for (const zone of zones) {
+      // Мигающая подсветка
+      const alpha = (Math.sin(time) * 0.3 + 0.5);
+      
+      // Свечение
+      const glowGradient = ctx.createRadialGradient(
+        zone.x + zone.width / 2, zone.y + zone.height / 2, 0,
+        zone.x + zone.width / 2, zone.y + zone.height / 2, zone.width
+      );
+      glowGradient.addColorStop(0, `rgba(255, 215, 0, ${alpha * 0.4})`);
+      glowGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      ctx.fillStyle = glowGradient;
+      ctx.fillRect(zone.x - 10, zone.y - 10, zone.width + 20, zone.height + 20);
+
+      // Иконка предмета
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(zone.item.icon, zone.x + zone.width / 2, zone.y + zone.height / 2 + 5);
+
+      // Подсказка
+      if (zone.triggerOnAttack) {
+        ctx.fillStyle = `rgba(255, 255, 100, ${alpha})`;
+        ctx.font = 'bold 9px Arial';
+        ctx.fillText('[J] Ударить', zone.x + zone.width / 2, zone.y - 5);
+      }
+    }
+  }
+
   private renderExitDoor(door: { x: number; y: number; width: number; height: number }): void {
     const ctx = this.ctx;
     const pulse = Math.sin(Date.now() * 0.005) * 0.3 + 0.7;
@@ -687,51 +723,66 @@ export class Renderer {
 
     // Оружие
     if (player.currentWeapon === WeaponType.MELEE) {
-      const swordX = facingRight ? x + width : x - 25;
-      if (player.isAttacking) {
-        // Анимация удара с эффектом
-        const swingAngle = player.comboCount === 2 ? 0.4 : 0.2;
-        ctx.save();
-        ctx.translate(swordX + 12, y + height / 2);
-        ctx.rotate((facingRight ? 0.6 : -0.6) + swingAngle);
-        
-        // Лезвие меча
-        const bladeGradient = ctx.createLinearGradient(0, 0, 28, 0);
-        bladeGradient.addColorStop(0, '#aaaaaa');
-        bladeGradient.addColorStop(0.5, '#ffffff');
-        bladeGradient.addColorStop(1, '#cccccc');
-        ctx.fillStyle = bladeGradient;
-        ctx.beginPath();
-        ctx.moveTo(0, -3);
-        ctx.lineTo(25, -2);
-        ctx.lineTo(28, 0);
-        ctx.lineTo(25, 2);
-        ctx.lineTo(0, 3);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Рукоять
-        ctx.fillStyle = '#8B4513';
-        ctx.fillRect(-8, -4, 8, 8);
-        ctx.fillStyle = '#DAA520';
-        ctx.fillRect(-2, -5, 2, 10);
-        
-        // Эффект удара
-        if (player.comboCount === 2) {
-          ctx.strokeStyle = 'rgba(255, 100, 0, 0.6)';
-          ctx.lineWidth = 2;
+      const weaponX = facingRight ? x + width : x - 25;
+      
+      if (player.hasBaton) {
+        // Дубинка
+        if (player.isAttacking) {
+          const swingAngle = player.comboCount === 2 ? 0.5 : 0.3;
+          ctx.save();
+          ctx.translate(weaponX + 10, y + height / 2);
+          ctx.rotate((facingRight ? 0.7 : -0.7) + swingAngle);
+          
+          // Дубинка
+          const batonGradient = ctx.createLinearGradient(0, 0, 20, 0);
+          batonGradient.addColorStop(0, '#4a3728');
+          batonGradient.addColorStop(0.5, '#6b5240');
+          batonGradient.addColorStop(1, '#4a3728');
+          ctx.fillStyle = batonGradient;
           ctx.beginPath();
-          ctx.arc(15, 0, 12, 0, Math.PI);
-          ctx.stroke();
+          ctx.roundRect(0, -3, 20, 6, 2);
+          ctx.fill();
+          
+          // Рукоять
+          ctx.fillStyle = '#2a1f18';
+          ctx.fillRect(-6, -4, 6, 8);
+          
+          // Эффект удара
+          if (player.comboCount === 2) {
+            ctx.strokeStyle = 'rgba(255, 150, 0, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(10, 0, 10, 0, Math.PI);
+            ctx.stroke();
+          }
+          
+          ctx.restore();
+        } else {
+          // Дубинка в покое
+          ctx.fillStyle = '#5a4a38';
+          ctx.fillRect(weaponX, y + height / 2 - 2, 18, 4);
+          ctx.fillStyle = '#3a2a18';
+          ctx.fillRect(weaponX - 5, y + height / 2 - 3, 5, 6);
         }
-        
-        ctx.restore();
       } else {
-        // Меч в покое
-        ctx.fillStyle = '#999999';
-        ctx.fillRect(swordX, y + height / 2 - 2, 22, 3);
-        ctx.fillStyle = '#8B4513';
-        ctx.fillRect(swordX - 6, y + height / 2 - 3, 6, 6);
+        // Кулаки
+        if (player.isAttacking) {
+          const punchOffset = player.comboCount === 2 ? 8 : 5;
+          ctx.fillStyle = '#ffcc99';
+          const fistX = facingRight ? x + width + punchOffset : x - punchOffset - 8;
+          ctx.beginPath();
+          ctx.roundRect(fistX, y + height / 2 - 5, 8, 10, 3);
+          ctx.fill();
+          
+          // Эффект удара
+          if (player.comboCount === 2) {
+            ctx.strokeStyle = 'rgba(255, 200, 0, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(fistX + 4, y + height / 2, 8, 0, Math.PI);
+            ctx.stroke();
+          }
+        }
       }
     } else {
       // Пистолет с деталями

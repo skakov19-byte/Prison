@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GameEngine } from './game/GameEngine';
-import { PlayerState, WeaponType } from './game/types';
+import { PlayerState, WeaponType, InventoryItem, ItemType } from './game/types';
 
 type GameScreen = 'menu' | 'playing' | 'dead' | 'victory' | 'shop';
 
@@ -34,6 +34,10 @@ export default function App() {
   const [previousScreen, setPreviousScreen] = useState<GameScreen>('playing');
   const [doorMessage, setDoorMessage] = useState<string | null>(null);
   const doorMessageTimerRef = useRef<number | null>(null);
+  
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [itemNotification, setItemNotification] = useState<string | null>(null);
+  const itemNotificationTimerRef = useRef<number | null>(null);
 
   const [shopItems, setShopItems] = useState<ShopItem[]>([
     { id: 'health', name: 'Макс. здоровье', description: '+25 к максимальному здоровью', cost: 30, icon: '❤️', maxLevel: 5, currentLevel: 0 },
@@ -76,6 +80,7 @@ export default function App() {
     setGold(0);
     setKills(0);
     setCurrentLevel(1);
+    setInventory([]);
     setScreen('playing');
   }, []);
 
@@ -92,6 +97,28 @@ export default function App() {
       setDoorMessage(null);
       doorMessageTimerRef.current = null;
     }, 3000);
+  };
+
+  const showItemNotification = (message: string) => {
+    setItemNotification(message);
+    
+    if (itemNotificationTimerRef.current) {
+      clearTimeout(itemNotificationTimerRef.current);
+    }
+    
+    itemNotificationTimerRef.current = window.setTimeout(() => {
+      setItemNotification(null);
+      itemNotificationTimerRef.current = null;
+    }, 3000);
+  };
+
+  const handleItemPickup = (item: InventoryItem) => {
+    setInventory(prev => [...prev, item]);
+    showItemNotification(`Найдено: ${item.name}`);
+  };
+
+  const handleInventoryChange = (newInventory: InventoryItem[]) => {
+    setInventory(newInventory);
   };
 
   // Запуск игрового движка когда экран = playing
@@ -123,6 +150,7 @@ export default function App() {
             if (engineRef.current) {
               engineRef.current.pause();
             }
+            setInventory([]);
             setScreen('dead');
           },
           onLevelComplete: () => {
@@ -133,6 +161,8 @@ export default function App() {
           },
           onEnemyKill: () => setKills(k => k + 1),
           onDoorMessage: (msg: string) => showDoorMessage(msg),
+          onItemPickup: (item: InventoryItem) => handleItemPickup(item),
+          onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
         }, currentLevel);
 
         // Применяем улучшения из магазина
@@ -228,6 +258,7 @@ export default function App() {
     setAmmo(12);
     setMaxAmmo(12);
     setKills(0);
+    setInventory([]);
     
     // Меняем screen чтобы меню victory пропало
     setScreen('playing');
@@ -248,6 +279,7 @@ export default function App() {
             if (engineRef.current) {
               engineRef.current.pause();
             }
+            setInventory([]);
             setScreen('dead');
           },
           onLevelComplete: () => {
@@ -258,6 +290,8 @@ export default function App() {
           },
           onEnemyKill: () => setKills(k => k + 1),
           onDoorMessage: (msg: string) => showDoorMessage(msg),
+          onItemPickup: (item: InventoryItem) => handleItemPickup(item),
+          onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
         }, nextLevel);
 
         // Применяем улучшения из магазина
@@ -498,16 +532,44 @@ export default function App() {
           </div>
         )}
 
+        {/* Уведомление о предмете */}
+        {itemNotification && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-fade-in">
+            <div className="bg-black/90 border-2 border-emerald-500 rounded-lg px-6 py-3 shadow-lg">
+              <p className="text-emerald-400 text-lg font-bold text-center">{itemNotification}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Инвентарь */}
+        {inventory.length > 0 && (
+          <div className="absolute top-20 left-3 bg-black/70 rounded-lg p-2 pointer-events-none">
+            <p className="text-gray-400 text-xs mb-1 font-bold">Инвентарь:</p>
+            <div className="flex flex-col gap-1">
+              {inventory.map((item, index) => (
+                <div key={index} className="flex items-center gap-2 bg-gray-800/50 rounded px-2 py-1">
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-white text-xs">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* HUD - Нижняя панель */}
         <div className="absolute bottom-0 left-0 right-0 p-3 flex justify-between items-end pointer-events-none">
           {/* Текущее оружие */}
           <div className="bg-black/70 rounded-lg p-2">
             <div className="flex items-center gap-2">
               <span className="text-lg">
-                {currentLevel <= 3 ? '👊' : (currentWeapon === WeaponType.MELEE ? '⚔️' : '🔫')}
+                {currentLevel <= 3 
+                  ? (inventory.some(i => i.type === ItemType.BATON) ? '🏏' : '👊')
+                  : (currentWeapon === WeaponType.MELEE ? '⚔️' : '🔫')}
               </span>
               <span className="text-white text-xs font-bold">
-                {currentLevel <= 3 ? 'КУЛАКИ' : (currentWeapon === WeaponType.MELEE ? 'МЕЧ' : 'ПИСТОЛЕТ')}
+                {currentLevel <= 3 
+                  ? (inventory.some(i => i.type === ItemType.BATON) ? 'ДУБИНКА' : 'КУЛАКИ')
+                  : (currentWeapon === WeaponType.MELEE ? 'МЕЧ' : 'ПИСТОЛЕТ')}
               </span>
             </div>
             <p className="text-gray-400 text-xs mt-1">{getStateText(playerState)}</p>
