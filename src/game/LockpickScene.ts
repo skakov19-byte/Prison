@@ -43,7 +43,7 @@ export class LockpickScene {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!this.gameActive) return;
       
-      if (e.code === 'Space') {
+      if (e.code === 'KeyP') {
         this.checkHit();
       }
     };
@@ -150,7 +150,7 @@ export class LockpickScene {
     // Подзаголовок
     ctx.font = '18px Arial';
     ctx.fillStyle = '#aaaaaa';
-    ctx.fillText('Нажмите SPACE когда риска в зелёной зоне', this.canvasWidth / 2, 120);
+    ctx.fillText('Нажмите P когда риска в зелёной зоне', this.canvasWidth / 2, 120);
     
     // Полоса-шкала
     const barX = 100;
@@ -245,7 +245,7 @@ export class LockpickScene {
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('SPACE - остановить риску', this.canvasWidth / 2, this.canvasHeight - 55);
+    ctx.fillText('P - остановить риску', this.canvasWidth / 2, this.canvasHeight - 55);
     
     // Эффект вспышки
     if (this.flashTimer > 0) {

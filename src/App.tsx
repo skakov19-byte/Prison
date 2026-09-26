@@ -226,6 +226,9 @@ export default function App() {
   useEffect(() => {
     if (screen !== 'intro') return;
 
+    let animFrameId: number;
+    let skipIntroHandler: (() => void) | null = null;
+
     const timer = setTimeout(() => {
       if (!canvasRef.current) return;
 
@@ -238,7 +241,6 @@ export default function App() {
       introRendererRef.current = introRenderer;
 
       let lastTime = performance.now();
-      let animFrameId: number;
 
       const renderLoop = (timestamp: number) => {
         const dt = (timestamp - lastTime) / 1000;
@@ -259,21 +261,22 @@ export default function App() {
       animFrameId = requestAnimationFrame(renderLoop);
 
       // Возможность пропустить интро по клику
-      const skipIntro = () => {
+      skipIntroHandler = () => {
         cancelAnimationFrame(animFrameId);
         setScreen('playing');
       };
 
-      canvas.addEventListener('click', skipIntro);
-
-      return () => {
-        cancelAnimationFrame(animFrameId);
-        canvas.removeEventListener('click', skipIntro);
-      };
+      canvas.addEventListener('click', skipIntroHandler);
     }, 100);
 
     return () => {
       clearTimeout(timer);
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+      }
+      if (skipIntroHandler && canvasRef.current) {
+        canvasRef.current.removeEventListener('click', skipIntroHandler);
+      }
     };
   }, [screen]);
 
