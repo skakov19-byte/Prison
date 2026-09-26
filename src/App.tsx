@@ -413,7 +413,9 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 gap-3">
-              {shopItems.map(item => (
+              {shopItems
+                .filter(item => currentLevel > 3 || item.id !== 'ranged')
+                .map(item => (
                 <div
                   key={item.id}
                   className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
@@ -615,12 +617,14 @@ export default function App() {
               >
                 🔄 Заново
               </button>
-              <button
-                onClick={openShop}
-                className="px-6 py-2 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg transition-all cursor-pointer"
-              >
-                🛒 Магазин
-              </button>
+              {currentLevel > 3 && (
+                <button
+                  onClick={openShop}
+                  className="px-6 py-2 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+                >
+                  🛒 Магазин
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -632,12 +636,14 @@ export default function App() {
             <p className="text-gray-300 mb-1">Уровень {currentLevel}: {levelName}</p>
             <p className="text-gray-400 mb-2">Убийств: {kills} | Золото: {gold}</p>
             <div className="flex gap-4 mt-4">
-              <button
-                onClick={openShop}
-                className="px-6 py-2 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg transition-all cursor-pointer"
-              >
-                🛒 Магазин
-              </button>
+              {currentLevel > 3 && (
+                <button
+                  onClick={openShop}
+                  className="px-6 py-2 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+                >
+                  🛒 Магазин
+                </button>
+              )}
               {currentLevel < 5 ? (
                 <button
                   onClick={goToNextLevel}
@@ -679,12 +685,14 @@ export default function App() {
               >
                 ▶ Продолжить
               </button>
-              <button
-                onClick={openShop}
-                className="px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg transition-all cursor-pointer"
-              >
-                🛒 Магазин
-              </button>
+              {currentLevel > 3 && (
+                <button
+                  onClick={openShop}
+                  className="px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+                >
+                  🛒 Магазин
+                </button>
+              )}
               <button
                 onClick={() => {
                   if (engineRef.current) {

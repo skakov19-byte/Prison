@@ -251,20 +251,23 @@ export class GameEngine {
     const playerHitbox = this.player.getHitbox();
 
     for (const zone of this.level.pickupZones) {
-      const zoneHitbox = { x: zone.x, y: zone.y, width: zone.width, height: zone.height };
-      
-      if (this.rectsOverlap(playerHitbox, zoneHitbox)) {
-        // Проверяем триггеры
-        if (zone.triggerOnAttack && this.player.isAttacking) {
+      // Проверяем триггеры
+      if (zone.triggerOnAttack) {
+        // Для отмычки - игрок должен быть в зоне и атаковать
+        const zoneHitbox = { x: zone.x, y: zone.y, width: zone.width, height: zone.height };
+        if (this.rectsOverlap(playerHitbox, zoneHitbox) && this.player.isAttacking) {
           this.pickupItem(zone);
-        } else if (zone.triggerOnKill && zone.enemyIndex !== undefined) {
-          // Проверяем, был ли убит соответствующий враг
-          const enemy = this.enemies[zone.enemyIndex];
-          if (enemy && enemy.isDead) {
-            this.pickupItem(zone);
-          }
-        } else if (!zone.triggerOnAttack && !zone.triggerOnKill) {
-          // Обычный подбор при касании
+        }
+      } else if (zone.triggerOnKill && zone.enemyIndex !== undefined) {
+        // Для дубинки - проверяем только убийство врага, без проверки позиции игрока
+        const enemy = this.enemies[zone.enemyIndex];
+        if (enemy && enemy.isDead) {
+          this.pickupItem(zone);
+        }
+      } else if (!zone.triggerOnAttack && !zone.triggerOnKill) {
+        // Обычный подбор при касании
+        const zoneHitbox = { x: zone.x, y: zone.y, width: zone.width, height: zone.height };
+        if (this.rectsOverlap(playerHitbox, zoneHitbox)) {
           this.pickupItem(zone);
         }
       }
