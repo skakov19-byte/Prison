@@ -46,6 +46,8 @@ export default function App() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [itemNotification, setItemNotification] = useState<string | null>(null);
   const itemNotificationTimerRef = useRef<number | null>(null);
+  const [hasCompletedChase, setHasCompletedChase] = useState(false);
+  const [startFromCrash, setStartFromCrash] = useState(false);
 
   const [shopItems, setShopItems] = useState<ShopItem[]>([
     { id: 'health', name: 'Макс. здоровье', description: '+25 к максимальному здоровью', cost: 30, icon: '❤️', maxLevel: 5, currentLevel: 0 },
@@ -276,7 +278,13 @@ export default function App() {
       if (!ctx) return;
 
       const act2Renderer = new Act2IntroRenderer(ctx, canvas.width, canvas.height);
-      act2Renderer.start();
+      if (startFromCrash) {
+        // Начинаем сразу со сцены аварии
+        act2Renderer.startCrashScene();
+        setStartFromCrash(false);
+      } else {
+        act2Renderer.start();
+      }
       act2IntroRendererRef.current = act2Renderer;
 
       let lastTime = performance.now();
@@ -353,18 +361,15 @@ export default function App() {
         chaseScene.render();
 
         if (isFinished) {
-          // Мини-игра завершена, возвращаемся к ролику
+          // Мини-игра завершена, показываем сцену аварии и переходим к 4 уровню
           cancelAnimationFrame(animFrameId);
           
-          // Возвращаемся к сцене crash в ролике
-          if (act2IntroRendererRef.current) {
-            act2IntroRendererRef.current.startCrashScene();
-            setScreen('act2_intro');
-          } else {
-            // Если рендерер недоступен, просто переходим к 4 уровню
-            setCurrentLevel(4);
-            setScreen('playing');
-          }
+          // Устанавливаем флаг, что погоня завершена
+          setHasCompletedChase(true);
+          // Устанавливаем флаг, что нужно начать со сцены аварии
+          setStartFromCrash(true);
+          // Переходим к сцене аварии
+          setScreen('act2_intro');
           return;
         }
 
