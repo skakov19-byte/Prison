@@ -496,18 +496,23 @@ export class GameEngine {
 
     const playerHitbox = this.player.getHitbox();
     
-    // Проверяем выход за границы уровня
-    if (this.level.exitDirection === 'right' && playerHitbox.x + playerHitbox.width > this.level.width) {
-      // На третьем уровне нужен ключ для завершения
-      if (this.currentLevelNumber === 3 && !this.player.hasItem(ItemType.KEY)) {
-        this.callbacks.onDoorMessage('Нужно найти ключ от выхода!');
-        // Отбрасываем игрока назад
-        this.player.x = this.level.width - playerHitbox.width - 10;
-        return;
+    // Проверяем столкновение с краями уровня
+    if (this.level.exitDirection === 'right') {
+      // Проверяем, упёрся ли игрок в правую стену
+      if (playerHitbox.x + playerHitbox.width >= this.level.width - 50) {
+        // На третьем уровне нужен ключ для завершения
+        if (this.currentLevelNumber === 3 && !this.player.hasItem(ItemType.KEY)) {
+          this.callbacks.onDoorMessage('Нужно найти ключ от выхода!');
+          this.player.x = this.level.width - playerHitbox.width - 60;
+          return;
+        }
+        this.callbacks.onLevelComplete('right');
       }
-      this.callbacks.onLevelComplete('right');
-    } else if (this.level.exitDirection === 'left' && playerHitbox.x < 0) {
-      this.callbacks.onLevelComplete('left');
+    } else if (this.level.exitDirection === 'left') {
+      // Проверяем, упёрся ли игрок в левую стену
+      if (playerHitbox.x <= 50) {
+        this.callbacks.onLevelComplete('left');
+      }
     }
   }
   
