@@ -16,7 +16,7 @@ export interface GameCallbacks {
   onWeaponChange: (weapon: WeaponType) => void;
   onStateChange: (state: PlayerState) => void;
   onDeath: () => void;
-  onLevelComplete: () => void;
+  onLevelComplete: (direction?: 'left' | 'right') => void;
   onEnemyKill: () => void;
   onDoorMessage: (message: string) => void;
   onItemPickup: (item: InventoryItem) => void;
@@ -494,18 +494,22 @@ export class GameEngine {
   }
 
   private checkExit(): void {
-    if (!this.level.exitDoor) return;
+    if (!this.level.exitDirection) return;
 
-    const door = this.level.exitDoor;
     const playerHitbox = this.player.getHitbox();
-
-    if (this.rectsOverlap(playerHitbox, door)) {
+    
+    // Проверяем выход за границы уровня
+    if (this.level.exitDirection === 'right' && playerHitbox.x + playerHitbox.width > this.level.width) {
       // На третьем уровне нужен ключ для завершения
       if (this.currentLevelNumber === 3 && !this.player.hasItem(ItemType.KEY)) {
         this.callbacks.onDoorMessage('Нужно найти ключ от выхода!');
+        // Отбрасываем игрока назад
+        this.player.x = this.level.width - playerHitbox.width - 10;
         return;
       }
-      this.callbacks.onLevelComplete();
+      this.callbacks.onLevelComplete('right');
+    } else if (this.level.exitDirection === 'left' && playerHitbox.x < 0) {
+      this.callbacks.onLevelComplete('left');
     }
   }
   
@@ -655,6 +659,17 @@ export class GameEngine {
 
   getCurrentLevelNumber(): number {
     return this.currentLevelNumber;
+  }
+
+  getLevel(): LevelData {
+    return this.level;
+  }
+
+  setPlayerPosition(x: number, y: number): void {
+    this.player.x = x;
+    this.player.y = y;
+    this.player.vx = 0;
+    this.player.vy = 0;
   }
 
   applyUpgrades(upgrades: {

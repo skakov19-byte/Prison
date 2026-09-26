@@ -169,7 +169,7 @@ export default function App() {
             setInventory([]);
             setScreen('dead');
           },
-          onLevelComplete: () => {
+          onLevelComplete: (direction?: 'left' | 'right') => {
             if (engineRef.current) {
               engineRef.current.pause();
             }
@@ -179,7 +179,8 @@ export default function App() {
             } else if (currentLevel === 6) {
               setScreen('act3_intro');
             } else {
-              setScreen('victory');
+              // Бесшовный переход на следующий уровень
+              goToNextLevelSeamless(direction || 'right');
             }
           },
           onEnemyKill: () => setKills(k => k + 1),
@@ -581,7 +582,7 @@ export default function App() {
             setInventory([]);
             setScreen('dead');
           },
-          onLevelComplete: () => {
+          onLevelComplete: (direction?: 'left' | 'right') => {
             if (engineRef.current) {
               engineRef.current.pause();
             }
@@ -591,7 +592,8 @@ export default function App() {
             } else if (nextLevel === 6) {
               setScreen('act3_intro');
             } else {
-              setScreen('victory');
+              // Бесшовный переход на следующий уровень
+              goToNextLevelSeamless(direction || 'right');
             }
           },
           onEnemyKill: () => setKills(k => k + 1),
@@ -617,6 +619,100 @@ export default function App() {
         isTransitioningRef.current = false;
       }
     }, 100);
+  };
+
+  const goToNextLevelSeamless = (direction: 'left' | 'right') => {
+    // Бесшовный переход на следующий уровень
+    isTransitioningRef.current = true;
+    
+    // Сохраняем текущий инвентарь и золото
+    const savedInventory = [...inventory];
+    const savedGold = gold;
+    
+    // Останавливаем текущий движок
+    if (engineRef.current) {
+      engineRef.current.stop();
+      engineRef.current = null;
+    }
+    
+    // Увеличиваем уровень
+    const nextLevel = currentLevel + 1;
+    setCurrentLevel(nextLevel);
+    
+    // Сбрасываем здоровье и патроны
+    setHealth(100);
+    setMaxHealth(100);
+    setAmmo(12);
+    setMaxAmmo(12);
+    setKills(0);
+    
+    // Создаем новый движок с новым уровнем
+    setTimeout(() => {
+      if (!canvasRef.current) return;
+      
+      try {
+        const canvas = canvasRef.current;
+        const engine = new GameEngine(canvas, {
+          onHealthChange: (h: number, mh: number) => { setHealth(h); setMaxHealth(mh); },
+          onAmmoChange: (a: number, ma: number) => { setAmmo(a); setMaxAmmo(ma); },
+          onGoldChange: (g: number) => setGold(g),
+          onWeaponChange: (w: WeaponType) => setCurrentWeapon(w),
+          onStateChange: (s: PlayerState) => setPlayerState(s),
+          onDeath: () => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            setInventory([]);
+            setScreen('dead');
+          },
+          onLevelComplete: (dir?: 'left' | 'right') => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            // После 3 уровня запускаем ролик Акта 2
+            if (nextLevel === 3) {
+              setScreen('act2_intro');
+            } else if (nextLevel === 6) {
+              setScreen('act3_intro');
+            } else {
+              // Бесшовный переход на следующий уровень
+              goToNextLevelSeamless(dir || 'right');
+            }
+          },
+          onEnemyKill: () => setKills(k => k + 1),
+          onDoorMessage: (msg: string) => showDoorMessage(msg),
+          onItemPickup: (item: InventoryItem) => handleItemPickup(item),
+          onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
+        }, nextLevel, savedInventory, savedGold);
+
+        // Применяем улучшения из магазина
+        const upgrades = getUpgrades();
+        if (Object.keys(upgrades).length > 0) {
+          engine.applyUpgrades(upgrades);
+        }
+
+        engineRef.current = engine;
+        setLevelName(engine.getLevelName());
+        
+        // Размещаем игрока на противоположной стороне нового уровня
+        const level = engine.getLevel();
+        if (direction === 'right') {
+          // Если вышли вправо, появляемся слева на новом уровне
+          engine.setPlayerPosition(50, level.playerSpawn.y);
+        } else {
+          // Если вышли влево, появляемся справа на новом уровне
+          engine.setPlayerPosition(level.width - 100, level.playerSpawn.y);
+        }
+        
+        engine.start();
+        
+        // Сбрасываем флаг после создания нового движка
+        isTransitioningRef.current = false;
+      } catch (error) {
+        console.error('Failed to start next level seamlessly:', error);
+        isTransitioningRef.current = false;
+      }
+    }, 50); // Меньше задержка для более плавного перехода
   };
 
   const buyItem = (itemId: string) => {

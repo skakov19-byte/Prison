@@ -51,7 +51,6 @@ export class Renderer {
     if (level.doors) this.renderDoors(level.doors);
     if (level.pickupZones) this.renderPickupZones(level.pickupZones, enemies);
     if (level.decorations) this.renderDecorations(level.decorations);
-    if (level.exitDoor) this.renderExitDoor(level.exitDoor);
     for (const enemy of enemies) this.renderEnemy(enemy);
     this.renderBullets(bullets);
     this.renderPlayer(player);

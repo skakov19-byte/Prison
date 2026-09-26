@@ -49,7 +49,7 @@ export interface LevelData {
   ladders: { x: number; y: number; width: number; height: number }[];
   enemies: EnemyStats[];
   playerSpawn: Vector2;
-  exitDoor?: { x: number; y: number; width: number; height: number };
+  exitDirection?: 'left' | 'right'; // Направление выхода с уровня
   doors?: Door[];
   pickupZones?: PickupZone[];
   pits: Pit[];
@@ -204,7 +204,7 @@ export function createLevel1(): LevelData {
     ladders,
     enemies,
     playerSpawn: { x: 60, y: 650 }, // В камере
-    exitDoor: { x: 1850, y: 190, width: 40, height: 60 },
+    exitDirection: 'right', // Выход вправо
     doors,
     pickupZones,
     pits: [], // Убраны ямы из уровня 1 (тюрьма)
@@ -377,7 +377,7 @@ export function createLevel2(): LevelData {
     ladders,
     enemies,
     playerSpawn: { x: 2300, y: 650 }, // Справа
-    exitDoor: { x: 50, y: 440, width: 40, height: 60 }, // Выход слева
+    exitDirection: 'left', // Выход влево
     pits: [], // Убраны ямы из уровня 2 (тюрьма)
     width: 2400,
     height: 740,
@@ -570,7 +570,7 @@ export function createLevel3(): LevelData {
     ladders,
     enemies,
     playerSpawn: { x: 1100, y: 750 }, // В центре
-    exitDoor: { x: 2650, y: 340, width: 40, height: 60 }, // Выход справа-сверху
+    exitDirection: 'right', // Выход вправо
     pickupZones,
     pits: [], // Убраны ямы из уровня 3 (тюрьма)
     width: 2800,
@@ -667,7 +667,7 @@ export function createLevel4(): LevelData {
     ladders,
     enemies,
     playerSpawn: { x: 50, y: 650 },
-    exitDoor: { x: 1900, y: 240, width: 40, height: 60 },
+    exitDirection: 'right',
     pits,
     width: 2000,
     height: 740,
@@ -815,7 +815,7 @@ export function createLevel5(): LevelData {
     ladders,
     enemies,
     playerSpawn: { x: 50, y: 750 },
-    exitDoor: { x: 2150, y: 190, width: 40, height: 60 },
+    exitDirection: 'right',
     pits,
     width: 2300,
     height: 840,
@@ -1031,7 +1031,7 @@ export function createLevel6(): LevelData {
     ladders,
     enemies,
     playerSpawn: { x: 100, y: 650 },
-    exitDoor: { x: 2850, y: 640, width: 40, height: 60 },
+    exitDirection: 'right',
     pits,
     width: 3000,
     height: 740,
@@ -1113,7 +1113,6 @@ export function createLevel7(): LevelData {
     ladders,
     enemies,
     playerSpawn: { x: 100, y: 400 },
-    exitDoor: { x: 3900, y: 350, width: 40, height: 60 },
     pits,
     bossIndex: 3, // Босс - последний враг в массиве
     width: 4000,
