@@ -24,7 +24,7 @@ export class Player {
   canDoubleJump: boolean = true;
   isDropping: boolean = false;
 
-  currentWeapon: WeaponType = WeaponType.MELEE;
+  currentWeapon: WeaponType = WeaponType.RANGED;
   meleeTimer: number = 0;
   shootTimer: number = 0;
   reloadTimer: number = 0;
@@ -165,6 +165,10 @@ export class Player {
     } else {
       this.handleNormalMovement(dt, input, state);
     }
+
+    // Применяем скорость к позиции
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
 
     this.handleCollisions(platforms, input);
     this.checkLadders(ladders, input);

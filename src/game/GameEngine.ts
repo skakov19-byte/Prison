@@ -40,6 +40,8 @@ export class GameEngine {
 
   private keysDown: Set<string> = new Set();
   private keysJustPressed: Set<string> = new Set();
+  private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+  private keyupHandler: ((e: KeyboardEvent) => void) | null = null;
 
   constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks) {
     this.canvas = canvas;
@@ -94,18 +96,26 @@ export class GameEngine {
   }
 
   private setupInput(): void {
-    window.addEventListener('keydown', (e) => {
+    this.keydownHandler = (e: KeyboardEvent) => {
       if (!this.keysDown.has(e.code)) {
         this.keysJustPressed.add(e.code);
       }
       this.keysDown.add(e.code);
-      e.preventDefault();
-    });
+      // Не блокируем все клавиши - только игровые
+      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.code)) {
+        e.preventDefault();
+      }
+    };
 
-    window.addEventListener('keyup', (e) => {
+    this.keyupHandler = (e: KeyboardEvent) => {
       this.keysDown.delete(e.code);
-      e.preventDefault();
-    });
+      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.code)) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', this.keydownHandler);
+    window.addEventListener('keyup', this.keyupHandler);
   }
 
   private readInput(): void {
@@ -147,6 +157,17 @@ export class GameEngine {
     if (this.animFrameId) {
       cancelAnimationFrame(this.animFrameId);
     }
+    // Удаляем event listeners
+    if (this.keydownHandler) {
+      window.removeEventListener('keydown', this.keydownHandler);
+      this.keydownHandler = null;
+    }
+    if (this.keyupHandler) {
+      window.removeEventListener('keyup', this.keyupHandler);
+      this.keyupHandler = null;
+    }
+    this.keysDown.clear();
+    this.keysJustPressed.clear();
   }
 
   private gameLoop = (timestamp: number): void => {
@@ -223,8 +244,9 @@ export class GameEngine {
       for (const enemy of this.enemies) {
         if (enemy.isDead) continue;
         const hitbox = enemy.getHitbox();
-        if (bullet.x > hitbox.x && bullet.x < hitbox.x + hitbox.width &&
-            bullet.y > hitbox.y && bullet.y < hitbox.y + hitbox.height) {
+        // Используем >= и <= для более надёжной проверки коллизий
+        if (bullet.x >= hitbox.x && bullet.x <= hitbox.x + hitbox.width &&
+            bullet.y >= hitbox.y && bullet.y <= hitbox.y + hitbox.height) {
           enemy.takeDamage(bullet.damage);
           this.bulletPool.release(bullet);
           if (enemy.isDead) {
@@ -240,8 +262,8 @@ export class GameEngine {
       if (bullet.fromPlayer) continue;
 
       const playerHitbox = this.player.getHitbox();
-      if (bullet.x > playerHitbox.x && bullet.x < playerHitbox.x + playerHitbox.width &&
-          bullet.y > playerHitbox.y && bullet.y < playerHitbox.y + playerHitbox.height) {
+      if (bullet.x >= playerHitbox.x && bullet.x <= playerHitbox.x + playerHitbox.width &&
+          bullet.y >= playerHitbox.y && bullet.y <= playerHitbox.y + playerHitbox.height) {
         this.player.takeDamage(bullet.damage);
         this.bulletPool.release(bullet);
       }
