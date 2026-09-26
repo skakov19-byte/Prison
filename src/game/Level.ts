@@ -68,8 +68,9 @@ export function createLevel1(): LevelData {
     
     // Тюремная камера (старт) - органичные стены
     { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена
-    { rect: { x: 150, y: 0, width: 40, height: 648 } }, // Правая стена камеры (до двери)
+    { rect: { x: 150, y: 0, width: 40, height: 620 } }, // Правая стена камеры (до перегородки)
     { rect: { x: 150, y: 700, width: 40, height: 40 } }, // Правая стена камеры (после двери)
+    { rect: { x: 150, y: 620, width: 40, height: 28 } }, // Перегородка над дверью (чуть выше верха двери)
     
     // Коридор после камеры - подъём 45° (убраны нижние 2 платформы)
     { rect: { x: 370, y: 550, width: 60, height: 20 } },
@@ -165,10 +166,7 @@ export function createLevel1(): LevelData {
     },
   ];
 
-  const pits: Pit[] = [
-    { x: 500, y: 700, width: 80, height: 40, damage: 40 },
-    { x: 1100, y: 700, width: 100, height: 40, damage: 40 },
-  ];
+  // Убраны ямы из уровня 1 (тюрьма)
 
   const pickupZones: PickupZone[] = [
     {
@@ -208,7 +206,7 @@ export function createLevel1(): LevelData {
     exitDoor: { x: 1850, y: 190, width: 40, height: 60 },
     doors,
     pickupZones,
-    pits,
+    pits: [], // Убраны ямы из уровня 1 (тюрьма)
     width: 2400,
     height: 740,
     bgColor: '#1a1a1a', // Тюремный фон
@@ -371,11 +369,7 @@ export function createLevel2(): LevelData {
     },
   ];
 
-  const pits: Pit[] = [
-    { x: 1900, y: 700, width: 80, height: 40, damage: 50 },
-    { x: 1050, y: 700, width: 100, height: 40, damage: 50 },
-    { x: 450, y: 700, width: 80, height: 40, damage: 50 },
-  ];
+  // Убраны ямы из уровня 2 (тюрьма)
 
   return {
     platforms,
@@ -383,7 +377,7 @@ export function createLevel2(): LevelData {
     enemies,
     playerSpawn: { x: 2300, y: 650 }, // Справа
     exitDoor: { x: 50, y: 440, width: 40, height: 60 }, // Выход слева
-    pits,
+    pits: [], // Убраны ямы из уровня 2 (тюрьма)
     width: 2400,
     height: 740,
     bgColor: '#1a1a1a',
@@ -551,11 +545,7 @@ export function createLevel3(): LevelData {
     },
   ];
 
-  const pits: Pit[] = [
-    { x: 800, y: 800, width: 100, height: 40, damage: 60 },
-    { x: 1900, y: 800, width: 100, height: 40, damage: 60 },
-    { x: 2650, y: 800, width: 100, height: 40, damage: 60 },
-  ];
+  // Убраны ямы из уровня 3 (тюрьма)
 
   const pickupZones: PickupZone[] = [
     {
@@ -581,7 +571,7 @@ export function createLevel3(): LevelData {
     playerSpawn: { x: 1100, y: 750 }, // В центре
     exitDoor: { x: 2650, y: 340, width: 40, height: 60 }, // Выход справа-сверху
     pickupZones,
-    pits,
+    pits: [], // Убраны ямы из уровня 3 (тюрьма)
     width: 2800,
     height: 840,
     bgColor: '#1a1a1a',
