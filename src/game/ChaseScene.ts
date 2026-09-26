@@ -88,27 +88,37 @@ export class ChaseScene {
     // Обновляем смещение дороги
     this.roadOffset = (this.roadOffset + this.speed) % 40;
     
-    // Спавн препятствий
+    // Спавн препятствий (каждую секунду, только на полосах 0, 1, 2)
     this.obstacleTimer += dt;
-    if (this.obstacleTimer > 1.5) {
+    if (this.obstacleTimer > 1.0) {
       this.obstacleTimer = 0;
-      const lane = Math.floor(Math.random() * 3);
-      const type = Math.random() > 0.7 ? 'truck' : 'car';
-      this.obstacles.push({ lane, y: -100, type });
+      // Спавним 1-2 машины на разных полосах
+      const numObstacles = Math.random() > 0.5 ? 2 : 1;
+      const usedLanes: number[] = [];
+      
+      for (let i = 0; i < numObstacles; i++) {
+        let lane: number;
+        do {
+          lane = Math.floor(Math.random() * 3);
+        } while (usedLanes.includes(lane));
+        usedLanes.push(lane);
+        
+        const type = Math.random() > 0.7 ? 'truck' : 'car';
+        this.obstacles.push({ lane, y: -100 - i * 150, type });
+      }
     }
     
-    // Спавн полицейских выстрелов
+    // Спавн полицейских выстрелов (каждые 1.5 секунды)
     this.policeTimer += dt;
-    if (this.policeTimer > 2) {
+    if (this.policeTimer > 1.5) {
       this.policeTimer = 0;
       for (const police of this.policeCars) {
-        police.shootTimer += dt;
-        if (police.shootTimer > 1.5) {
-          police.shootTimer = 0;
-          const laneWidth = this.canvasWidth / 3;
-          const bulletX = laneWidth * police.lane + laneWidth / 2;
-          this.bullets.push({ x: bulletX, y: police.y, vy: -8 });
-        }
+        const laneWidth = this.canvasWidth / 3;
+        const bulletX = laneWidth * police.lane + laneWidth / 2;
+        // Стреляют 3 пулями веером
+        this.bullets.push({ x: bulletX, y: police.y - 50, vy: -10 });
+        this.bullets.push({ x: bulletX - 15, y: police.y - 50, vy: -10 });
+        this.bullets.push({ x: bulletX + 15, y: police.y - 50, vy: -10 });
       }
     }
     
@@ -594,7 +604,7 @@ export class ChaseScene {
   private renderHUD(): void {
     const ctx = this.ctx;
     
-    // Полоска здоровья машины
+    // Полоска здоровья машины (верхний левый угол)
     const barWidth = 200;
     const barHeight = 25;
     const barX = 20;
@@ -658,10 +668,42 @@ export class ChaseScene {
     ctx.fillStyle = '#ffff00';
     ctx.fillText(`⭐ Очки: ${this.score}`, barX, barY + barHeight + 50);
     
-    // Время
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
+    // Большой таймер в верхнем правом углу
     const timeLeft = Math.max(0, this.minSurvivalTime - this.elapsedTime);
+    const timerX = this.canvasWidth - 150;
+    const timerY = 20;
+    
+    // Фон таймера
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.beginPath();
+    ctx.roundRect(timerX - 10, timerY - 10, 140, 80, 10);
+    ctx.fill();
+    
+    // Рамка таймера
+    ctx.strokeStyle = timeLeft < 5 ? '#ff0000' : '#00ffff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(timerX - 10, timerY - 10, 140, 80, 10);
+    ctx.stroke();
+    
+    // Текст таймера
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ВРЕМЯ', timerX + 60, timerY + 15);
+    
     ctx.fillStyle = timeLeft < 5 ? '#ff0000' : '#00ffff';
-    ctx.fillText(`⏱️ Время: ${timeLeft.toFixed(1)}s`, barX, barY + barHeight + 75);
+    ctx.font = 'bold 36px Arial';
+    ctx.fillText(`${timeLeft.toFixed(1)}`, timerX + 60, timerY + 55);
     
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
