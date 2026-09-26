@@ -182,17 +182,47 @@ export class ChaseScene {
 
   render(): void {
     const ctx = this.ctx;
+    const time = Date.now() * 0.001;
     
     // Фон - ночная дорога
     const bgGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
     bgGradient.addColorStop(0, '#0a0a1a');
+    bgGradient.addColorStop(0.5, '#151535');
     bgGradient.addColorStop(1, '#1a1a2a');
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Дорога
-    ctx.fillStyle = '#2a2a2a';
+    // Звёзды
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    for (let i = 0; i < 50; i++) {
+      const starX = (i * 137) % this.canvasWidth;
+      const starY = (i * 97) % (this.canvasHeight * 0.3);
+      const starSize = (i % 3) + 1;
+      const twinkle = Math.sin(time * 2 + i) * 0.3 + 0.7;
+      ctx.globalAlpha = twinkle;
+      ctx.beginPath();
+      ctx.arc(starX, starY, starSize * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    
+    // Дорога с градиентом
+    const roadGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
+    roadGradient.addColorStop(0, '#2a2a2a');
+    roadGradient.addColorStop(0.5, '#333333');
+    roadGradient.addColorStop(1, '#2a2a2a');
+    ctx.fillStyle = roadGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    
+    // Текстура дороги
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    for (let i = 0; i < 20; i++) {
+      const spotX = (i * 137 + time * 100) % this.canvasWidth;
+      const spotY = (i * 97 + time * 200) % this.canvasHeight;
+      ctx.beginPath();
+      ctx.arc(spotX, spotY, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
     
     // Разметка дороги
     const laneWidth = this.canvasWidth / 3;
@@ -214,10 +244,28 @@ export class ChaseScene {
     
     ctx.setLineDash([]);
     
-    // Обочины
-    ctx.fillStyle = '#4a4a4a';
+    // Обочины с градиентом
+    const shoulderGradient = ctx.createLinearGradient(0, 0, 20, 0);
+    shoulderGradient.addColorStop(0, '#3a3a3a');
+    shoulderGradient.addColorStop(1, '#4a4a4a');
+    ctx.fillStyle = shoulderGradient;
     ctx.fillRect(0, 0, 20, this.canvasHeight);
+    
+    const shoulderGradient2 = ctx.createLinearGradient(this.canvasWidth - 20, 0, this.canvasWidth, 0);
+    shoulderGradient2.addColorStop(0, '#4a4a4a');
+    shoulderGradient2.addColorStop(1, '#3a3a3a');
+    ctx.fillStyle = shoulderGradient2;
     ctx.fillRect(this.canvasWidth - 20, 0, 20, this.canvasHeight);
+    
+    // Пыль от машин
+    ctx.fillStyle = 'rgba(100, 100, 100, 0.2)';
+    for (let i = 0; i < 15; i++) {
+      const dustX = (i * 137 + time * 50) % this.canvasWidth;
+      const dustY = this.canvasHeight - 50 + Math.sin(time + i) * 20;
+      ctx.beginPath();
+      ctx.arc(dustX, dustY, 3 + Math.sin(time + i) * 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
     
     // Препятствия
     for (const obstacle of this.obstacles) {
@@ -229,17 +277,29 @@ export class ChaseScene {
       this.renderPoliceCar(police);
     }
     
-    // Пули
+    // Пули с деталями
     for (const bullet of this.bullets) {
-      ctx.fillStyle = '#ff0000';
+      // След пули
+      const trailGradient = ctx.createLinearGradient(bullet.x, bullet.y, bullet.x, bullet.y + 20);
+      trailGradient.addColorStop(0, 'rgba(255, 0, 0, 0.6)');
+      trailGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+      ctx.fillStyle = trailGradient;
+      ctx.fillRect(bullet.x - 2, bullet.y, 4, 20);
+      
+      // Пуля с градиентом
+      const bulletGradient = ctx.createRadialGradient(bullet.x, bullet.y, 1, bullet.x, bullet.y, 5);
+      bulletGradient.addColorStop(0, '#ffffff');
+      bulletGradient.addColorStop(0.3, '#ff6666');
+      bulletGradient.addColorStop(1, '#ff0000');
+      ctx.fillStyle = bulletGradient;
       ctx.beginPath();
-      ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
+      ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2);
       ctx.fill();
       
       // Свечение
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
       ctx.beginPath();
-      ctx.arc(bullet.x, bullet.y, 8, 0, Math.PI * 2);
+      ctx.arc(bullet.x, bullet.y, 12, 0, Math.PI * 2);
       ctx.fill();
     }
     
@@ -248,6 +308,16 @@ export class ChaseScene {
     
     // HUD
     this.renderHUD();
+    
+    // Виньетка
+    const vignetteGradient = ctx.createRadialGradient(
+      this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * 0.3,
+      this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * 0.7
+    );
+    vignetteGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    vignetteGradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+    ctx.fillStyle = vignetteGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
     // Game Over экран
     if (this.gameOver) {
@@ -261,42 +331,113 @@ export class ChaseScene {
     const x = laneWidth * obstacle.lane + laneWidth / 2;
     const y = obstacle.y;
     
+    // Тень
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(x, y + (obstacle.type === 'truck' ? 55 : 45), 
+                obstacle.type === 'truck' ? 35 : 30, 
+                obstacle.type === 'truck' ? 12 : 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
     if (obstacle.type === 'truck') {
-      // Грузовик
+      // Грузовик с деталями
       const truckGradient = ctx.createLinearGradient(x - 30, y - 50, x + 30, y + 50);
-      truckGradient.addColorStop(0, '#4a4a4a');
+      truckGradient.addColorStop(0, '#5a5a5a');
+      truckGradient.addColorStop(0.5, '#4a4a4a');
       truckGradient.addColorStop(1, '#2a2a2a');
       ctx.fillStyle = truckGradient;
-      ctx.fillRect(x - 30, y - 50, 60, 100);
+      ctx.beginPath();
+      ctx.roundRect(x - 30, y - 50, 60, 100, 4);
+      ctx.fill();
       
-      // Кабина
-      ctx.fillStyle = '#3a3a3a';
-      ctx.fillRect(x - 25, y - 50, 50, 30);
+      // Блик на кузове
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.fillRect(x - 28, y - 48, 8, 96);
       
-      // Окна
-      ctx.fillStyle = '#87ceeb';
-      ctx.fillRect(x - 20, y - 45, 40, 20);
+      // Кабина с градиентом
+      const cabGradient = ctx.createLinearGradient(x - 25, y - 50, x + 25, y - 50);
+      cabGradient.addColorStop(0, '#3a3a3a');
+      cabGradient.addColorStop(0.5, '#4a4a4a');
+      cabGradient.addColorStop(1, '#3a3a3a');
+      ctx.fillStyle = cabGradient;
+      ctx.beginPath();
+      ctx.roundRect(x - 25, y - 50, 50, 30, 3);
+      ctx.fill();
+      
+      // Окна с градиентом
+      const windowGradient = ctx.createLinearGradient(x - 20, y - 45, x - 20, y - 25);
+      windowGradient.addColorStop(0, '#a0d8ef');
+      windowGradient.addColorStop(1, '#6ba5d7');
+      ctx.fillStyle = windowGradient;
+      ctx.beginPath();
+      ctx.roundRect(x - 20, y - 45, 40, 20, 2);
+      ctx.fill();
+      
+      // Блик на окне
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillRect(x - 18, y - 43, 10, 16);
     } else {
-      // Легковая машина
+      // Легковая машина с деталями
       const carGradient = ctx.createLinearGradient(x - 25, y - 40, x + 25, y + 40);
-      carGradient.addColorStop(0, '#5a5a5a');
+      carGradient.addColorStop(0, '#6a6a6a');
+      carGradient.addColorStop(0.5, '#5a5a5a');
       carGradient.addColorStop(1, '#3a3a3a');
       ctx.fillStyle = carGradient;
-      ctx.fillRect(x - 25, y - 40, 50, 80);
+      ctx.beginPath();
+      ctx.roundRect(x - 25, y - 40, 50, 80, 5);
+      ctx.fill();
       
-      // Крыша
-      ctx.fillStyle = '#4a4a4a';
-      ctx.fillRect(x - 20, y - 30, 40, 30);
+      // Блик на кузове
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.fillRect(x - 23, y - 38, 8, 76);
       
-      // Окна
-      ctx.fillStyle = '#87ceeb';
-      ctx.fillRect(x - 15, y - 25, 30, 20);
+      // Крыша с градиентом
+      const roofGradient = ctx.createLinearGradient(x - 20, y - 30, x + 20, y - 30);
+      roofGradient.addColorStop(0, '#4a4a4a');
+      roofGradient.addColorStop(0.5, '#5a5a5a');
+      roofGradient.addColorStop(1, '#4a4a4a');
+      ctx.fillStyle = roofGradient;
+      ctx.beginPath();
+      ctx.roundRect(x - 20, y - 30, 40, 30, 3);
+      ctx.fill();
+      
+      // Окна с градиентом
+      const windowGradient = ctx.createLinearGradient(x - 15, y - 25, x - 15, y - 5);
+      windowGradient.addColorStop(0, '#a0d8ef');
+      windowGradient.addColorStop(1, '#6ba5d7');
+      ctx.fillStyle = windowGradient;
+      ctx.beginPath();
+      ctx.roundRect(x - 15, y - 25, 30, 20, 2);
+      ctx.fill();
+      
+      // Блик на окне
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillRect(x - 13, y - 23, 8, 16);
     }
     
-    // Фары (задние)
-    ctx.fillStyle = '#ff0000';
-    ctx.fillRect(x - 20, y + 35, 10, 5);
-    ctx.fillRect(x + 10, y + 35, 10, 5);
+    // Задние фонари с деталями
+    const taillightGradient = ctx.createRadialGradient(x - 15, y + 37, 1, x - 15, y + 37, 5);
+    taillightGradient.addColorStop(0, '#ff6666');
+    taillightGradient.addColorStop(0.5, '#ff0000');
+    taillightGradient.addColorStop(1, '#cc0000');
+    ctx.fillStyle = taillightGradient;
+    ctx.beginPath();
+    ctx.arc(x - 15, y + 37, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = taillightGradient;
+    ctx.beginPath();
+    ctx.arc(x + 15, y + 37, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Свечение задних фонарей
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.arc(x - 15, y + 37, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + 15, y + 37, 10, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   private renderPoliceCar(police: { lane: number; y: number; shootTimer: number }): void {
@@ -341,47 +482,112 @@ export class ChaseScene {
     const x = this.playerX;
     const y = this.playerY;
     
-    // Тень
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    // Тень с размытием
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.beginPath();
-    ctx.ellipse(x, y + 45, 30, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, y + 48, 35, 10, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Кузов
+    // Кузов с градиентом и объёмом
     const carGradient = ctx.createLinearGradient(x - 25, y - 40, x + 25, y + 40);
-    carGradient.addColorStop(0, '#2a2a4e');
-    carGradient.addColorStop(0.5, '#1a1a2e');
+    carGradient.addColorStop(0, '#3a3a5e');
+    carGradient.addColorStop(0.3, '#2a2a4e');
+    carGradient.addColorStop(0.7, '#1a1a2e');
     carGradient.addColorStop(1, '#0a0a1e');
     ctx.fillStyle = carGradient;
-    ctx.fillRect(x - 25, y - 40, 50, 80);
     
-    // Крыша
-    ctx.fillStyle = '#3a3a5e';
-    ctx.fillRect(x - 20, y - 30, 40, 30);
-    
-    // Окна
-    ctx.fillStyle = '#87ceeb';
-    ctx.fillRect(x - 15, y - 25, 30, 20);
-    
-    // Фары (передние)
-    ctx.fillStyle = '#ffff99';
-    ctx.fillRect(x - 20, y - 40, 10, 5);
-    ctx.fillRect(x + 10, y - 40, 10, 5);
-    
-    // Свечение фар
-    ctx.fillStyle = 'rgba(255, 255, 150, 0.3)';
+    // Кузов с закруглёнными углами
     ctx.beginPath();
-    ctx.moveTo(x - 15, y - 40);
-    ctx.lineTo(x - 25, y - 80);
-    ctx.lineTo(x - 5, y - 80);
+    ctx.roundRect(x - 25, y - 40, 50, 80, 5);
+    ctx.fill();
+    
+    // Блик на кузове
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fillRect(x - 23, y - 38, 10, 76);
+    
+    // Крыша с градиентом
+    const roofGradient = ctx.createLinearGradient(x - 20, y - 30, x + 20, y - 30);
+    roofGradient.addColorStop(0, '#2a2a4e');
+    roofGradient.addColorStop(0.5, '#4a4a6e');
+    roofGradient.addColorStop(1, '#2a2a4e');
+    ctx.fillStyle = roofGradient;
+    ctx.beginPath();
+    ctx.roundRect(x - 20, y - 30, 40, 30, 3);
+    ctx.fill();
+    
+    // Окна с градиентом
+    const windowGradient = ctx.createLinearGradient(x - 15, y - 25, x - 15, y - 5);
+    windowGradient.addColorStop(0, '#a0d8ef');
+    windowGradient.addColorStop(0.5, '#87ceeb');
+    windowGradient.addColorStop(1, '#6ba5d7');
+    ctx.fillStyle = windowGradient;
+    ctx.beginPath();
+    ctx.roundRect(x - 15, y - 25, 30, 20, 2);
+    ctx.fill();
+    
+    // Блик на окне
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.beginPath();
+    ctx.moveTo(x - 12, y - 23);
+    ctx.lineTo(x - 5, y - 23);
+    ctx.lineTo(x - 8, y - 15);
+    ctx.lineTo(x - 12, y - 15);
     ctx.closePath();
     ctx.fill();
     
+    // Фары (передние) с деталями
+    const headlightGradient = ctx.createRadialGradient(x - 15, y - 38, 2, x - 15, y - 38, 6);
+    headlightGradient.addColorStop(0, '#ffffff');
+    headlightGradient.addColorStop(0.5, '#ffff99');
+    headlightGradient.addColorStop(1, '#ffcc00');
+    ctx.fillStyle = headlightGradient;
     ctx.beginPath();
-    ctx.moveTo(x + 15, y - 40);
-    ctx.lineTo(x + 25, y - 80);
-    ctx.lineTo(x + 5, y - 80);
+    ctx.arc(x - 15, y - 38, 6, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = headlightGradient;
+    ctx.beginPath();
+    ctx.arc(x + 15, y - 38, 6, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Свечение фар с конусами
+    const beamGradient = ctx.createLinearGradient(x - 15, y - 40, x - 15, y - 100);
+    beamGradient.addColorStop(0, 'rgba(255, 255, 200, 0.4)');
+    beamGradient.addColorStop(1, 'rgba(255, 255, 150, 0)');
+    ctx.fillStyle = beamGradient;
+    ctx.beginPath();
+    ctx.moveTo(x - 20, y - 40);
+    ctx.lineTo(x - 35, y - 100);
+    ctx.lineTo(x + 5, y - 100);
+    ctx.lineTo(x - 10, y - 40);
     ctx.closePath();
+    ctx.fill();
+    
+    ctx.fillStyle = beamGradient;
+    ctx.beginPath();
+    ctx.moveTo(x + 20, y - 40);
+    ctx.lineTo(x + 35, y - 100);
+    ctx.lineTo(x - 5, y - 100);
+    ctx.lineTo(x + 10, y - 40);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Задние фонари
+    ctx.fillStyle = '#ff0000';
+    ctx.beginPath();
+    ctx.arc(x - 18, y + 38, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + 18, y + 38, 4, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Свечение задних фонарей
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.arc(x - 18, y + 38, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + 18, y + 38, 8, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -390,53 +596,85 @@ export class ChaseScene {
     
     // Полоска здоровья машины
     const barWidth = 200;
-    const barHeight = 20;
+    const barHeight = 25;
     const barX = 20;
     const barY = 20;
     
-    // Фон
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 4);
+    // Фон с градиентом
+    const bgGradient = ctx.createLinearGradient(barX, barY, barX, barY + barHeight);
+    bgGradient.addColorStop(0, 'rgba(0, 0, 0, 0.8)');
+    bgGradient.addColorStop(1, 'rgba(20, 20, 20, 0.8)');
+    ctx.fillStyle = bgGradient;
+    ctx.beginPath();
+    ctx.roundRect(barX - 3, barY - 3, barWidth + 6, barHeight + 6, 5);
+    ctx.fill();
     
-    // Полоска
+    // Полоска с градиентом
     const healthPercent = this.carHealth / this.maxCarHealth;
-    const healthGradient = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+    const healthGradient = ctx.createLinearGradient(barX, barY, barX + barWidth * healthPercent, barY);
     
     if (healthPercent > 0.5) {
       healthGradient.addColorStop(0, '#00ff00');
+      healthGradient.addColorStop(0.5, '#00cc00');
       healthGradient.addColorStop(1, '#00aa00');
     } else if (healthPercent > 0.25) {
       healthGradient.addColorStop(0, '#ffff00');
+      healthGradient.addColorStop(0.5, '#ffcc00');
       healthGradient.addColorStop(1, '#ffaa00');
     } else {
       healthGradient.addColorStop(0, '#ff0000');
+      healthGradient.addColorStop(0.5, '#cc0000');
       healthGradient.addColorStop(1, '#aa0000');
     }
     
     ctx.fillStyle = healthGradient;
-    ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barWidth * healthPercent, barHeight, 3);
+    ctx.fill();
     
-    // Рамка
-    ctx.strokeStyle = '#ffffff';
+    // Блик на полоске
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight / 3);
+    
+    // Рамка с тенью
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.lineWidth = 2;
-    ctx.strokeRect(barX, barY, barWidth, barHeight);
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barWidth, barHeight, 3);
+    ctx.stroke();
     
-    // Текст
+    // Текст с тенью
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 14px Arial';
+    ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(`Машина: ${Math.ceil(this.carHealth)}%`, barX, barY + barHeight + 20);
+    ctx.fillText(`🚗 Машина: ${Math.ceil(this.carHealth)}%`, barX, barY + barHeight + 25);
     
     // Счёт
-    ctx.fillText(`Очки: ${this.score}`, barX, barY + barHeight + 40);
+    ctx.fillStyle = '#ffff00';
+    ctx.fillText(`⭐ Очки: ${this.score}`, barX, barY + barHeight + 50);
     
     // Время
     const timeLeft = Math.max(0, this.minSurvivalTime - this.elapsedTime);
-    ctx.fillText(`Время: ${timeLeft.toFixed(1)}s`, barX, barY + barHeight + 60);
+    ctx.fillStyle = timeLeft < 5 ? '#ff0000' : '#00ffff';
+    ctx.fillText(`⏱️ Время: ${timeLeft.toFixed(1)}s`, barX, barY + barHeight + 75);
     
-    // Подсказка управления
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '12px Arial';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
+    // Подсказка управления с фоном
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.beginPath();
+    ctx.roundRect(this.canvasWidth / 2 - 120, this.canvasHeight - 40, 240, 30, 5);
+    ctx.fill();
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('← → или A/D для перестроения', this.canvasWidth / 2, this.canvasHeight - 20);
   }

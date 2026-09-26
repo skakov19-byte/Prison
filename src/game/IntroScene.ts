@@ -98,66 +98,157 @@ export class IntroRenderer {
 
     // Небо (закат с градиентом)
     const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight * 0.6);
-    skyGradient.addColorStop(0, '#ff6b35');
-    skyGradient.addColorStop(0.3, '#f7931e');
-    skyGradient.addColorStop(0.7, '#ffd700');
+    skyGradient.addColorStop(0, '#ff4500');
+    skyGradient.addColorStop(0.2, '#ff6b35');
+    skyGradient.addColorStop(0.4, '#f7931e');
+    skyGradient.addColorStop(0.6, '#ffa500');
+    skyGradient.addColorStop(0.8, '#ffd700');
     skyGradient.addColorStop(1, '#ffed4e');
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight * 0.6);
 
-    // Облака
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-    for (let i = 0; i < 5; i++) {
-      const cloudX = 100 + i * 150;
-      const cloudY = 50 + Math.sin(i) * 30;
+    // Солнце
+    const sunGradient = ctx.createRadialGradient(
+      this.canvasWidth * 0.7, 120, 0,
+      this.canvasWidth * 0.7, 120, 60
+    );
+    sunGradient.addColorStop(0, 'rgba(255, 255, 200, 1)');
+    sunGradient.addColorStop(0.3, 'rgba(255, 200, 100, 0.8)');
+    sunGradient.addColorStop(0.7, 'rgba(255, 150, 50, 0.4)');
+    sunGradient.addColorStop(1, 'rgba(255, 100, 0, 0)');
+    ctx.fillStyle = sunGradient;
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth * 0.7, 120, 60, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Облака с деталями
+    for (let i = 0; i < 7; i++) {
+      const cloudX = 50 + i * 120;
+      const cloudY = 60 + Math.sin(i * 0.8) * 25;
+      const cloudSize = 25 + (i % 3) * 10;
+      
+      // Тень облака
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
       ctx.beginPath();
-      ctx.arc(cloudX, cloudY, 30, 0, Math.PI * 2);
-      ctx.arc(cloudX + 25, cloudY, 35, 0, Math.PI * 2);
-      ctx.arc(cloudX + 50, cloudY, 30, 0, Math.PI * 2);
+      ctx.arc(cloudX + 3, cloudY + 3, cloudSize, 0, Math.PI * 2);
+      ctx.arc(cloudX + 28, cloudY + 3, cloudSize + 5, 0, Math.PI * 2);
+      ctx.arc(cloudX + 53, cloudY + 3, cloudSize, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Облако
+      const cloudGradient = ctx.createRadialGradient(cloudX, cloudY, 0, cloudX, cloudY, cloudSize);
+      cloudGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+      cloudGradient.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
+      ctx.fillStyle = cloudGradient;
+      ctx.beginPath();
+      ctx.arc(cloudX, cloudY, cloudSize, 0, Math.PI * 2);
+      ctx.arc(cloudX + 25, cloudY, cloudSize + 5, 0, Math.PI * 2);
+      ctx.arc(cloudX + 50, cloudY, cloudSize, 0, Math.PI * 2);
       ctx.fill();
     }
 
     // Капитолий на заднем плане (детализированный)
     const capitolX = this.canvasWidth / 2;
     
+    // Тень здания
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(capitolX - 195, 255, 400, 150);
+    
     // Основание здания
     const buildingGradient = ctx.createLinearGradient(capitolX - 200, 250, capitolX - 200, 400);
-    buildingGradient.addColorStop(0, '#f5f5f5');
-    buildingGradient.addColorStop(1, '#d0d0d0');
+    buildingGradient.addColorStop(0, '#ffffff');
+    buildingGradient.addColorStop(0.3, '#f5f5f5');
+    buildingGradient.addColorStop(0.7, '#e0e0e0');
+    buildingGradient.addColorStop(1, '#c0c0c0');
     ctx.fillStyle = buildingGradient;
     ctx.fillRect(capitolX - 200, 250, 400, 150);
     
+    // Детали здания - окна
+    ctx.fillStyle = 'rgba(100, 100, 150, 0.5)';
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 3; j++) {
+        ctx.fillRect(capitolX - 180 + i * 45, 280 + j * 40, 20, 25);
+      }
+    }
+    
     // Купол (детализированный)
-    const domeGradient = ctx.createRadialGradient(capitolX, 200, 10, capitolX, 200, 100);
+    const domeGradient = ctx.createRadialGradient(capitolX - 20, 180, 10, capitolX, 200, 110);
     domeGradient.addColorStop(0, '#ffffff');
-    domeGradient.addColorStop(0.5, '#e8e8e8');
-    domeGradient.addColorStop(1, '#c0c0c0');
+    domeGradient.addColorStop(0.3, '#f0f0f0');
+    domeGradient.addColorStop(0.6, '#e0e0e0');
+    domeGradient.addColorStop(1, '#b0b0b0');
     ctx.fillStyle = domeGradient;
     ctx.beginPath();
     ctx.arc(capitolX, 250, 100, Math.PI, 0);
     ctx.fill();
     
-    // Шпиль на куполе
-    ctx.fillStyle = '#ffd700';
-    ctx.fillRect(capitolX - 3, 150, 6, 50);
+    // Детали купола - ребра
+    ctx.strokeStyle = 'rgba(150, 150, 150, 0.5)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 8; i++) {
+      const angle = Math.PI + (i / 8) * Math.PI;
+      ctx.beginPath();
+      ctx.moveTo(capitolX, 250);
+      ctx.lineTo(capitolX + Math.cos(angle) * 95, 250 + Math.sin(angle) * 95);
+      ctx.stroke();
+    }
+    
+    // Шпиль на куполе (детализированный)
+    const spireGradient = ctx.createLinearGradient(capitolX, 150, capitolX, 200);
+    spireGradient.addColorStop(0, '#ffd700');
+    spireGradient.addColorStop(0.5, '#ffed4e');
+    spireGradient.addColorStop(1, '#daa520');
+    ctx.fillStyle = spireGradient;
+    ctx.fillRect(capitolX - 4, 150, 8, 50);
+    
+    // Шар на шпиле
+    const ballGradient = ctx.createRadialGradient(capitolX - 2, 148, 1, capitolX, 150, 10);
+    ballGradient.addColorStop(0, '#ffff99');
+    ballGradient.addColorStop(0.5, '#ffd700');
+    ballGradient.addColorStop(1, '#daa520');
+    ctx.fillStyle = ballGradient;
     ctx.beginPath();
-    ctx.arc(capitolX, 150, 8, 0, Math.PI * 2);
+    ctx.arc(capitolX, 150, 10, 0, Math.PI * 2);
     ctx.fill();
     
     // Колонны (детализированные)
-    ctx.fillStyle = '#d0d0d0';
     for (let i = 0; i < 10; i++) {
       const colX = capitolX - 180 + i * 40;
+      
       // Тень колонны
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.fillRect(colX + 2, 280, 18, 120);
-      // Колонна
-      ctx.fillStyle = '#e0e0e0';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fillRect(colX + 3, 282, 18, 120);
+      
+      // Колонна с градиентом
+      const colGradient = ctx.createLinearGradient(colX, 280, colX + 18, 280);
+      colGradient.addColorStop(0, '#c0c0c0');
+      colGradient.addColorStop(0.3, '#f0f0f0');
+      colGradient.addColorStop(0.7, '#e0e0e0');
+      colGradient.addColorStop(1, '#b0b0b0');
+      ctx.fillStyle = colGradient;
       ctx.fillRect(colX, 280, 18, 120);
-      // Капитель
-      ctx.fillStyle = '#d0d0d0';
+      
+      // Капитель (верх)
+      const capGradient = ctx.createLinearGradient(colX - 3, 275, colX + 21, 275);
+      capGradient.addColorStop(0, '#a0a0a0');
+      capGradient.addColorStop(0.5, '#d0d0d0');
+      capGradient.addColorStop(1, '#a0a0a0');
+      ctx.fillStyle = capGradient;
       ctx.fillRect(colX - 3, 275, 24, 8);
+      
+      // База (низ)
+      ctx.fillStyle = capGradient;
       ctx.fillRect(colX - 3, 395, 24, 8);
+      
+      // Детали колонны - каннелюры
+      ctx.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+      ctx.lineWidth = 1;
+      for (let j = 0; j < 3; j++) {
+        ctx.beginPath();
+        ctx.moveTo(colX + 4 + j * 5, 283);
+        ctx.lineTo(colX + 4 + j * 5, 397);
+        ctx.stroke();
+      }
     }
 
     // Трибуны (детализированные)
@@ -319,31 +410,89 @@ export class IntroRenderer {
     }
 
     // Толпа (детализированные силуэты)
-    for (let i = 0; i < 25; i++) {
-      const x = 30 + i * 30;
+    for (let i = 0; i < 30; i++) {
+      const x = 20 + i * 27;
       const y = 500 + Math.sin(i * 0.5) * 10;
+      const shade = 0.4 + (i % 3) * 0.1;
       
-      // Тело
-      ctx.fillStyle = `rgba(0, 0, 0, ${0.5 + Math.random() * 0.2})`;
+      // Тень
+      ctx.fillStyle = `rgba(0, 0, 0, ${shade * 0.5})`;
+      ctx.fillRect(x - 9, y + 2, 20, 35);
+      
+      // Тело с градиентом
+      const bodyGradient = ctx.createLinearGradient(x - 10, y, x - 10, y + 35);
+      bodyGradient.addColorStop(0, `rgba(20, 20, 30, ${shade})`);
+      bodyGradient.addColorStop(1, `rgba(10, 10, 20, ${shade})`);
+      ctx.fillStyle = bodyGradient;
       ctx.fillRect(x - 10, y, 20, 35);
       
       // Голова
+      const headGradient = ctx.createRadialGradient(x, y - 5, 2, x, y - 5, 12);
+      headGradient.addColorStop(0, `rgba(30, 30, 40, ${shade})`);
+      headGradient.addColorStop(1, `rgba(10, 10, 20, ${shade})`);
+      ctx.fillStyle = headGradient;
       ctx.beginPath();
       ctx.arc(x, y - 5, 12, 0, Math.PI * 2);
       ctx.fill();
       
       // Руки
+      ctx.fillStyle = `rgba(15, 15, 25, ${shade})`;
       ctx.fillRect(x - 15, y + 5, 5, 20);
       ctx.fillRect(x + 10, y + 5, 5, 20);
+      
+      // Некоторые люди с поднятыми руками (реакция на выстрел)
+      if (time > 5 && i % 4 === 0) {
+        ctx.fillRect(x - 15, y - 10, 5, 15);
+        ctx.fillRect(x + 10, y - 10, 5, 15);
+      }
     }
+
+    // Атмосферные эффекты - пыль в воздухе
+    ctx.fillStyle = 'rgba(255, 255, 200, 0.1)';
+    for (let i = 0; i < 30; i++) {
+      const dustX = (i * 137 + time * 20) % this.canvasWidth;
+      const dustY = (i * 97 + Math.sin(time + i) * 30) % (this.canvasHeight * 0.6);
+      ctx.beginPath();
+      ctx.arc(dustX, dustY, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Световые лучи от солнца
+    ctx.globalAlpha = 0.15;
+    const rayGradient = ctx.createLinearGradient(
+      this.canvasWidth * 0.7, 120,
+      this.canvasWidth * 0.5, this.canvasHeight
+    );
+    rayGradient.addColorStop(0, 'rgba(255, 200, 100, 0.3)');
+    rayGradient.addColorStop(1, 'rgba(255, 200, 100, 0)');
+    ctx.fillStyle = rayGradient;
+    ctx.beginPath();
+    ctx.moveTo(this.canvasWidth * 0.7, 120);
+    ctx.lineTo(this.canvasWidth * 0.3, this.canvasHeight);
+    ctx.lineTo(this.canvasWidth * 0.8, this.canvasHeight);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    
+    // Виньетка
+    const vignetteGradient = ctx.createRadialGradient(
+      this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * 0.3,
+      this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * 0.7
+    );
+    vignetteGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    vignetteGradient.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+    ctx.fillStyle = vignetteGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
 
     // Текст
     ctx.globalAlpha = this.state.textAlpha;
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 28px Arial';
     ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
     
     if (time < 4) {
       ctx.fillText('Вашингтон, Капитолий', this.canvasWidth / 2, 100);
@@ -351,15 +500,17 @@ export class IntroRenderer {
       ctx.fillText('Мэр выступает с речью...', this.canvasWidth / 2, 140);
     } else if (time < 6) {
       ctx.fillStyle = '#ff0000';
-      ctx.font = 'bold 36px Arial';
+      ctx.font = 'bold 42px Arial';
       ctx.fillText('ВЫСТРЕЛ!', this.canvasWidth / 2, 100);
     } else {
       ctx.fillStyle = '#ff0000';
-      ctx.font = 'bold 32px Arial';
+      ctx.font = 'bold 36px Arial';
       ctx.fillText('Мэр убит...', this.canvasWidth / 2, 100);
     }
     
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     ctx.globalAlpha = 1;
   }
 
@@ -369,32 +520,66 @@ export class IntroRenderer {
 
     // Комната (вид изнутри) с детализированными стенами
     const wallGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
-    wallGradient.addColorStop(0, '#4a4a4a');
+    wallGradient.addColorStop(0, '#5a5a5a');
+    wallGradient.addColorStop(0.5, '#4a4a4a');
     wallGradient.addColorStop(1, '#3a3a3a');
     ctx.fillStyle = wallGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    // Текстура стен (обои)
-    ctx.strokeStyle = 'rgba(60, 60, 60, 0.3)';
+    // Текстура стен (обои с узором)
+    ctx.strokeStyle = 'rgba(70, 70, 70, 0.4)';
     ctx.lineWidth = 1;
     for (let y = 0; y < this.canvasHeight; y += 30) {
       for (let x = 0; x < this.canvasWidth; x += 40) {
         ctx.strokeRect(x, y, 40, 30);
+        // Узор на обоях
+        ctx.fillStyle = 'rgba(80, 80, 80, 0.2)';
+        ctx.beginPath();
+        ctx.arc(x + 20, y + 15, 3, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
 
-    // Потолок
-    ctx.fillStyle = '#5a5a5a';
+    // Потолок с градиентом
+    const ceilingGradient = ctx.createLinearGradient(0, 0, 0, 100);
+    ceilingGradient.addColorStop(0, '#6a6a6a');
+    ceilingGradient.addColorStop(1, '#5a5a5a');
+    ctx.fillStyle = ceilingGradient;
     ctx.fillRect(0, 0, this.canvasWidth, 100);
     
-    // Люстра
-    ctx.fillStyle = '#ffd700';
+    // Люстра с деталями
+    // Цепь
+    ctx.strokeStyle = '#888888';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(this.canvasWidth / 2, 50, 20, 0, Math.PI * 2);
+    ctx.moveTo(this.canvasWidth / 2, 0);
+    ctx.lineTo(this.canvasWidth / 2, 30);
+    ctx.stroke();
+    
+    // Основание люстры
+    const chandelierGradient = ctx.createRadialGradient(
+      this.canvasWidth / 2, 50, 5,
+      this.canvasWidth / 2, 50, 25
+    );
+    chandelierGradient.addColorStop(0, '#ffff99');
+    chandelierGradient.addColorStop(0.5, '#ffd700');
+    chandelierGradient.addColorStop(1, '#daa520');
+    ctx.fillStyle = chandelierGradient;
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth / 2, 50, 25, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#ffff99';
+    
+    // Свет от люстры
+    const lightGradient = ctx.createRadialGradient(
+      this.canvasWidth / 2, 50, 10,
+      this.canvasWidth / 2, 50, 150
+    );
+    lightGradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+    lightGradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.1)');
+    lightGradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+    ctx.fillStyle = lightGradient;
     ctx.beginPath();
-    ctx.arc(this.canvasWidth / 2, 50, 10, 0, Math.PI * 2);
+    ctx.arc(this.canvasWidth / 2, 50, 150, 0, Math.PI * 2);
     ctx.fill();
 
     // Пол (паркет)
@@ -416,11 +601,15 @@ export class IntroRenderer {
     // Окно (детализированное)
     const windowGradient = ctx.createLinearGradient(150, 150, 150, 300);
     windowGradient.addColorStop(0, '#87ceeb');
+    windowGradient.addColorStop(0.5, '#6ba5d7');
     windowGradient.addColorStop(1, '#4a90d9');
     ctx.fillStyle = windowGradient;
     ctx.fillRect(150, 150, 200, 150);
     
-    // Рама окна
+    // Рама окна с тенью
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(147, 153, 206, 156);
+    
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 8;
     ctx.strokeRect(150, 150, 200, 150);
@@ -432,29 +621,91 @@ export class IntroRenderer {
     ctx.lineTo(350, 225);
     ctx.stroke();
     
-    // Вид из окна (город)
-    ctx.fillStyle = 'rgba(100, 100, 150, 0.5)';
-    ctx.fillRect(160, 200, 30, 80);
-    ctx.fillRect(210, 180, 40, 100);
-    ctx.fillRect(270, 220, 35, 60);
+    // Вид из окна (город с деталями)
+    // Небо
+    const skyGradient = ctx.createLinearGradient(160, 160, 160, 300);
+    skyGradient.addColorStop(0, '#87ceeb');
+    skyGradient.addColorStop(1, '#b0d4e8');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(160, 160, 180, 130);
+    
+    // Здания
+    ctx.fillStyle = 'rgba(80, 80, 120, 0.7)';
+    ctx.fillRect(165, 220, 35, 70);
+    ctx.fillRect(210, 200, 45, 90);
+    ctx.fillRect(265, 230, 40, 60);
+    
+    // Окна зданий
+    ctx.fillStyle = 'rgba(255, 255, 200, 0.6)';
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 4; j++) {
+        ctx.fillRect(170 + i * 15, 225 + j * 15, 8, 10);
+      }
+    }
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 5; j++) {
+        ctx.fillRect(215 + i * 15, 205 + j * 15, 8, 10);
+      }
+    }
+    
+    // Блик на окне
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.beginPath();
+    ctx.moveTo(160, 160);
+    ctx.lineTo(200, 160);
+    ctx.lineTo(180, 200);
+    ctx.lineTo(160, 200);
+    ctx.closePath();
+    ctx.fill();
 
     // Мебель (детализированная)
+    // Стол с тенью
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(453, 353, 150, 100);
+    
     // Стол
     const tableGradient = ctx.createLinearGradient(450, 350, 450, 450);
-    tableGradient.addColorStop(0, '#8b4513');
+    tableGradient.addColorStop(0, '#a0522d');
+    tableGradient.addColorStop(0.5, '#8b4513');
     tableGradient.addColorStop(1, '#654321');
     ctx.fillStyle = tableGradient;
     ctx.fillRect(450, 350, 150, 100);
     
-    // Ножки стола
-    ctx.fillStyle = '#654321';
+    // Текстура дерева на столе
+    ctx.strokeStyle = 'rgba(60, 30, 10, 0.3)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      ctx.moveTo(450, 360 + i * 20);
+      ctx.lineTo(600, 360 + i * 20);
+      ctx.stroke();
+    }
+    
+    // Блик на столе
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fillRect(450, 350, 150, 10);
+    
+    // Ножки стола с градиентом
+    const legGradient = ctx.createLinearGradient(460, 450, 475, 450);
+    legGradient.addColorStop(0, '#654321');
+    legGradient.addColorStop(0.5, '#8b4513');
+    legGradient.addColorStop(1, '#654321');
+    ctx.fillStyle = legGradient;
     ctx.fillRect(460, 450, 15, 50);
     ctx.fillRect(575, 450, 15, 50);
     
-    // Стул
-    ctx.fillStyle = '#5a3a1a';
+    // Стул с деталями
+    const chairGradient = ctx.createLinearGradient(620, 380, 680, 380);
+    chairGradient.addColorStop(0, '#5a3a1a');
+    chairGradient.addColorStop(0.5, '#6a4a2a');
+    chairGradient.addColorStop(1, '#5a3a1a');
+    ctx.fillStyle = chairGradient;
     ctx.fillRect(620, 380, 60, 80);
     ctx.fillRect(620, 460, 60, 40);
+    
+    // Спинка стула
+    ctx.fillStyle = '#4a2a0a';
+    ctx.fillRect(625, 385, 50, 70);
 
     // Главный герой (в обычной одежде - до ареста)
     const heroX = 400;
@@ -574,26 +825,51 @@ export class IntroRenderer {
       ctx.globalAlpha = 1;
     }
 
+    // Атмосферные эффекты - пыль в воздухе
+    ctx.fillStyle = 'rgba(255, 255, 200, 0.05)';
+    for (let i = 0; i < 20; i++) {
+      const dustX = (i * 137 + time * 10) % this.canvasWidth;
+      const dustY = (i * 97 + Math.sin(time + i) * 20) % this.canvasHeight;
+      ctx.beginPath();
+      ctx.arc(dustX, dustY, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Виньетка
+    const vignetteGradient = ctx.createRadialGradient(
+      this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * 0.3,
+      this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * 0.7
+    );
+    vignetteGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    vignetteGradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+    ctx.fillStyle = vignetteGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+
     // Текст
     ctx.globalAlpha = this.state.textAlpha;
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 24px Arial';
+    ctx.font = 'bold 26px Arial';
     ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
     
     if (time < 3) {
       ctx.fillText('Квартира главного героя', this.canvasWidth / 2, 80);
     } else if (time < 6) {
       ctx.fillText('Полиция: "Вы обвиняетесь в убийстве мэра!"', this.canvasWidth / 2, 80);
-      ctx.font = '18px Arial';
+      ctx.font = '20px Arial';
       ctx.fillText('Вас задерживают и увозят...', this.canvasWidth / 2, 120);
     } else {
       ctx.fillStyle = '#ff0000';
+      ctx.font = 'bold 32px Arial';
       ctx.fillText('Арестован...', this.canvasWidth / 2, 80);
     }
     
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     ctx.globalAlpha = 1;
   }
 
@@ -604,32 +880,85 @@ export class IntroRenderer {
     // Тюремная камера (детализированная)
     const wallGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
     wallGradient.addColorStop(0, '#2a2a2a');
+    wallGradient.addColorStop(0.5, '#252525');
     wallGradient.addColorStop(1, '#1a1a1a');
     ctx.fillStyle = wallGradient;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     
-    // Текстура кирпичной стены
-    ctx.strokeStyle = 'rgba(50, 50, 50, 0.5)';
-    ctx.lineWidth = 2;
+    // Текстура кирпичной стены с объёмом
     for (let y = 0; y < this.canvasHeight; y += 30) {
       for (let x = 0; x < this.canvasWidth; x += 60) {
         const offset = (Math.floor(y / 30) % 2) * 30;
-        ctx.strokeRect(x + offset, y, 60, 30);
+        const brickX = x + offset;
+        
+        // Тень кирпича
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(brickX + 2, y + 2, 56, 26);
+        
+        // Кирпич с градиентом
+        const brickGradient = ctx.createLinearGradient(brickX, y, brickX, y + 28);
+        brickGradient.addColorStop(0, '#3a3a3a');
+        brickGradient.addColorStop(0.5, '#2a2a2a');
+        brickGradient.addColorStop(1, '#1a1a1a');
+        ctx.fillStyle = brickGradient;
+        ctx.fillRect(brickX, y, 56, 26);
+        
+        // Блик на кирпиче
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.fillRect(brickX, y, 56, 3);
+        
+        // Трещины на некоторых кирпичах
+        if ((x + y) % 180 === 0) {
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(brickX + 10, y + 5);
+          ctx.lineTo(brickX + 30, y + 20);
+          ctx.stroke();
+        }
       }
     }
 
-    // Потолок
-    ctx.fillStyle = '#1a1a1a';
+    // Потолок с градиентом
+    const ceilingGradient = ctx.createLinearGradient(0, 0, 0, 80);
+    ceilingGradient.addColorStop(0, '#1a1a1a');
+    ceilingGradient.addColorStop(1, '#0a0a0a');
+    ctx.fillStyle = ceilingGradient;
     ctx.fillRect(0, 0, this.canvasWidth, 80);
     
-    // Лампа на потолке
-    ctx.fillStyle = '#ffff99';
+    // Лампа на потолке с деталями
+    // Цепь
+    ctx.strokeStyle = '#555555';
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(this.canvasWidth / 2, 60, 15, 0, Math.PI * 2);
+    ctx.moveTo(this.canvasWidth / 2, 0);
+    ctx.lineTo(this.canvasWidth / 2, 45);
+    ctx.stroke();
+    
+    // Абажур
+    const lampGradient = ctx.createRadialGradient(
+      this.canvasWidth / 2, 60, 5,
+      this.canvasWidth / 2, 60, 20
+    );
+    lampGradient.addColorStop(0, '#ffff99');
+    lampGradient.addColorStop(0.5, '#ffff66');
+    lampGradient.addColorStop(1, '#cccc00');
+    ctx.fillStyle = lampGradient;
+    ctx.beginPath();
+    ctx.arc(this.canvasWidth / 2, 60, 18, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = 'rgba(255, 255, 150, 0.3)';
+    
+    // Свет от лампы
+    const lightGradient = ctx.createRadialGradient(
+      this.canvasWidth / 2, 60, 10,
+      this.canvasWidth / 2, 60, 200
+    );
+    lightGradient.addColorStop(0, 'rgba(255, 255, 150, 0.4)');
+    lightGradient.addColorStop(0.5, 'rgba(255, 255, 100, 0.2)');
+    lightGradient.addColorStop(1, 'rgba(255, 255, 50, 0)');
+    ctx.fillStyle = lightGradient;
     ctx.beginPath();
-    ctx.arc(this.canvasWidth / 2, 60, 40, 0, Math.PI * 2);
+    ctx.arc(this.canvasWidth / 2, 60, 200, 0, Math.PI * 2);
     ctx.fill();
 
     // Пол (бетон)
@@ -800,30 +1129,54 @@ export class IntroRenderer {
       }
     }
 
+    // Атмосферные эффекты - пыль в воздухе
+    ctx.fillStyle = 'rgba(255, 255, 200, 0.08)';
+    for (let i = 0; i < 25; i++) {
+      const dustX = (i * 137 + time * 15) % this.canvasWidth;
+      const dustY = (i * 97 + Math.sin(time + i) * 25) % this.canvasHeight;
+      ctx.beginPath();
+      ctx.arc(dustX, dustY, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Виньетка
+    const vignetteGradient = ctx.createRadialGradient(
+      this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * 0.25,
+      this.canvasWidth / 2, this.canvasHeight / 2, this.canvasWidth * 0.7
+    );
+    vignetteGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    vignetteGradient.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
+    ctx.fillStyle = vignetteGradient;
+    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+
     // Текст
     ctx.globalAlpha = this.state.textAlpha;
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 26px Arial';
+    ctx.font = 'bold 28px Arial';
     ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
     
     if (time < 3) {
       ctx.fillText('Тюрьма строгого режима', this.canvasWidth / 2, 60);
-      ctx.font = '18px Arial';
+      ctx.font = '20px Arial';
       ctx.fillText('Вас приводят в камеру...', this.canvasWidth / 2, 100);
     } else if (time < 5) {
       ctx.fillText('Дверь захлопывается...', this.canvasWidth / 2, 60);
     } else {
       ctx.fillStyle = '#ff0000';
-      ctx.font = 'bold 32px Arial';
+      ctx.font = 'bold 36px Arial';
       ctx.fillText('ПОБЕГ НАЧИНАЕТСЯ', this.canvasWidth / 2, 60);
-      ctx.font = '18px Arial';
+      ctx.font = '20px Arial';
       ctx.fillStyle = '#ffffff';
       ctx.fillText('Найдите способ выбраться...', this.canvasWidth / 2, 100);
     }
     
     ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
     ctx.globalAlpha = 1;
   }
 }
