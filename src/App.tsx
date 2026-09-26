@@ -102,8 +102,18 @@ export default function App() {
           onGoldChange: (g: number) => setGold(g),
           onWeaponChange: (w: WeaponType) => setCurrentWeapon(w),
           onStateChange: (s: PlayerState) => setPlayerState(s),
-          onDeath: () => setScreen('dead'),
-          onLevelComplete: () => setScreen('victory'),
+          onDeath: () => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            setScreen('dead');
+          },
+          onLevelComplete: () => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            setScreen('victory');
+          },
           onEnemyKill: () => setKills(k => k + 1),
         }, currentLevel);
 
@@ -216,8 +226,18 @@ export default function App() {
           onGoldChange: (g: number) => setGold(g),
           onWeaponChange: (w: WeaponType) => setCurrentWeapon(w),
           onStateChange: (s: PlayerState) => setPlayerState(s),
-          onDeath: () => setScreen('dead'),
-          onLevelComplete: () => setScreen('victory'),
+          onDeath: () => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            setScreen('dead');
+          },
+          onLevelComplete: () => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            setScreen('victory');
+          },
           onEnemyKill: () => setKills(k => k + 1),
         }, nextLevel);
 
@@ -474,7 +494,17 @@ export default function App() {
             <p className="text-gray-400 mb-2">Убийств: {kills} | Золото: {gold}</p>
             <div className="flex gap-4 mt-4">
               <button
-                onClick={() => { engineRef.current?.reset(); setScreen('playing'); }}
+                onClick={() => { 
+                  if (engineRef.current) {
+                    engineRef.current.reset();
+                    const upgrades = getUpgrades();
+                    if (Object.keys(upgrades).length > 0) {
+                      engineRef.current.applyUpgrades(upgrades);
+                    }
+                    engineRef.current.resume();
+                  }
+                  setScreen('playing'); 
+                }}
                 className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all cursor-pointer"
               >
                 🔄 Заново
@@ -511,7 +541,18 @@ export default function App() {
                 </button>
               ) : (
                 <button
-                  onClick={() => { setCurrentLevel(1); engineRef.current?.reset(); setScreen('playing'); }}
+                  onClick={() => { 
+                    setCurrentLevel(1);
+                    if (engineRef.current) {
+                      engineRef.current.reset();
+                      const upgrades = getUpgrades();
+                      if (Object.keys(upgrades).length > 0) {
+                        engineRef.current.applyUpgrades(upgrades);
+                      }
+                      engineRef.current.resume();
+                    }
+                    setScreen('playing'); 
+                  }}
                   className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all cursor-pointer"
                 >
                   🏆 Начать заново
