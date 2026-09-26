@@ -318,18 +318,8 @@ export default function App() {
 
       animFrameId = requestAnimationFrame(renderLoop);
 
-      // Возможность пропустить ролик по клику
-      const skipIntro = () => {
-        cancelAnimationFrame(animFrameId);
-        setCurrentLevel(4);
-        setScreen('playing');
-      };
-
-      canvas.addEventListener('click', skipIntro);
-
       return () => {
         cancelAnimationFrame(animFrameId);
-        canvas.removeEventListener('click', skipIntro);
       };
     }, 100);
 
@@ -427,18 +417,8 @@ export default function App() {
 
       animFrameId = requestAnimationFrame(renderLoop);
 
-      // Возможность пропустить ролик по клику
-      const skipIntro = () => {
-        cancelAnimationFrame(animFrameId);
-        setCurrentLevel(7);
-        setScreen('playing');
-      };
-
-      canvas.addEventListener('click', skipIntro);
-
       return () => {
         cancelAnimationFrame(animFrameId);
-        canvas.removeEventListener('click', skipIntro);
       };
     }, 100);
 
@@ -514,20 +494,7 @@ export default function App() {
       if (screen === 'intro' && (e.code === 'Space' || e.code === 'Enter')) {
         setScreen('playing');
       }
-      // Пропуск ролика Акта 2 по Space или Enter
-      if (screen === 'act2_intro' && (e.code === 'Space' || e.code === 'Enter')) {
-        setCurrentLevel(4);
-        setScreen('playing');
-      }
-      // Пропуск ролика Акта 3 по Space или Enter
-      if (screen === 'act3_intro' && (e.code === 'Space' || e.code === 'Enter')) {
-        setScreen('jetpack_scene');
-      }
-      // Пропуск мини-игры с реактивным ранцем
-      if (screen === 'jetpack_scene' && (e.code === 'Space' || e.code === 'Enter')) {
-        setCurrentLevel(7);
-        setScreen('playing');
-      }
+      // Ролики и мини-игры нельзя пропустить
     };
 
     window.addEventListener('keydown', handleKeyDown);

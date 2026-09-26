@@ -432,6 +432,14 @@ export class GameEngine {
           if (enemy.isDead) {
             this.player.addGold(enemy.stats.goldDrop);
             this.callbacks.onEnemyKill();
+            
+            // Проверяем, был ли убит босс
+            if (this.level.bossIndex !== undefined) {
+              const bossEnemy = this.enemies[this.level.bossIndex];
+              if (bossEnemy && bossEnemy.isDead) {
+                this.callbacks.onLevelComplete();
+              }
+            }
           }
           break;
         }
@@ -460,6 +468,14 @@ export class GameEngine {
           if (enemy.isDead) {
             this.player.addGold(enemy.stats.goldDrop);
             this.callbacks.onEnemyKill();
+            
+            // Проверяем, был ли убит босс
+            if (this.level.bossIndex !== undefined) {
+              const bossEnemy = this.enemies[this.level.bossIndex];
+              if (bossEnemy && bossEnemy.isDead) {
+                this.callbacks.onLevelComplete();
+              }
+            }
           }
         }
       }

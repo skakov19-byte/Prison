@@ -26,7 +26,6 @@ export class JetpackScene {
   // Позиция игрока
   private playerX: number;
   private playerY: number;
-  private playerVY: number;
   
   // Высота полёта
   private altitude: number = 0;
@@ -62,7 +61,6 @@ export class JetpackScene {
     // Начальная позиция игрока (внизу по центру)
     this.playerX = canvasWidth / 2 - 100;
     this.playerY = canvasHeight - 150;
-    this.playerVY = -2; // Лётит вверх
     
     // Небоскрёб справа
     this.buildingX = canvasWidth - 150;
@@ -74,11 +72,15 @@ export class JetpackScene {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!this.gameActive) return;
       
-      // Движение влево/вправо
+      // Движение
       if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
         this.playerX = Math.max(50, this.playerX - 30);
       } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
         this.playerX = Math.min(this.buildingX - 50, this.playerX + 30);
+      } else if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+        this.playerY = Math.max(50, this.playerY - 30);
+      } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+        this.playerY = Math.min(this.canvasHeight - 100, this.playerY + 30);
       }
       
       // Стрельба
@@ -113,8 +115,7 @@ export class JetpackScene {
     this.shootTimer = Math.max(0, this.shootTimer - dt);
     this.enemySpawnTimer -= dt;
     
-    // Игрок автоматически летит вверх
-    this.playerY += this.playerVY;
+    // Высота увеличивается автоматически (но игрок не двигается по Y автоматически)
     this.altitude += 20 * dt; // Скорость подъёма
     
     // Прокрутка фона
@@ -525,13 +526,13 @@ export class JetpackScene {
     // Подсказка управления
     ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
     ctx.beginPath();
-    ctx.roundRect(this.canvasWidth / 2 - 150, this.canvasHeight - 40, 300, 30, 5);
+    ctx.roundRect(this.canvasWidth / 2 - 180, this.canvasHeight - 40, 360, 30, 5);
     ctx.fill();
     
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('← → движение | SPACE стрельба', this.canvasWidth / 2, this.canvasHeight - 20);
+    ctx.fillText('WASD/стрелки движение | SPACE стрельба', this.canvasWidth / 2, this.canvasHeight - 20);
   }
 
   private renderGameOver(): void {

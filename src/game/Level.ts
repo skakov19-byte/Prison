@@ -54,6 +54,7 @@ export interface LevelData {
   pickupZones?: PickupZone[];
   pits: Pit[];
   decorations?: Decoration[];
+  bossIndex?: number; // Индекс босса в массиве enemies
   width: number;
   height: number;
   bgColor: string;
@@ -1090,6 +1091,19 @@ export function createLevel7(): LevelData {
       type: EnemyType.FLYING,
       goldDrop: 25,
     },
+    // Босс уровня 7
+    {
+      maxHealth: 300,
+      health: 300,
+      damage: 35,
+      moveSpeed: 180,
+      detectionRange: 1000,
+      attackRange: 800,
+      attackCooldown: 0.3,
+      patrolPoints: [{ x: 3000, y: 250 }, { x: 3500, y: 250 }, { x: 3500, y: 450 }, { x: 3000, y: 450 }],
+      type: EnemyType.FLYING,
+      goldDrop: 500,
+    },
   ];
 
   const pits: Pit[] = [];
@@ -1101,6 +1115,7 @@ export function createLevel7(): LevelData {
     playerSpawn: { x: 100, y: 400 },
     exitDoor: { x: 3900, y: 350, width: 40, height: 60 },
     pits,
+    bossIndex: 3, // Босс - последний враг в массиве
     width: 4000,
     height: 740,
     bgColor: '#0a0a3a',
