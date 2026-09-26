@@ -100,7 +100,7 @@ export function createLevel1(): LevelData {
     
     // Стены
     { rect: { x: 2360, y: 0, width: 40, height: 600 } }, // Толстая правая стена (с проходом внизу)
-    { rect: { x: 0, y: 0, width: 2400, height: 30 } }, // Потолок
+    { rect: { x: 0, y: 0, width: 2360, height: 30 } }, // Потолок (не перекрывает проход)
     
     // Проходные платформы
     { rect: { x: 200, y: 650, width: 80, height: 15 }, isPassThrough: true },
