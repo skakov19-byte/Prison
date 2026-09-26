@@ -17,6 +17,7 @@ interface ShopItem {
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
+  const isTransitioningRef = useRef(false);
 
   const [screen, setScreen] = useState<GameScreen>('menu');
   const [health, setHealth] = useState(100);
@@ -29,6 +30,8 @@ export default function App() {
   const [kills, setKills] = useState(0);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [levelName, setLevelName] = useState('');
+  const [isPaused, setIsPaused] = useState(false);
+  const [previousScreen, setPreviousScreen] = useState<GameScreen>('playing');
 
   const [shopItems, setShopItems] = useState<ShopItem[]>([
     { id: 'health', name: 'Макс. здоровье', description: '+25 к максимальному здоровью', cost: 30, icon: '❤️', maxLevel: 5, currentLevel: 0 },
@@ -84,17 +87,66 @@ export default function App() {
 
     return () => {
       clearTimeout(timer);
-      if (engineRef.current) {
+      // Не останавливаем движок если мы в процессе перехода между уровнями
+      if (engineRef.current && !isTransitioningRef.current) {
         engineRef.current.stop();
         engineRef.current = null;
       }
     };
   }, [screen]); // Убираем currentLevel из зависимостей
 
-  const openShop = () => setScreen('shop');
-  const closeShop = () => setScreen('playing');
+  // Обработка Escape для паузы
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Escape') {
+        if (screen === 'playing' || isPaused) {
+          togglePause();
+        } else if (screen === 'shop') {
+          closeShop();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [screen, isPaused]);
+
+  const openShop = () => {
+    if (engineRef.current) {
+      engineRef.current.pause();
+    }
+    setPreviousScreen(screen);
+    setScreen('shop');
+  };
+  
+  const closeShop = () => {
+    // Если предыдущий экран был playing, возобновляем движок
+    if (previousScreen === 'playing' && engineRef.current) {
+      engineRef.current.resume();
+    }
+    setScreen(previousScreen);
+  };
+  
+  const togglePause = () => {
+    if (screen !== 'playing') return;
+    
+    if (isPaused) {
+      if (engineRef.current) {
+        engineRef.current.resume();
+      }
+      setIsPaused(false);
+    } else {
+      if (engineRef.current) {
+        engineRef.current.pause();
+      }
+      setIsPaused(true);
+    }
+  };
   
   const goToNextLevel = () => {
+    // Устанавливаем флаг перехода
+    isTransitioningRef.current = true;
+    
     // Останавливаем текущий движок
     if (engineRef.current) {
       engineRef.current.stop();
@@ -111,6 +163,9 @@ export default function App() {
     setAmmo(12);
     setMaxAmmo(12);
     setKills(0);
+    
+    // Меняем screen чтобы меню victory пропало
+    setScreen('playing');
     
     // Создаем новый движок с новым уровнем
     setTimeout(() => {
@@ -132,8 +187,12 @@ export default function App() {
         engineRef.current = engine;
         setLevelName(engine.getLevelName());
         engine.start();
+        
+        // Сбрасываем флаг после создания нового движка
+        isTransitioningRef.current = false;
       } catch (error) {
         console.error('Failed to start next level:', error);
+        isTransitioningRef.current = false;
       }
     }, 100);
   };
@@ -270,7 +329,7 @@ export default function App() {
     );
   }
 
-  // ====== ИГРОВОЙ ЭКРАН (playing / dead / victory) ======
+  // ====== ИГРОВОЙ ЭКРАН (playing / dead / victory / paused) ======
   return (
     <div className="w-full h-screen bg-gray-900 flex flex-col items-center justify-center overflow-hidden">
       <div className="relative">
@@ -337,6 +396,7 @@ export default function App() {
           <div className="bg-black/70 rounded-lg p-2">
             <p className="text-gray-400 text-xs">[Q] Сменить оружие</p>
             <p className="text-gray-400 text-xs">[R] Перезарядка</p>
+            <p className="text-gray-400 text-xs">[ESC] Пауза</p>
           </div>
         </div>
 
@@ -391,6 +451,41 @@ export default function App() {
                 </button>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Меню паузы */}
+        {isPaused && (
+          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-lg">
+            <h2 className="text-4xl font-bold text-blue-400 mb-6">⏸️ ПАУЗА</h2>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={togglePause}
+                className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+              >
+                ▶ Продолжить
+              </button>
+              <button
+                onClick={openShop}
+                className="px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+              >
+                🛒 Магазин
+              </button>
+              <button
+                onClick={() => {
+                  if (engineRef.current) {
+                    engineRef.current.stop();
+                    engineRef.current = null;
+                  }
+                  setScreen('menu');
+                  setIsPaused(false);
+                }}
+                className="px-8 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-all cursor-pointer"
+              >
+                🏠 В главное меню
+              </button>
+            </div>
+            <p className="text-gray-500 text-sm mt-6">Нажмите ESC чтобы продолжить</p>
           </div>
         )}
       </div>

@@ -172,6 +172,21 @@ export class GameEngine {
     this.keysJustPressed.clear();
   }
 
+  pause(): void {
+    this.running = false;
+    if (this.animFrameId) {
+      cancelAnimationFrame(this.animFrameId);
+    }
+  }
+
+  resume(): void {
+    if (!this.running) {
+      this.running = true;
+      this.lastTime = performance.now();
+      this.gameLoop(this.lastTime);
+    }
+  }
+
   private gameLoop = (timestamp: number): void => {
     if (!this.running) return;
 
