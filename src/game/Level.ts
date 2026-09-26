@@ -870,6 +870,218 @@ export function createLevel5(): LevelData {
   };
 }
 
+// Уровень 6: Финальная битва - Крыша небоскрёба
+export function createLevel6(): LevelData {
+  const platforms: Platform[] = [
+    // Основная платформа крыши
+    { rect: { x: 0, y: 700, width: 3000, height: 40 } },
+    
+    // Стены по краям
+    { rect: { x: 0, y: 0, width: 40, height: 740 } },
+    { rect: { x: 2960, y: 0, width: 40, height: 740 } },
+    { rect: { x: 0, y: 0, width: 3000, height: 30 } },
+    
+    // Препятствия на крыше
+    { rect: { x: 400, y: 600, width: 150, height: 100 } },
+    { rect: { x: 800, y: 550, width: 200, height: 150 } },
+    { rect: { x: 1200, y: 600, width: 150, height: 100 } },
+    { rect: { x: 1600, y: 500, width: 200, height: 200 } },
+    { rect: { x: 2000, y: 600, width: 150, height: 100 } },
+    { rect: { x: 2400, y: 550, width: 200, height: 150 } },
+    
+    // Платформы для маневрирования
+    { rect: { x: 600, y: 500, width: 100, height: 20 } },
+    { rect: { x: 1050, y: 450, width: 100, height: 20 } },
+    { rect: { x: 1450, y: 400, width: 100, height: 20 } },
+    { rect: { x: 1850, y: 450, width: 100, height: 20 } },
+    { rect: { x: 2250, y: 400, width: 100, height: 20 } },
+    
+    // Проходные платформы
+    { rect: { x: 500, y: 650, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 1100, y: 650, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 1700, y: 650, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 2300, y: 650, width: 80, height: 15 }, isPassThrough: true },
+  ];
+
+  const ladders = [
+    { x: 700, y: 500, width: 30, height: 200 },
+    { x: 1150, y: 450, width: 30, height: 250 },
+    { x: 1550, y: 400, width: 30, height: 300 },
+    { x: 1950, y: 450, width: 30, height: 250 },
+    { x: 2350, y: 400, width: 30, height: 300 },
+  ];
+
+  const enemies: EnemyStats[] = [
+    // Финальные летающие враги
+    {
+      maxHealth: 50,
+      health: 50,
+      damage: 20,
+      moveSpeed: 150,
+      detectionRange: 500,
+      attackRange: 400,
+      attackCooldown: 0.5,
+      patrolPoints: [{ x: 300, y: 150 }, { x: 700, y: 150 }],
+      type: EnemyType.FLYING,
+      goldDrop: 40,
+    },
+    {
+      maxHealth: 50,
+      health: 50,
+      damage: 20,
+      moveSpeed: 150,
+      detectionRange: 500,
+      attackRange: 400,
+      attackCooldown: 0.5,
+      patrolPoints: [{ x: 900, y: 150 }, { x: 1300, y: 150 }],
+      type: EnemyType.FLYING,
+      goldDrop: 40,
+    },
+    {
+      maxHealth: 50,
+      health: 50,
+      damage: 20,
+      moveSpeed: 150,
+      detectionRange: 500,
+      attackRange: 400,
+      attackCooldown: 0.5,
+      patrolPoints: [{ x: 1500, y: 150 }, { x: 1900, y: 150 }],
+      type: EnemyType.FLYING,
+      goldDrop: 40,
+    },
+    {
+      maxHealth: 50,
+      health: 50,
+      damage: 20,
+      moveSpeed: 150,
+      detectionRange: 500,
+      attackRange: 400,
+      attackCooldown: 0.5,
+      patrolPoints: [{ x: 2100, y: 150 }, { x: 2500, y: 150 }],
+      type: EnemyType.FLYING,
+      goldDrop: 40,
+    },
+    // Наземные враги
+    {
+      maxHealth: 60,
+      health: 60,
+      damage: 22,
+      moveSpeed: 130,
+      detectionRange: 300,
+      attackRange: 60,
+      attackCooldown: 0.6,
+      patrolPoints: [{ x: 100, y: 656 }, { x: 350, y: 656 }],
+      type: EnemyType.MELEE,
+      goldDrop: 35,
+    },
+    {
+      maxHealth: 60,
+      health: 60,
+      damage: 22,
+      moveSpeed: 130,
+      detectionRange: 300,
+      attackRange: 60,
+      attackCooldown: 0.6,
+      patrolPoints: [{ x: 850, y: 656 }, { x: 1100, y: 656 }],
+      type: EnemyType.MELEE,
+      goldDrop: 35,
+    },
+    {
+      maxHealth: 60,
+      health: 60,
+      damage: 22,
+      moveSpeed: 130,
+      detectionRange: 300,
+      attackRange: 60,
+      attackCooldown: 0.6,
+      patrolPoints: [{ x: 1650, y: 656 }, { x: 1900, y: 656 }],
+      type: EnemyType.MELEE,
+      goldDrop: 35,
+    },
+    {
+      maxHealth: 60,
+      health: 60,
+      damage: 22,
+      moveSpeed: 130,
+      detectionRange: 300,
+      attackRange: 60,
+      attackCooldown: 0.6,
+      patrolPoints: [{ x: 2450, y: 656 }, { x: 2700, y: 656 }],
+      type: EnemyType.MELEE,
+      goldDrop: 35,
+    },
+    // Стрелки
+    {
+      maxHealth: 55,
+      health: 55,
+      damage: 20,
+      moveSpeed: 100,
+      detectionRange: 400,
+      attackRange: 350,
+      attackCooldown: 0.8,
+      patrolPoints: [{ x: 500, y: 656 }, { x: 700, y: 656 }],
+      type: EnemyType.RANGED,
+      goldDrop: 40,
+    },
+    {
+      maxHealth: 55,
+      health: 55,
+      damage: 20,
+      moveSpeed: 100,
+      detectionRange: 400,
+      attackRange: 350,
+      attackCooldown: 0.8,
+      patrolPoints: [{ x: 1300, y: 656 }, { x: 1500, y: 656 }],
+      type: EnemyType.RANGED,
+      goldDrop: 40,
+    },
+    {
+      maxHealth: 55,
+      health: 55,
+      damage: 20,
+      moveSpeed: 100,
+      detectionRange: 400,
+      attackRange: 350,
+      attackCooldown: 0.8,
+      patrolPoints: [{ x: 2100, y: 656 }, { x: 2300, y: 656 }],
+      type: EnemyType.RANGED,
+      goldDrop: 40,
+    },
+    // Финальный босс
+    {
+      maxHealth: 150,
+      health: 150,
+      damage: 30,
+      moveSpeed: 160,
+      detectionRange: 600,
+      attackRange: 500,
+      attackCooldown: 0.4,
+      patrolPoints: [{ x: 2700, y: 100 }, { x: 2900, y: 100 }],
+      type: EnemyType.FLYING,
+      goldDrop: 200,
+    },
+  ];
+
+  const pits: Pit[] = [
+    { x: 700, y: 700, width: 100, height: 40, damage: 100 },
+    { x: 1400, y: 700, width: 100, height: 40, damage: 100 },
+    { x: 2100, y: 700, width: 100, height: 40, damage: 100 },
+  ];
+
+  return {
+    platforms,
+    ladders,
+    enemies,
+    playerSpawn: { x: 100, y: 650 },
+    exitDoor: { x: 2850, y: 640, width: 40, height: 60 },
+    pits,
+    width: 3000,
+    height: 740,
+    bgColor: '#0a0a2a',
+    name: 'Крыша Небоскрёба',
+  };
+}
+
 // Функция для получения уровня по номеру
 export function getLevel(levelNumber: number): LevelData {
   switch (levelNumber) {
@@ -883,6 +1095,8 @@ export function getLevel(levelNumber: number): LevelData {
       return createLevel4();
     case 5:
       return createLevel5();
+    case 6:
+      return createLevel6();
     default:
       return createLevel1();
   }

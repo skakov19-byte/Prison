@@ -285,7 +285,10 @@ export default function App() {
 
         if (isFinished) {
           // Ролик завершён, переходим к 4 уровню
+          // Сохраняем текущий инвентарь
+          const savedInventory = inventory;
           setCurrentLevel(4);
+          setInventory(savedInventory);
           setScreen('playing');
           return;
         }
@@ -535,7 +538,7 @@ export default function App() {
             <p><span className="text-gray-300">W</span> — Стрелять вверх (с пистолетом)</p>
             <p><span className="text-gray-300">S</span> — Падение сквозь платформу</p>
             <p><span className="text-gray-300">ESC</span> — Пауза</p>
-            <p className="mt-4 text-orange-400">🎮 5 уровней: 3 уровня тюрьмы + 2 уровня свободы!</p>
+            <p className="mt-4 text-orange-400">🎮 6 уровней: 3 уровня тюрьмы + 3 уровня свободы!</p>
             <p className="text-xs text-gray-600">Первые 3 уровня - только ближний бой. Огнестрел найдёте позже!</p>
           </div>
         </div>
@@ -785,6 +788,12 @@ export default function App() {
             <div className="flex gap-4 mt-4">
               <button
                 onClick={() => { 
+                  // Сбрасываем здоровье и патроны
+                  setHealth(100);
+                  setMaxHealth(100);
+                  setAmmo(12);
+                  setMaxAmmo(12);
+                  
                   if (engineRef.current) {
                     engineRef.current.reset();
                     const upgrades = getUpgrades();
@@ -826,7 +835,7 @@ export default function App() {
                   🛒 Магазин
                 </button>
               )}
-              {currentLevel < 5 ? (
+              {currentLevel < 6 ? (
                 <button
                   onClick={goToNextLevel}
                   className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all cursor-pointer"
