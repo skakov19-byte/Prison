@@ -63,7 +63,7 @@ export class Renderer {
     }
 
     if (level.pickupZones) {
-      this.renderPickupZones(level.pickupZones);
+      this.renderPickupZones(level.pickupZones, enemies);
     }
 
     if (level.exitDoor) {
@@ -525,11 +525,19 @@ export class Renderer {
     }
   }
 
-  private renderPickupZones(zones: PickupZone[]): void {
+  private renderPickupZones(zones: PickupZone[], enemies: Enemy[]): void {
     const ctx = this.ctx;
     const time = Date.now() * 0.003;
 
     for (const zone of zones) {
+      // Проверяем, должна ли зона быть видима
+      if (zone.triggerOnKill && zone.enemyIndex !== undefined) {
+        // Зона появляется только после убийства врага
+        const enemy = enemies[zone.enemyIndex];
+        if (!enemy || !enemy.isDead) {
+          continue; // Пропускаем эту зону, враг ещё жив
+        }
+      }
       // Мигающая подсветка
       const alpha = (Math.sin(time) * 0.3 + 0.5);
       
