@@ -30,6 +30,7 @@ export class Player {
   reloadTimer: number = 0;
   isReloading: boolean = false;
   isAttacking: boolean = false;
+  aimingUp: boolean = false;
   attackFrame: number = 0;
   comboCount: number = 0;
   comboTimer: number = 0;
@@ -201,6 +202,9 @@ export class Player {
     if (input.switchWeaponPressed) {
       this.currentWeapon = this.currentWeapon === WeaponType.MELEE ? WeaponType.RANGED : WeaponType.MELEE;
     }
+
+    // Прицеливание вверх (только для дальнего боя)
+    this.aimingUp = input.up && this.currentWeapon === WeaponType.RANGED;
 
     // Перезарядка запускается только через reload() из GameEngine
     // Не устанавливаем reloadTimer здесь, чтобы reload() мог сработать
@@ -385,12 +389,20 @@ export class Player {
 
   private fireBullet(): void {
     const speed = 500;
-    const dir = this.facingRight ? 1 : -1;
-    const startX = this.facingRight ? this.x + this.width : this.x;
-    const startY = this.y + this.height / 2 - 2;
-
-    this.bulletPool.get(startX, startY, speed * dir, 0, this.stats.rangedDamage, true);
-    this.vx -= dir * 30;
+    
+    if (this.aimingUp) {
+      // Стрельба вверх
+      const startX = this.x + this.width / 2 - 2;
+      const startY = this.y - 5;
+      this.bulletPool.get(startX, startY, 0, -speed, this.stats.rangedDamage, true);
+    } else {
+      // Стрельба горизонтально
+      const dir = this.facingRight ? 1 : -1;
+      const startX = this.facingRight ? this.x + this.width : this.x;
+      const startY = this.y + this.height / 2 - 2;
+      this.bulletPool.get(startX, startY, speed * dir, 0, this.stats.rangedDamage, true);
+      this.vx -= dir * 30; // Отдача только при горизонтальной стрельбе
+    }
   }
 
   private spawnMeleeParticles(): void {

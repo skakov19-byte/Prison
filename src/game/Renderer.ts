@@ -610,31 +610,63 @@ export class Renderer {
       }
     } else {
       // Пистолет с деталями
-      const gunX = facingRight ? x + width - 2 : x - 14;
-      
-      // Корпус пистолета
-      const gunGradient = ctx.createLinearGradient(gunX, y + height / 2 - 4, gunX, y + height / 2 + 4);
-      gunGradient.addColorStop(0, '#777777');
-      gunGradient.addColorStop(0.5, '#555555');
-      gunGradient.addColorStop(1, '#333333');
-      ctx.fillStyle = gunGradient;
-      ctx.beginPath();
-      ctx.roundRect(gunX, y + height / 2 - 4, 16, 8, 2);
-      ctx.fill();
-      
-      // Ствол
-      ctx.fillStyle = '#444444';
-      ctx.fillRect(gunX + (facingRight ? 12 : -4), y + height / 2 - 2, 6, 4);
-      
-      // Рукоять
-      ctx.fillStyle = '#2a2a2a';
-      ctx.beginPath();
-      ctx.roundRect(gunX + (facingRight ? 10 : 2), y + height / 2 + 2, 5, 7, 1);
-      ctx.fill();
-      
-      // Детали
-      ctx.fillStyle = '#666666';
-      ctx.fillRect(gunX + 2, y + height / 2 - 3, 3, 2);
+      if (player.aimingUp) {
+        // Прицеливание вверх - рисуем пистолет направленным вверх
+        const gunCenterX = x + width / 2;
+        const gunBaseY = y + 5;
+        
+        ctx.save();
+        ctx.translate(gunCenterX, gunBaseY);
+        
+        // Корпус пистолета (вертикально)
+        const gunGradient = ctx.createLinearGradient(-4, 0, 4, 0);
+        gunGradient.addColorStop(0, '#777777');
+        gunGradient.addColorStop(0.5, '#555555');
+        gunGradient.addColorStop(1, '#333333');
+        ctx.fillStyle = gunGradient;
+        ctx.beginPath();
+        ctx.roundRect(-4, -12, 8, 16, 2);
+        ctx.fill();
+        
+        // Ствол (направлен вверх)
+        ctx.fillStyle = '#444444';
+        ctx.fillRect(-2, -18, 4, 6);
+        
+        // Рукоять
+        ctx.fillStyle = '#2a2a2a';
+        ctx.beginPath();
+        ctx.roundRect(-3, 2, 6, 5, 1);
+        ctx.fill();
+        
+        ctx.restore();
+      } else {
+        // Горизонтальное положение пистолета
+        const gunX = facingRight ? x + width - 2 : x - 14;
+        
+        // Корпус пистолета
+        const gunGradient = ctx.createLinearGradient(gunX, y + height / 2 - 4, gunX, y + height / 2 + 4);
+        gunGradient.addColorStop(0, '#777777');
+        gunGradient.addColorStop(0.5, '#555555');
+        gunGradient.addColorStop(1, '#333333');
+        ctx.fillStyle = gunGradient;
+        ctx.beginPath();
+        ctx.roundRect(gunX, y + height / 2 - 4, 16, 8, 2);
+        ctx.fill();
+        
+        // Ствол
+        ctx.fillStyle = '#444444';
+        ctx.fillRect(gunX + (facingRight ? 12 : -4), y + height / 2 - 2, 6, 4);
+        
+        // Рукоять
+        ctx.fillStyle = '#2a2a2a';
+        ctx.beginPath();
+        ctx.roundRect(gunX + (facingRight ? 10 : 2), y + height / 2 + 2, 5, 7, 1);
+        ctx.fill();
+        
+        // Детали
+        ctx.fillStyle = '#666666';
+        ctx.fillRect(gunX + 2, y + height / 2 - 3, 3, 2);
+      }
     }
 
     ctx.globalAlpha = 1.0;

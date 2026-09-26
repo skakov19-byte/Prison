@@ -312,6 +312,7 @@ export default function App() {
             <p><span className="text-gray-300">J / Z</span> — Атака</p>
             <p><span className="text-gray-300">Q / Tab</span> — Смена оружия</p>
             <p><span className="text-gray-300">R</span> — Перезарядка</p>
+            <p><span className="text-gray-300">W</span> — Стрелять вверх (с пистолетом)</p>
             <p><span className="text-gray-300">S</span> — Падение сквозь платформу</p>
             <p><span className="text-gray-300">ESC</span> — Пауза</p>
             <p className="mt-4 text-emerald-400">🎮 5 уникальных уровней с вертикальным дизайном!</p>
@@ -461,6 +462,7 @@ export default function App() {
           <div className="bg-black/70 rounded-lg p-2">
             <p className="text-gray-400 text-xs">[Q] Сменить оружие</p>
             <p className="text-gray-400 text-xs">[R] Перезарядка</p>
+            <p className="text-gray-400 text-xs">[W] Стрелять вверх</p>
             <p className="text-gray-400 text-xs">[ESC] Пауза</p>
           </div>
         </div>

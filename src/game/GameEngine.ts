@@ -329,18 +329,29 @@ export class GameEngine {
   private checkPits(): void {
     if (!this.level.pits || this.level.pits.length === 0) return;
     
+    // Если игрок на лестнице или мёртв - не проверяем ямы
+    if (this.player.isOnLadder || this.player.fsm.getCurrentState() === PlayerState.DEAD) return;
+    
     const playerHitbox = this.player.getHitbox();
     const playerCenterX = playerHitbox.x + playerHitbox.width / 2;
     const playerBottom = playerHitbox.y + playerHitbox.height;
     
     for (const pit of this.level.pits) {
-      // Проверяем, упал ли игрок в яму
-      if (playerCenterX > pit.x && playerCenterX < pit.x + pit.width &&
-          playerBottom > pit.y) {
+      // Проверяем, упал ли игрок В яму (не просто стоит рядом)
+      // Игрок должен быть:
+      // 1. Горизонтально внутри ямы
+      // 2. Его нижняя часть ниже верхней границы ямы
+      // 3. Он падает (vy > 0) или уже внутри ямы
+      // 4. Он НЕ стоит на платформе (isGrounded = false)
+      const isOverPit = playerCenterX > pit.x + 5 && playerCenterX < pit.x + pit.width - 5;
+      const isFallingIntoPit = playerBottom > pit.y + 10 && this.player.vy > 0;
+      const isDeepInPit = playerHitbox.y > pit.y;
+      
+      if (isOverPit && (isFallingIntoPit || isDeepInPit) && !this.player.isGrounded) {
         this.player.takeDamage(pit.damage);
-        // Отбрасываем игрока назад
-        this.player.vy = -300;
-        this.player.vx = this.player.x < pit.x + pit.width / 2 ? -200 : 200;
+        // Отбрасываем игрока назад и вверх
+        this.player.vy = -400;
+        this.player.vx = this.player.x < pit.x + pit.width / 2 ? -250 : 250;
         break;
       }
     }
