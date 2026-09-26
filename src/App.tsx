@@ -5,8 +5,9 @@ import { IntroRenderer } from './game/IntroScene';
 import { Act2IntroRenderer } from './game/Act2Intro';
 import { Act3IntroRenderer } from './game/Act3Intro';
 import { ChaseScene } from './game/ChaseScene';
+import { JetpackScene } from './game/JetpackScene';
 
-type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro' | 'act3_intro' | 'chase_scene';
+type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro' | 'act3_intro' | 'chase_scene' | 'jetpack_scene';
 
 interface ShopItem {
   id: string;
@@ -25,6 +26,7 @@ export default function App() {
   const act2IntroRendererRef = useRef<Act2IntroRenderer | null>(null);
   const act3IntroRendererRef = useRef<Act3IntroRenderer | null>(null);
   const chaseSceneRef = useRef<ChaseScene | null>(null);
+  const jetpackSceneRef = useRef<JetpackScene | null>(null);
   const isTransitioningRef = useRef(false);
 
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -414,13 +416,9 @@ export default function App() {
         act3Renderer.render();
 
         if (isFinished) {
-          // Ролик завершён, переходим к 7 уровню
-          const savedInventory = inventory;
-          const savedGold = gold;
-          setCurrentLevel(7);
-          setInventory(savedInventory);
-          setGold(savedGold);
-          setScreen('playing');
+          // Ролик завершён, запускаем мини-игру с реактивным ранцем
+          cancelAnimationFrame(animFrameId);
+          setScreen('jetpack_scene');
           return;
         }
 
@@ -441,6 +439,59 @@ export default function App() {
       return () => {
         cancelAnimationFrame(animFrameId);
         canvas.removeEventListener('click', skipIntro);
+      };
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [screen]);
+
+  // Рендеринг мини-игры с реактивным ранцем
+  useEffect(() => {
+    if (screen !== 'jetpack_scene') return;
+
+    const timer = setTimeout(() => {
+      if (!canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const jetpackScene = new JetpackScene(ctx, canvas.width, canvas.height);
+      jetpackSceneRef.current = jetpackScene;
+
+      let lastTime = performance.now();
+      let animFrameId: number;
+
+      const renderLoop = (timestamp: number) => {
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        const isFinished = jetpackScene.update(dt);
+        jetpackScene.render();
+
+        if (isFinished) {
+          // Мини-игра завершена
+          cancelAnimationFrame(animFrameId);
+          
+          // Переходим к 7 уровню
+          const savedInventory = inventory;
+          const savedGold = gold;
+          setCurrentLevel(7);
+          setInventory(savedInventory);
+          setGold(savedGold);
+          setScreen('playing');
+          return;
+        }
+
+        animFrameId = requestAnimationFrame(renderLoop);
+      };
+
+      animFrameId = requestAnimationFrame(renderLoop);
+
+      return () => {
+        cancelAnimationFrame(animFrameId);
       };
     }, 100);
 
@@ -470,6 +521,10 @@ export default function App() {
       }
       // Пропуск ролика Акта 3 по Space или Enter
       if (screen === 'act3_intro' && (e.code === 'Space' || e.code === 'Enter')) {
+        setScreen('jetpack_scene');
+      }
+      // Пропуск мини-игры с реактивным ранцем
+      if (screen === 'jetpack_scene' && (e.code === 'Space' || e.code === 'Enter')) {
         setCurrentLevel(7);
         setScreen('playing');
       }
@@ -834,6 +889,27 @@ export default function App() {
           <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-3 py-2">
             <p className="text-red-400 text-xs font-bold">🚗 ПОГОНЯ!</p>
             <p className="text-gray-400 text-xs">Уклоняйтесь и выживите!</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== МИНИ-ИГРА РЕАКТИВНОГО РАНЦА ======
+  if (screen === 'jetpack_scene') {
+    return (
+      <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="border-2 border-cyan-700 rounded-lg shadow-2xl block"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-3 py-2">
+            <p className="text-cyan-400 text-xs font-bold">🚀 ПОЛЁТ!</p>
+            <p className="text-gray-400 text-xs">Долетите до крыши!</p>
           </div>
         </div>
       </div>
