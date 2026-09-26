@@ -307,6 +307,11 @@ export class Player {
 
     this.isGrounded = false;
 
+    // Если игрок на лестнице, он проходит сквозь платформы
+    if (this.isOnLadder) {
+      return;
+    }
+
     for (const platform of platforms) {
       if (platform.isPassThrough && !this.isDropping) {
         if (this.vy >= 0) {
