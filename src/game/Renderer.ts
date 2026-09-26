@@ -5,7 +5,7 @@
 import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { Bullet, Particle, Platform, PlayerState, WeaponType, EnemyType } from './types';
-import { LevelData, Pit, Door, PickupZone } from './Level';
+import { LevelData, Pit, Door, PickupZone, Decoration } from './Level';
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
@@ -64,6 +64,10 @@ export class Renderer {
 
     if (level.pickupZones) {
       this.renderPickupZones(level.pickupZones, enemies);
+    }
+
+    if (level.decorations) {
+      this.renderDecorations(level.decorations);
     }
 
     if (level.exitDoor) {
@@ -553,6 +557,118 @@ export class Renderer {
         ctx.fillStyle = `rgba(192, 192, 192, ${alpha})`;
         ctx.font = 'bold 9px Arial';
         ctx.fillText('Ключ', zone.x + zone.width / 2, zone.y - 5);
+      }
+    }
+  }
+
+  private renderDecorations(decorations: Decoration[]): void {
+    const ctx = this.ctx;
+    const time = Date.now() * 0.005;
+
+    for (const decoration of decorations) {
+      if (decoration.type === 'burning_car') {
+        const carX = decoration.x;
+        const carY = decoration.y;
+
+        // Тень машины
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.beginPath();
+        ctx.ellipse(carX + 60, carY + 45, 70, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Кузов машины (поврежденный)
+        const carGradient = ctx.createLinearGradient(carX, carY, carX, carY + 40);
+        carGradient.addColorStop(0, '#2a2a4e');
+        carGradient.addColorStop(0.5, '#1a1a2e');
+        carGradient.addColorStop(1, '#0a0a1e');
+        ctx.fillStyle = carGradient;
+        ctx.save();
+        ctx.translate(carX + 60, carY + 20);
+        ctx.rotate(0.3);
+        ctx.fillRect(-60, -20, 120, 40);
+        ctx.restore();
+
+        // Вмятины и повреждения
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.arc(carX + 40, carY + 20, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(carX + 90, carY + 10, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Разбитые окна
+        ctx.fillStyle = 'rgba(100, 150, 200, 0.4)';
+        ctx.fillRect(carX + 25, carY - 15, 25, 10);
+        ctx.fillRect(carX + 65, carY - 15, 25, 10);
+
+        // Трещины на окнах
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(carX + 30, carY - 10);
+        ctx.lineTo(carX + 45, carY - 15);
+        ctx.moveTo(carX + 35, carY - 12);
+        ctx.lineTo(carX + 40, carY - 5);
+        ctx.stroke();
+
+        // Колёса
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        ctx.arc(carX + 25, carY + 40, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(carX + 95, carY + 40, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Диски
+        ctx.fillStyle = '#888888';
+        ctx.beginPath();
+        ctx.arc(carX + 25, carY + 40, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(carX + 95, carY + 40, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Огонь на машине (интенсивный)
+        for (let i = 0; i < 25; i++) {
+          const flameX = carX + Math.random() * 120;
+          const flameY = carY - Math.random() * 100;
+          const flameSize = 15 + Math.random() * 35;
+
+          const flameGradient = ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, flameSize);
+          flameGradient.addColorStop(0, 'rgba(255, 255, 200, 0.8)');
+          flameGradient.addColorStop(0.2, 'rgba(255, 200, 0, 0.7)');
+          flameGradient.addColorStop(0.5, 'rgba(255, 100, 0, 0.5)');
+          flameGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+          ctx.fillStyle = flameGradient;
+          ctx.beginPath();
+          ctx.arc(flameX, flameY, flameSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Густой дым
+        for (let i = 0; i < 15; i++) {
+          const smokeX = carX + Math.random() * 150;
+          const smokeY = carY - 100 - Math.random() * 150;
+          const smokeSize = 30 + Math.random() * 50;
+
+          const smokeGradient = ctx.createRadialGradient(smokeX, smokeY, 0, smokeX, smokeY, smokeSize);
+          smokeGradient.addColorStop(0, 'rgba(50, 50, 50, 0.6)');
+          smokeGradient.addColorStop(1, 'rgba(30, 30, 30, 0)');
+          ctx.fillStyle = smokeGradient;
+          ctx.beginPath();
+          ctx.arc(smokeX, smokeY, smokeSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Осколки
+        ctx.fillStyle = 'rgba(150, 200, 255, 0.7)';
+        for (let i = 0; i < 8; i++) {
+          const shardX = carX + Math.random() * 100;
+          const shardY = carY + 30 + Math.random() * 20;
+          ctx.fillRect(shardX, shardY, 3, 3);
+        }
       }
     }
   }

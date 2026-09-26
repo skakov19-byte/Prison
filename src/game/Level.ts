@@ -38,6 +38,12 @@ export interface PickupZone {
   enemyIndex?: number; // Индекс врага для triggerOnKill
 }
 
+export interface Decoration {
+  type: 'burning_car';
+  x: number;
+  y: number;
+}
+
 export interface LevelData {
   platforms: Platform[];
   ladders: { x: number; y: number; width: number; height: number }[];
@@ -47,6 +53,7 @@ export interface LevelData {
   doors?: Door[];
   pickupZones?: PickupZone[];
   pits: Pit[];
+  decorations?: Decoration[];
   width: number;
   height: number;
   bgColor: string;
@@ -313,19 +320,7 @@ export function createLevel2(): LevelData {
   ];
 
   const enemies: EnemyStats[] = [
-    // Охранники в каждом коридоре
-    {
-      maxHealth: 40,
-      health: 40,
-      damage: 14,
-      moveSpeed: 85,
-      detectionRange: 230,
-      attackRange: 48,
-      attackCooldown: 0.9,
-      patrolPoints: [{ x: 2200, y: 656 }, { x: 2350, y: 656 }],
-      type: EnemyType.MELEE,
-      goldDrop: 15,
-    },
+    // Охранники в каждом коридоре (убран враг в начале)
     {
       maxHealth: 40,
       health: 40,
@@ -630,19 +625,7 @@ export function createLevel4(): LevelData {
   ];
 
   const enemies: EnemyStats[] = [
-    // Летающие враги
-    {
-      maxHealth: 25,
-      health: 25,
-      damage: 12,
-      moveSpeed: 100,
-      detectionRange: 350,
-      attackRange: 280,
-      attackCooldown: 1.0,
-      patrolPoints: [{ x: 300, y: 250 }, { x: 600, y: 250 }],
-      type: EnemyType.FLYING,
-      goldDrop: 20,
-    },
+    // Летающие враги (убран враг в начале)
     {
       maxHealth: 25,
       health: 25,
@@ -667,19 +650,7 @@ export function createLevel4(): LevelData {
       type: EnemyType.FLYING,
       goldDrop: 25,
     },
-    // Наземные враги
-    {
-      maxHealth: 35,
-      health: 35,
-      damage: 14,
-      moveSpeed: 90,
-      detectionRange: 220,
-      attackRange: 45,
-      attackCooldown: 0.9,
-      patrolPoints: [{ x: 100, y: 656 }, { x: 350, y: 656 }],
-      type: EnemyType.MELEE,
-      goldDrop: 15,
-    },
+    // Наземные враги (убран враг в начале)
     {
       maxHealth: 30,
       health: 30,
@@ -707,6 +678,9 @@ export function createLevel4(): LevelData {
     playerSpawn: { x: 50, y: 650 },
     exitDoor: { x: 1900, y: 240, width: 40, height: 60 },
     pits,
+    decorations: [
+      { type: 'burning_car', x: 100, y: 650 }
+    ],
     width: 2000,
     height: 740,
     bgColor: '#0a1a2a',
@@ -737,6 +711,8 @@ export function createLevel5(): LevelData {
     { rect: { x: 1750, y: 450, width: 150, height: 20 } },
     { rect: { x: 1950, y: 350, width: 150, height: 20 } },
     { rect: { x: 2100, y: 250, width: 200, height: 20 } },
+    // Платформа под выходом
+    { rect: { x: 2130, y: 250, width: 80, height: 20 } },
     
     // Стены
     { rect: { x: 0, y: 0, width: 20, height: 840 } },
@@ -758,22 +734,22 @@ export function createLevel5(): LevelData {
   ];
 
   const enemies: EnemyStats[] = [
-    // Летающие враги
+    // Летающие враги (уменьшен HP, убран враг в начале)
     {
-      maxHealth: 35,
-      health: 35,
+      maxHealth: 20,
+      health: 20,
       damage: 16,
       moveSpeed: 130,
       detectionRange: 400,
       attackRange: 320,
       attackCooldown: 0.7,
-      patrolPoints: [{ x: 400, y: 200 }, { x: 800, y: 200 }],
+      patrolPoints: [{ x: 800, y: 200 }, { x: 1200, y: 200 }],
       type: EnemyType.FLYING,
       goldDrop: 30,
     },
     {
-      maxHealth: 40,
-      health: 40,
+      maxHealth: 25,
+      health: 25,
       damage: 18,
       moveSpeed: 140,
       detectionRange: 450,
@@ -783,19 +759,7 @@ export function createLevel5(): LevelData {
       type: EnemyType.FLYING,
       goldDrop: 35,
     },
-    // Наземные враги
-    {
-      maxHealth: 45,
-      health: 45,
-      damage: 18,
-      moveSpeed: 110,
-      detectionRange: 250,
-      attackRange: 55,
-      attackCooldown: 0.7,
-      patrolPoints: [{ x: 50, y: 756 }, { x: 250, y: 756 }],
-      type: EnemyType.MELEE,
-      goldDrop: 25,
-    },
+    // Наземные враги (убран враг в начале)
     {
       maxHealth: 40,
       health: 40,
@@ -832,10 +796,10 @@ export function createLevel5(): LevelData {
       type: EnemyType.RANGED,
       goldDrop: 30,
     },
-    // Босс - летающий
+    // Босс - летающий (уменьшен HP)
     {
-      maxHealth: 80,
-      health: 80,
+      maxHealth: 60,
+      health: 60,
       damage: 25,
       moveSpeed: 150,
       detectionRange: 500,
@@ -866,6 +830,9 @@ export function createLevel5(): LevelData {
     height: 840,
     bgColor: '#2a0a0a',
     name: 'Адская Бездна',
+    decorations: [
+      { type: 'burning_car', x: 100, y: 700 }
+    ]
   };
 }
 
