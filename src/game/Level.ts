@@ -64,8 +64,8 @@ export interface LevelData {
 // Уровень 1: Побег из камеры (движение вправо)
 export function createLevel1(): LevelData {
   const platforms: Platform[] = [
-    // Пол тюрьмы
-    { rect: { x: 0, y: 700, width: 2400, height: 40 } },
+    // Пол тюрьмы (не доходит до правой стены, создавая проход)
+    { rect: { x: 0, y: 700, width: 2360, height: 40 } },
     
     // Тюремная камера (старт) - органичные стены
     { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена (без прохода)
@@ -99,7 +99,7 @@ export function createLevel1(): LevelData {
     { rect: { x: 1600, y: 250, width: 350, height: 25 } },
     
     // Стены
-    { rect: { x: 2360, y: 0, width: 40, height: 600 } }, // Толстая правая стена (с проходом внизу)
+    { rect: { x: 2360, y: 0, width: 40, height: 500 } }, // Правая стена (ниже, чтобы был проход)
     { rect: { x: 0, y: 0, width: 2360, height: 30 } }, // Потолок (не перекрывает проход)
     
     // Проходные платформы
