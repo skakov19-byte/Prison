@@ -393,4 +393,36 @@ export class GameEngine {
   getCurrentLevelNumber(): number {
     return this.currentLevelNumber;
   }
+
+  applyUpgrades(upgrades: {
+    health?: number;
+    meleeDamage?: number;
+    rangedDamage?: number;
+    maxAmmo?: number;
+    moveSpeed?: number;
+  }): void {
+    if (upgrades.health !== undefined) {
+      this.player.stats.maxHealth += upgrades.health;
+      this.player.stats.health = this.player.stats.maxHealth;
+      if (this.callbacks.onHealthChange) {
+        this.callbacks.onHealthChange(this.player.stats.health, this.player.stats.maxHealth);
+      }
+    }
+    if (upgrades.meleeDamage !== undefined) {
+      this.player.stats.meleeDamage += upgrades.meleeDamage;
+    }
+    if (upgrades.rangedDamage !== undefined) {
+      this.player.stats.rangedDamage += upgrades.rangedDamage;
+    }
+    if (upgrades.maxAmmo !== undefined) {
+      this.player.stats.maxAmmo += upgrades.maxAmmo;
+      this.player.stats.currentAmmo = this.player.stats.maxAmmo;
+      if (this.callbacks.onAmmoChange) {
+        this.callbacks.onAmmoChange(this.player.stats.currentAmmo, this.player.stats.maxAmmo);
+      }
+    }
+    if (upgrades.moveSpeed !== undefined) {
+      this.player.stats.moveSpeed += upgrades.moveSpeed;
+    }
+  }
 }

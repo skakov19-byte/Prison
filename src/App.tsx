@@ -41,6 +41,31 @@ export default function App() {
     { id: 'speed', name: 'Скорость', description: '+20 к скорости передвижения', cost: 35, icon: '💨', maxLevel: 3, currentLevel: 0 },
   ]);
 
+  // Функция для получения текущих улучшений
+  const getUpgrades = () => {
+    const upgrades: any = {};
+    shopItems.forEach(item => {
+      switch (item.id) {
+        case 'health':
+          if (item.currentLevel > 0) upgrades.health = item.currentLevel * 25;
+          break;
+        case 'melee':
+          if (item.currentLevel > 0) upgrades.meleeDamage = item.currentLevel * 5;
+          break;
+        case 'ranged':
+          if (item.currentLevel > 0) upgrades.rangedDamage = item.currentLevel * 3;
+          break;
+        case 'ammo':
+          if (item.currentLevel > 0) upgrades.maxAmmo = item.currentLevel * 3;
+          break;
+        case 'speed':
+          if (item.currentLevel > 0) upgrades.moveSpeed = item.currentLevel * 20;
+          break;
+      }
+    });
+    return upgrades;
+  };
+
   const startGame = useCallback(() => {
     setHealth(100);
     setMaxHealth(100);
@@ -55,6 +80,9 @@ export default function App() {
   // Запуск игрового движка когда экран = playing
   useEffect(() => {
     if (screen !== 'playing') return;
+    
+    // Если мы в процессе перехода между уровнями, не создаём новый движок
+    if (isTransitioningRef.current) return;
 
     // Небольшая задержка чтобы canvas успел отрисоваться
     const timer = setTimeout(() => {
@@ -62,6 +90,9 @@ export default function App() {
         console.error('Canvas ref is null');
         return;
       }
+      
+      // Проверяем ещё раз перед созданием
+      if (isTransitioningRef.current) return;
 
       try {
         const canvas = canvasRef.current;
@@ -75,6 +106,12 @@ export default function App() {
           onLevelComplete: () => setScreen('victory'),
           onEnemyKill: () => setKills(k => k + 1),
         }, currentLevel);
+
+        // Применяем улучшения из магазина
+        const upgrades = getUpgrades();
+        if (Object.keys(upgrades).length > 0) {
+          engine.applyUpgrades(upgrades);
+        }
 
         engineRef.current = engine;
         setLevelName(engine.getLevelName());
@@ -184,6 +221,12 @@ export default function App() {
           onEnemyKill: () => setKills(k => k + 1),
         }, nextLevel);
 
+        // Применяем улучшения из магазина
+        const upgrades = getUpgrades();
+        if (Object.keys(upgrades).length > 0) {
+          engine.applyUpgrades(upgrades);
+        }
+
         engineRef.current = engine;
         setLevelName(engine.getLevelName());
         engine.start();
@@ -205,6 +248,27 @@ export default function App() {
     setShopItems(items => items.map(i =>
       i.id === itemId ? { ...i, currentLevel: i.currentLevel + 1 } : i
     ));
+
+    // Применяем улучшение к игроку
+    if (engineRef.current) {
+      switch (itemId) {
+        case 'health':
+          engineRef.current.applyUpgrades({ health: 25 });
+          break;
+        case 'melee':
+          engineRef.current.applyUpgrades({ meleeDamage: 5 });
+          break;
+        case 'ranged':
+          engineRef.current.applyUpgrades({ rangedDamage: 3 });
+          break;
+        case 'ammo':
+          engineRef.current.applyUpgrades({ maxAmmo: 3 });
+          break;
+        case 'speed':
+          engineRef.current.applyUpgrades({ moveSpeed: 20 });
+          break;
+      }
+    }
   };
 
   const getStateText = (state: PlayerState): string => {
