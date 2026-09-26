@@ -26,6 +26,7 @@ export enum EnemyState {
 export enum EnemyType {
   MELEE = 'MELEE',
   RANGED = 'RANGED',
+  FLYING = 'FLYING',
 }
 
 export enum WeaponType {

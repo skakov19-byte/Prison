@@ -313,8 +313,9 @@ export default function App() {
             <p><span className="text-gray-300">Q / Tab</span> — Смена оружия</p>
             <p><span className="text-gray-300">R</span> — Перезарядка</p>
             <p><span className="text-gray-300">S</span> — Падение сквозь платформу</p>
-            <p className="mt-4 text-emerald-400">🎮 3 уникальных уровня с вертикальным дизайном!</p>
-            <p className="text-xs text-gray-600">Используйте лестницы чтобы добраться до вершины</p>
+            <p><span className="text-gray-300">ESC</span> — Пауза</p>
+            <p className="mt-4 text-emerald-400">🎮 5 уникальных уровней с вертикальным дизайном!</p>
+            <p className="text-xs text-gray-600">Избегайте ям, сражайтесь с летающими врагами!</p>
           </div>
         </div>
       </div>
@@ -499,7 +500,7 @@ export default function App() {
               >
                 🛒 Магазин
               </button>
-              {currentLevel < 3 ? (
+              {currentLevel < 5 ? (
                 <button
                   onClick={goToNextLevel}
                   className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all cursor-pointer"

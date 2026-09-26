@@ -28,6 +28,7 @@ export class Player {
   meleeTimer: number = 0;
   shootTimer: number = 0;
   reloadTimer: number = 0;
+  isReloading: boolean = false;
   isAttacking: boolean = false;
   attackFrame: number = 0;
   comboCount: number = 0;
@@ -159,6 +160,7 @@ export class Player {
       if (this.comboTimer <= 0) this.comboCount = 0;
     }
 
+    this.checkReload(dt);
     this.updateParticles(dt);
     this.fsm.update();
 
@@ -200,9 +202,8 @@ export class Player {
       this.currentWeapon = this.currentWeapon === WeaponType.MELEE ? WeaponType.RANGED : WeaponType.MELEE;
     }
 
-    if (input.reload && this.stats.currentAmmo < this.stats.maxAmmo && this.reloadTimer <= 0) {
-      this.reloadTimer = this.stats.reloadTime;
-    }
+    // Перезарядка запускается только через reload() из GameEngine
+    // Не устанавливаем reloadTimer здесь, чтобы reload() мог сработать
 
     if (input.attackPressed && this.meleeTimer <= 0 && this.shootTimer <= 0) {
       this.isAttacking = true;
@@ -458,10 +459,15 @@ export class Player {
   reload(): void {
     if (this.reloadTimer <= 0 && this.stats.currentAmmo < this.stats.maxAmmo) {
       this.reloadTimer = this.stats.reloadTime;
-      setTimeout(() => {
-        this.stats.currentAmmo = this.stats.maxAmmo;
-        if (this.onAmmoChange) this.onAmmoChange(this.stats.currentAmmo, this.stats.maxAmmo);
-      }, this.stats.reloadTime * 1000);
+      this.isReloading = true;
+    }
+  }
+  
+  private checkReload(dt: number): void {
+    if (this.isReloading && this.reloadTimer <= 0) {
+      this.stats.currentAmmo = this.stats.maxAmmo;
+      this.isReloading = false;
+      if (this.onAmmoChange) this.onAmmoChange(this.stats.currentAmmo, this.stats.maxAmmo);
     }
   }
 

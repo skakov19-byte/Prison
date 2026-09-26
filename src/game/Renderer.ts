@@ -5,7 +5,7 @@
 import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { Bullet, Particle, Platform, PlayerState, WeaponType, EnemyType } from './types';
-import { LevelData } from './Level';
+import { LevelData, Pit } from './Level';
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
@@ -48,6 +48,10 @@ export class Renderer {
 
     this.renderLadders(level.ladders);
     this.renderPlatforms(level.platforms);
+    
+    if (level.pits) {
+      this.renderPits(level.pits);
+    }
 
     if (level.exitDoor) {
       this.renderExitDoor(level.exitDoor);
@@ -324,6 +328,68 @@ export class Renderer {
     }
   }
 
+  private renderPits(pits: Pit[]): void {
+    const ctx = this.ctx;
+    
+    for (const pit of pits) {
+      // Тёмная бездна
+      const pitGradient = ctx.createLinearGradient(pit.x, pit.y, pit.x, pit.y + pit.height);
+      pitGradient.addColorStop(0, '#000000');
+      pitGradient.addColorStop(0.5, '#1a0000');
+      pitGradient.addColorStop(1, '#000000');
+      ctx.fillStyle = pitGradient;
+      ctx.fillRect(pit.x, pit.y, pit.width, pit.height);
+      
+      // Красное свечение снизу (лава/опасность)
+      const glowGradient = ctx.createRadialGradient(
+        pit.x + pit.width / 2, pit.y + pit.height, 0,
+        pit.x + pit.width / 2, pit.y + pit.height, pit.width / 2
+      );
+      glowGradient.addColorStop(0, 'rgba(255, 50, 0, 0.6)');
+      glowGradient.addColorStop(0.5, 'rgba(255, 100, 0, 0.3)');
+      glowGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+      ctx.fillStyle = glowGradient;
+      ctx.fillRect(pit.x - 20, pit.y, pit.width + 40, pit.height + 30);
+      
+      // Пульсирующие языки пламени
+      const time = Date.now() * 0.005;
+      for (let i = 0; i < 5; i++) {
+        const flameX = pit.x + (pit.width / 5) * i + 10;
+        const flameHeight = 15 + Math.sin(time + i) * 8;
+        
+        const flameGradient = ctx.createLinearGradient(flameX, pit.y + pit.height, flameX, pit.y + pit.height - flameHeight);
+        flameGradient.addColorStop(0, 'rgba(255, 100, 0, 0.8)');
+        flameGradient.addColorStop(0.5, 'rgba(255, 200, 0, 0.6)');
+        flameGradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+        ctx.fillStyle = flameGradient;
+        
+        ctx.beginPath();
+        ctx.moveTo(flameX, pit.y + pit.height);
+        ctx.quadraticCurveTo(flameX + 5, pit.y + pit.height - flameHeight / 2, flameX + 3, pit.y + pit.height - flameHeight);
+        ctx.quadraticCurveTo(flameX + 8, pit.y + pit.height - flameHeight / 2, flameX + 10, pit.y + pit.height);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      // Опасные шипы по краям
+      ctx.fillStyle = '#333333';
+      for (let sx = pit.x; sx < pit.x + pit.width; sx += 15) {
+        ctx.beginPath();
+        ctx.moveTo(sx, pit.y);
+        ctx.lineTo(sx + 7, pit.y - 8);
+        ctx.lineTo(sx + 14, pit.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      // Предупреждающий знак
+      ctx.fillStyle = 'rgba(255, 255, 0, 0.8)';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚠', pit.x + pit.width / 2, pit.y - 12);
+    }
+  }
+
   private renderExitDoor(door: { x: number; y: number; width: number; height: number }): void {
     const ctx = this.ctx;
     const pulse = Math.sin(Date.now() * 0.005) * 0.3 + 0.7;
@@ -593,9 +659,10 @@ export class Renderer {
     ctx.fill();
 
     const isMelee = stats.type === EnemyType.MELEE;
-    const mainColor = isMelee ? '#dd4444' : '#4477dd';
-    const darkColor = isMelee ? '#991111' : '#112299';
-    const accentColor = isMelee ? '#ff6666' : '#6699ff';
+    const isFlying = stats.type === EnemyType.FLYING;
+    const mainColor = isMelee ? '#dd4444' : isFlying ? '#dd44dd' : '#4477dd';
+    const darkColor = isMelee ? '#991111' : isFlying ? '#991199' : '#112299';
+    const accentColor = isMelee ? '#ff6666' : isFlying ? '#ff66ff' : '#6699ff';
 
     // Тело с градиентом
     const bodyGradient = ctx.createLinearGradient(x, y, x, y + height);
@@ -673,6 +740,31 @@ export class Renderer {
       ctx.fill();
     }
 
+    // Крылья для летающих врагов
+    if (isFlying) {
+      const wingFlap = Math.sin(enemy.animTimer * 10) * 0.3;
+      ctx.save();
+      
+      // Левое крыло
+      ctx.fillStyle = accentColor;
+      ctx.beginPath();
+      ctx.moveTo(x + 5, y + 10);
+      ctx.quadraticCurveTo(x - 10, y + 5 + wingFlap * 10, x - 5, y + 20);
+      ctx.quadraticCurveTo(x, y + 15, x + 5, y + 15);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Правое крыло
+      ctx.beginPath();
+      ctx.moveTo(x + width - 5, y + 10);
+      ctx.quadraticCurveTo(x + width + 10, y + 5 + wingFlap * 10, x + width + 5, y + 20);
+      ctx.quadraticCurveTo(x + width, y + 15, x + width - 5, y + 15);
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.restore();
+    }
+
     // Оружие
     if (isMelee) {
       // Топор/меч
@@ -707,8 +799,8 @@ export class Renderer {
         ctx.fillStyle = '#8B4513';
         ctx.fillRect(weaponX - 4, y + height / 2 - 3, 4, 6);
       }
-    } else {
-      // Винтовка/пистолет
+    } else if (!isFlying) {
+      // Винтовка/пистолет (только для наземных стрелков)
       const gunX = facingRight ? x + width : x - 16;
       
       // Корпус

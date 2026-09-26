@@ -4,12 +4,21 @@
 
 import { Platform, EnemyStats, EnemyType, Vector2 } from './types';
 
+export interface Pit {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  damage: number;
+}
+
 export interface LevelData {
   platforms: Platform[];
   ladders: { x: number; y: number; width: number; height: number }[];
   enemies: EnemyStats[];
   playerSpawn: Vector2;
   exitDoor?: { x: number; y: number; width: number; height: number };
+  pits: Pit[];
   width: number;
   height: number;
   bgColor: string;
@@ -91,12 +100,18 @@ export function createLevel1(): LevelData {
     },
   ];
 
+  const pits: Pit[] = [
+    { x: 700, y: 700, width: 80, height: 40, damage: 30 },
+    { x: 1300, y: 700, width: 100, height: 40, damage: 30 },
+  ];
+
   return {
     platforms,
     ladders,
     enemies,
     playerSpawn: { x: 50, y: 650 },
     exitDoor: { x: 1500, y: 140, width: 40, height: 60 },
+    pits,
     width: 2000,
     height: 740,
     bgColor: '#0a0a1a',
@@ -210,12 +225,18 @@ export function createLevel2(): LevelData {
     },
   ];
 
+  const pits: Pit[] = [
+    { x: 300, y: 800, width: 80, height: 40, damage: 40 },
+    { x: 900, y: 800, width: 80, height: 40, damage: 40 },
+  ];
+
   return {
     platforms,
     ladders,
     enemies,
     playerSpawn: { x: 50, y: 750 },
     exitDoor: { x: 530, y: 20, width: 40, height: 60 },
+    pits,
     width: 1600,
     height: 840,
     bgColor: '#0a1a0a',
@@ -354,16 +375,298 @@ export function createLevel3(): LevelData {
     },
   ];
 
+  const pits: Pit[] = [
+    { x: 500, y: 900, width: 80, height: 40, damage: 50 },
+    { x: 1100, y: 900, width: 80, height: 40, damage: 50 },
+    { x: 1700, y: 900, width: 80, height: 40, damage: 50 },
+  ];
+
   return {
     platforms,
     ladders,
     enemies,
     playerSpawn: { x: 50, y: 850 },
     exitDoor: { x: 1950, y: 90, width: 40, height: 60 },
+    pits,
     width: 2400,
     height: 940,
     bgColor: '#1a0a0a',
     name: 'Кровавый Лабиринт',
+  };
+}
+
+// Уровень 4: Небесная крепость с летающими врагами
+export function createLevel4(): LevelData {
+  const platforms: Platform[] = [
+    // Пол с пропастями
+    { rect: { x: 0, y: 700, width: 400, height: 40 } },
+    { rect: { x: 550, y: 700, width: 300, height: 40 } },
+    { rect: { x: 1000, y: 700, width: 400, height: 40 } },
+    { rect: { x: 1550, y: 700, width: 450, height: 40 } },
+    
+    // Парящие платформы
+    { rect: { x: 150, y: 550, width: 120, height: 20 } },
+    { rect: { x: 350, y: 450, width: 120, height: 20 } },
+    { rect: { x: 550, y: 350, width: 120, height: 20 } },
+    { rect: { x: 750, y: 250, width: 150, height: 20 } },
+    { rect: { x: 1000, y: 350, width: 120, height: 20 } },
+    { rect: { x: 1200, y: 450, width: 120, height: 20 } },
+    { rect: { x: 1400, y: 550, width: 120, height: 20 } },
+    { rect: { x: 1650, y: 450, width: 150, height: 20 } },
+    { rect: { x: 1850, y: 300, width: 150, height: 20 } },
+    
+    // Стены
+    { rect: { x: 0, y: 0, width: 20, height: 740 } },
+    { rect: { x: 1980, y: 0, width: 20, height: 740 } },
+    
+    // Проходные платформы
+    { rect: { x: 450, y: 600, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 900, y: 550, width: 80, height: 15 }, isPassThrough: true },
+  ];
+
+  const ladders = [
+    { x: 200, y: 450, width: 30, height: 250 },
+    { x: 1100, y: 350, width: 30, height: 350 },
+    { x: 1700, y: 300, width: 30, height: 400 },
+  ];
+
+  const enemies: EnemyStats[] = [
+    // Летающие враги
+    {
+      maxHealth: 25,
+      health: 25,
+      damage: 12,
+      moveSpeed: 100,
+      detectionRange: 350,
+      attackRange: 280,
+      attackCooldown: 1.0,
+      patrolPoints: [{ x: 300, y: 250 }, { x: 600, y: 250 }],
+      type: EnemyType.FLYING,
+      goldDrop: 20,
+    },
+    {
+      maxHealth: 25,
+      health: 25,
+      damage: 12,
+      moveSpeed: 100,
+      detectionRange: 350,
+      attackRange: 280,
+      attackCooldown: 1.0,
+      patrolPoints: [{ x: 900, y: 200 }, { x: 1200, y: 200 }],
+      type: EnemyType.FLYING,
+      goldDrop: 20,
+    },
+    {
+      maxHealth: 30,
+      health: 30,
+      damage: 15,
+      moveSpeed: 120,
+      detectionRange: 400,
+      attackRange: 300,
+      attackCooldown: 0.8,
+      patrolPoints: [{ x: 1500, y: 180 }, { x: 1800, y: 180 }],
+      type: EnemyType.FLYING,
+      goldDrop: 25,
+    },
+    // Наземные враги
+    {
+      maxHealth: 35,
+      health: 35,
+      damage: 14,
+      moveSpeed: 90,
+      detectionRange: 220,
+      attackRange: 45,
+      attackCooldown: 0.9,
+      patrolPoints: [{ x: 100, y: 656 }, { x: 350, y: 656 }],
+      type: EnemyType.MELEE,
+      goldDrop: 15,
+    },
+    {
+      maxHealth: 30,
+      health: 30,
+      damage: 12,
+      moveSpeed: 70,
+      detectionRange: 320,
+      attackRange: 280,
+      attackCooldown: 1.2,
+      patrolPoints: [{ x: 1050, y: 656 }, { x: 1350, y: 656 }],
+      type: EnemyType.RANGED,
+      goldDrop: 20,
+    },
+  ];
+
+  const pits: Pit[] = [
+    { x: 400, y: 700, width: 150, height: 40, damage: 100 },
+    { x: 850, y: 700, width: 150, height: 40, damage: 100 },
+    { x: 1400, y: 700, width: 150, height: 40, damage: 100 },
+  ];
+
+  return {
+    platforms,
+    ladders,
+    enemies,
+    playerSpawn: { x: 50, y: 650 },
+    exitDoor: { x: 1900, y: 240, width: 40, height: 60 },
+    pits,
+    width: 2000,
+    height: 740,
+    bgColor: '#0a1a2a',
+    name: 'Небесная Крепость',
+  };
+}
+
+// Уровень 5: Адская Бездна - финальный уровень
+export function createLevel5(): LevelData {
+  const platforms: Platform[] = [
+    // Пол с множеством пропастей
+    { rect: { x: 0, y: 800, width: 300, height: 40 } },
+    { rect: { x: 450, y: 800, width: 200, height: 40 } },
+    { rect: { x: 800, y: 800, width: 250, height: 40 } },
+    { rect: { x: 1200, y: 800, width: 200, height: 40 } },
+    { rect: { x: 1550, y: 800, width: 250, height: 40 } },
+    { rect: { x: 1950, y: 800, width: 350, height: 40 } },
+    
+    // Множество платформ разной высоты
+    { rect: { x: 100, y: 650, width: 150, height: 20 } },
+    { rect: { x: 300, y: 550, width: 120, height: 20 } },
+    { rect: { x: 500, y: 450, width: 120, height: 20 } },
+    { rect: { x: 700, y: 350, width: 150, height: 20 } },
+    { rect: { x: 950, y: 450, width: 120, height: 20 } },
+    { rect: { x: 1150, y: 550, width: 120, height: 20 } },
+    { rect: { x: 1350, y: 650, width: 150, height: 20 } },
+    { rect: { x: 1550, y: 550, width: 120, height: 20 } },
+    { rect: { x: 1750, y: 450, width: 150, height: 20 } },
+    { rect: { x: 1950, y: 350, width: 150, height: 20 } },
+    { rect: { x: 2100, y: 250, width: 200, height: 20 } },
+    
+    // Стены
+    { rect: { x: 0, y: 0, width: 20, height: 840 } },
+    { rect: { x: 2280, y: 0, width: 20, height: 840 } },
+    
+    // Проходные платформы
+    { rect: { x: 200, y: 750, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 650, y: 700, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 1050, y: 750, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 1450, y: 750, width: 80, height: 15 }, isPassThrough: true },
+  ];
+
+  const ladders = [
+    { x: 150, y: 550, width: 30, height: 250 },
+    { x: 550, y: 350, width: 30, height: 450 },
+    { x: 1000, y: 350, width: 30, height: 450 },
+    { x: 1600, y: 450, width: 30, height: 350 },
+    { x: 2000, y: 250, width: 30, height: 550 },
+  ];
+
+  const enemies: EnemyStats[] = [
+    // Летающие враги
+    {
+      maxHealth: 35,
+      health: 35,
+      damage: 16,
+      moveSpeed: 130,
+      detectionRange: 400,
+      attackRange: 320,
+      attackCooldown: 0.7,
+      patrolPoints: [{ x: 400, y: 200 }, { x: 800, y: 200 }],
+      type: EnemyType.FLYING,
+      goldDrop: 30,
+    },
+    {
+      maxHealth: 40,
+      health: 40,
+      damage: 18,
+      moveSpeed: 140,
+      detectionRange: 450,
+      attackRange: 350,
+      attackCooldown: 0.6,
+      patrolPoints: [{ x: 1200, y: 180 }, { x: 1700, y: 180 }],
+      type: EnemyType.FLYING,
+      goldDrop: 35,
+    },
+    // Наземные враги
+    {
+      maxHealth: 45,
+      health: 45,
+      damage: 18,
+      moveSpeed: 110,
+      detectionRange: 250,
+      attackRange: 55,
+      attackCooldown: 0.7,
+      patrolPoints: [{ x: 50, y: 756 }, { x: 250, y: 756 }],
+      type: EnemyType.MELEE,
+      goldDrop: 25,
+    },
+    {
+      maxHealth: 40,
+      health: 40,
+      damage: 16,
+      moveSpeed: 80,
+      detectionRange: 350,
+      attackRange: 300,
+      attackCooldown: 1.0,
+      patrolPoints: [{ x: 850, y: 756 }, { x: 1000, y: 756 }],
+      type: EnemyType.RANGED,
+      goldDrop: 30,
+    },
+    {
+      maxHealth: 50,
+      health: 50,
+      damage: 20,
+      moveSpeed: 120,
+      detectionRange: 280,
+      attackRange: 60,
+      attackCooldown: 0.6,
+      patrolPoints: [{ x: 1250, y: 756 }, { x: 1400, y: 756 }],
+      type: EnemyType.MELEE,
+      goldDrop: 35,
+    },
+    {
+      maxHealth: 45,
+      health: 45,
+      damage: 18,
+      moveSpeed: 90,
+      detectionRange: 380,
+      attackRange: 320,
+      attackCooldown: 0.9,
+      patrolPoints: [{ x: 1600, y: 756 }, { x: 1750, y: 756 }],
+      type: EnemyType.RANGED,
+      goldDrop: 30,
+    },
+    // Босс - летающий
+    {
+      maxHealth: 80,
+      health: 80,
+      damage: 25,
+      moveSpeed: 150,
+      detectionRange: 500,
+      attackRange: 400,
+      attackCooldown: 0.5,
+      patrolPoints: [{ x: 1900, y: 150 }, { x: 2200, y: 150 }],
+      type: EnemyType.FLYING,
+      goldDrop: 100,
+    },
+  ];
+
+  const pits: Pit[] = [
+    { x: 300, y: 800, width: 150, height: 40, damage: 100 },
+    { x: 650, y: 800, width: 150, height: 40, damage: 100 },
+    { x: 1050, y: 800, width: 150, height: 40, damage: 100 },
+    { x: 1400, y: 800, width: 150, height: 40, damage: 100 },
+    { x: 1800, y: 800, width: 150, height: 40, damage: 100 },
+  ];
+
+  return {
+    platforms,
+    ladders,
+    enemies,
+    playerSpawn: { x: 50, y: 750 },
+    exitDoor: { x: 2150, y: 190, width: 40, height: 60 },
+    pits,
+    width: 2300,
+    height: 840,
+    bgColor: '#2a0a0a',
+    name: 'Адская Бездна',
   };
 }
 
@@ -376,6 +679,10 @@ export function getLevel(levelNumber: number): LevelData {
       return createLevel2();
     case 3:
       return createLevel3();
+    case 4:
+      return createLevel4();
+    case 5:
+      return createLevel5();
     default:
       return createLevel1();
   }

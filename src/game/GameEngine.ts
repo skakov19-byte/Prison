@@ -205,12 +205,13 @@ export class GameEngine {
     this.player.update(dt, this.input, this.level.platforms, this.level.ladders, this.level.width, this.level.height);
 
     for (const enemy of this.enemies) {
-      enemy.update(dt, this.player.x, this.player.y, this.level.platforms, this.level.height);
+      enemy.update(dt, this.player.x, this.player.y, this.level.platforms, this.level.height, this.level.width);
     }
 
     this.updateBullets(dt);
     this.checkCombat();
     this.checkExit();
+    this.checkPits();
 
     this.callbacks.onStateChange(this.player.fsm.getCurrentState());
     this.callbacks.onWeaponChange(this.player.currentWeapon);
@@ -322,6 +323,26 @@ export class GameEngine {
 
     if (this.rectsOverlap(playerHitbox, door)) {
       this.callbacks.onLevelComplete();
+    }
+  }
+  
+  private checkPits(): void {
+    if (!this.level.pits || this.level.pits.length === 0) return;
+    
+    const playerHitbox = this.player.getHitbox();
+    const playerCenterX = playerHitbox.x + playerHitbox.width / 2;
+    const playerBottom = playerHitbox.y + playerHitbox.height;
+    
+    for (const pit of this.level.pits) {
+      // Проверяем, упал ли игрок в яму
+      if (playerCenterX > pit.x && playerCenterX < pit.x + pit.width &&
+          playerBottom > pit.y) {
+        this.player.takeDamage(pit.damage);
+        // Отбрасываем игрока назад
+        this.player.vy = -300;
+        this.player.vx = this.player.x < pit.x + pit.width / 2 ? -200 : 200;
+        break;
+      }
     }
   }
 

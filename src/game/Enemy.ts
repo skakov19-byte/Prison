@@ -32,6 +32,10 @@ export class Enemy {
 
   animTimer: number = 0;
   animFrame: number = 0;
+  
+  flyTimer: number = 0;
+  baseY: number = 0;
+  levelWidth: number = 2000;
 
   constructor(stats: EnemyStats, bulletPool: ObjectPool) {
     this.stats = { ...stats };
@@ -58,8 +62,15 @@ export class Enemy {
 
   levelHeight: number = 740;
 
-  update(dt: number, playerX: number, playerY: number, platforms: Platform[], levelHeight?: number): void {
+  update(dt: number, playerX: number, playerY: number, platforms: Platform[], levelHeight?: number, levelWidth?: number): void {
     if (levelHeight) this.levelHeight = levelHeight;
+    if (levelWidth) this.levelWidth = levelWidth;
+    
+    // Инициализация базовой высоты для летающих врагов
+    if (this.stats.type === EnemyType.FLYING && this.baseY === 0) {
+      this.baseY = this.y;
+    }
+
     if (this.isDead) {
       this.deathTimer -= dt;
       this.updateParticles(dt);
@@ -83,52 +94,154 @@ export class Enemy {
 
     const playerDetected = dist < this.stats.detectionRange;
 
+    // Летающие враги имеют особую логику
+    if (this.stats.type === EnemyType.FLYING) {
+      this.updateFlying(dt, playerX, playerY, dist, playerDetected);
+    } else {
+      switch (this.state) {
+        case EnemyState.PATROL:
+          this.patrol(dt);
+          if (playerDetected) {
+            this.state = EnemyState.CHASE;
+          }
+          break;
+
+        case EnemyState.CHASE:
+          this.chase(dt, playerX);
+          if (dist < this.stats.attackRange && this.attackTimer <= 0) {
+            this.state = EnemyState.ATTACK;
+          }
+          if (!playerDetected && dist > this.stats.detectionRange * 1.5) {
+            this.state = EnemyState.PATROL;
+          }
+          break;
+
+        case EnemyState.ATTACK:
+          this.attack(dt, playerX, playerY);
+          if (dist > this.stats.attackRange * 1.2) {
+            this.state = EnemyState.CHASE;
+          }
+          break;
+
+        case EnemyState.HURT:
+          if (this.hurtTimer <= 0) {
+            this.state = playerDetected ? EnemyState.CHASE : EnemyState.PATROL;
+          }
+          break;
+      }
+
+      if (!this.isGrounded) {
+        this.vy += GRAVITY * dt;
+        if (this.vy > 600) this.vy = 600;
+      }
+
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+
+      this.handleCollisions(platforms);
+
+      if (this.y > this.levelHeight) {
+        this.y = this.levelHeight - 100;
+        this.vy = 0;
+      }
+    }
+  }
+  
+  private updateFlying(dt: number, playerX: number, playerY: number, dist: number, playerDetected: boolean): void {
+    this.flyTimer += dt;
+    
     switch (this.state) {
-      case EnemyState.PATROL:
-        this.patrol(dt);
+      case EnemyState.PATROL: {
+        // Летаем по синусоиде между точками патруля
+        const patrolTarget = this.stats.patrolPoints[this.currentPatrolIndex];
+        const pdx = patrolTarget.x - this.x;
+        
+        if (Math.abs(pdx) < 10) {
+          this.vx = 0;
+          this.patrolWaitTimer += dt;
+          if (this.patrolWaitTimer > 1.5) {
+            this.patrolWaitTimer = 0;
+            this.currentPatrolIndex = (this.currentPatrolIndex + 1) % this.stats.patrolPoints.length;
+          }
+        } else {
+          this.vx = Math.sign(pdx) * this.stats.moveSpeed * 0.6;
+          this.facingRight = pdx > 0;
+        }
+        
+        // Синусоидальное движение по вертикали
+        this.y = this.baseY + Math.sin(this.flyTimer * 2) * 20;
+        
         if (playerDetected) {
           this.state = EnemyState.CHASE;
         }
         break;
+      }
 
-      case EnemyState.CHASE:
-        this.chase(dt, playerX);
+      case EnemyState.CHASE: {
+        // Преследуем игрока, оставаясь на высоте
+        const cdx = playerX - this.x;
+        this.facingRight = cdx > 0;
+        
+        // Держим дистанцию
+        if (dist < 120) {
+          this.vx = -Math.sign(cdx) * this.stats.moveSpeed * 0.5;
+        } else if (dist > this.stats.attackRange * 0.7) {
+          this.vx = Math.sign(cdx) * this.stats.moveSpeed * 0.8;
+        } else {
+          this.vx *= 0.9;
+        }
+        
+        // Плавно приближаемся по вертикали к игроку, но выше
+        const targetY = playerY - 80;
+        const cdy = targetY - this.y;
+        this.y += Math.sign(cdy) * Math.min(Math.abs(cdy), 60) * dt;
+        
+        // Лёгкое покачивание
+        this.y += Math.sin(this.flyTimer * 3) * 0.5;
+        
         if (dist < this.stats.attackRange && this.attackTimer <= 0) {
           this.state = EnemyState.ATTACK;
         }
         if (!playerDetected && dist > this.stats.detectionRange * 1.5) {
           this.state = EnemyState.PATROL;
+          this.baseY = this.y;
         }
         break;
+      }
 
-      case EnemyState.ATTACK:
-        this.attack(dt, playerX, playerY);
-        if (dist > this.stats.attackRange * 1.2) {
+      case EnemyState.ATTACK: {
+        // Зависаем и атакуем
+        this.vx *= 0.85;
+        this.y += Math.sin(this.flyTimer * 4) * 0.3;
+        
+        if (this.attackTimer <= 0) {
+          this.shootAtPlayer(playerX, playerY);
+          this.attackTimer = this.stats.attackCooldown;
+        }
+        
+        if (dist > this.stats.attackRange * 1.3) {
           this.state = EnemyState.CHASE;
         }
         break;
+      }
 
-      case EnemyState.HURT:
+      case EnemyState.HURT: {
+        // Отлетаем при получении урона
+        this.vx = -this.vx * 0.5;
         if (this.hurtTimer <= 0) {
           this.state = playerDetected ? EnemyState.CHASE : EnemyState.PATROL;
         }
         break;
+      }
     }
-
-    if (!this.isGrounded) {
-      this.vy += GRAVITY * dt;
-      if (this.vy > 600) this.vy = 600;
-    }
-
+    
+    // Применяем горизонтальную скорость
     this.x += this.vx * dt;
-    this.y += this.vy * dt;
-
-    this.handleCollisions(platforms);
-
-    if (this.y > this.levelHeight) {
-      this.y = this.levelHeight - 100;
-      this.vy = 0;
-    }
+    
+    // Ограничение по границам уровня
+    if (this.x < 30) this.x = 30;
+    if (this.x > this.levelWidth - 30) this.x = this.levelWidth - 30;
+    if (this.y < 30) this.y = 30;
   }
 
   private patrol(dt: number): void {
