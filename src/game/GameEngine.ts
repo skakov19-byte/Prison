@@ -47,7 +47,7 @@ export class GameEngine {
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private keyupHandler: ((e: KeyboardEvent) => void) | null = null;
 
-  constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks, startLevel: number = 1) {
+  constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks, startLevel: number = 1, savedInventory: InventoryItem[] = []) {
     this.canvas = canvas;
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -82,6 +82,19 @@ export class GameEngine {
     this.player.hasRangedWeapon = this.currentLevelNumber > 3;
     if (!this.player.hasRangedWeapon) {
       this.player.currentWeapon = WeaponType.MELEE;
+    }
+
+    // Восстанавливаем инвентарь из сохранённого состояния
+    if (savedInventory.length > 0) {
+      for (const item of savedInventory) {
+        this.player.inventory.push(item);
+        if (item.type === ItemType.LOCKPICK) {
+          this.player.hasLockpick = true;
+        } else if (item.type === ItemType.BATON) {
+          this.player.hasBaton = true;
+          this.player.stats.meleeDamage = 25;
+        }
+      }
     }
 
     this.player.onHealthChange = callbacks.onHealthChange;

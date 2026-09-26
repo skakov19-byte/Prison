@@ -163,7 +163,7 @@ export default function App() {
           onDoorMessage: (msg: string) => showDoorMessage(msg),
           onItemPickup: (item: InventoryItem) => handleItemPickup(item),
           onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
-        }, currentLevel);
+        }, currentLevel, inventory);
 
         // Применяем улучшения из магазина
         const upgrades = getUpgrades();
@@ -242,6 +242,9 @@ export default function App() {
     // Устанавливаем флаг перехода
     isTransitioningRef.current = true;
     
+    // Сохраняем текущий инвентарь перед переходом
+    const savedInventory = [...inventory];
+    
     // Останавливаем текущий движок
     if (engineRef.current) {
       engineRef.current.stop();
@@ -252,18 +255,18 @@ export default function App() {
     const nextLevel = currentLevel + 1;
     setCurrentLevel(nextLevel);
     
-    // Сбрасываем здоровье и патроны
+    // Сбрасываем здоровье и патроны, но сохраняем инвентарь
     setHealth(100);
     setMaxHealth(100);
     setAmmo(12);
     setMaxAmmo(12);
     setKills(0);
-    setInventory([]);
+    // Инвентарь НЕ сбрасываем - он сохраняется между уровнями
     
     // Меняем screen чтобы меню victory пропало
     setScreen('playing');
     
-    // Создаем новый движок с новым уровнем
+    // Создаем новый движок с новым уровнем и сохранённым инвентарём
     setTimeout(() => {
       if (!canvasRef.current) return;
       
@@ -292,7 +295,7 @@ export default function App() {
           onDoorMessage: (msg: string) => showDoorMessage(msg),
           onItemPickup: (item: InventoryItem) => handleItemPickup(item),
           onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
-        }, nextLevel);
+        }, nextLevel, savedInventory);
 
         // Применяем улучшения из магазина
         const upgrades = getUpgrades();

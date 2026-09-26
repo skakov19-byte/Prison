@@ -403,9 +403,15 @@ export function createLevel3(): LevelData {
     // Пол
     { rect: { x: 0, y: 800, width: 2800, height: 40 } },
     
-    // Старт в центре - органичная центральная стена
-    { rect: { x: 1200, y: 180, width: 60, height: 620 } },
-    { rect: { x: 1180, y: 180, width: 100, height: 30 } }, // Верхушка
+    // Старт в центре - центральная стена (уменьшена)
+    { rect: { x: 1200, y: 400, width: 60, height: 400 } },
+    { rect: { x: 1180, y: 400, width: 100, height: 30 } }, // Верхушка
+    
+    // Платформы для обхода центральной стены
+    { rect: { x: 1280, y: 600, width: 80, height: 25 } }, // Справа (нижняя)
+    { rect: { x: 1280, y: 450, width: 80, height: 25 } }, // Справа (верхняя)
+    { rect: { x: 1100, y: 450, width: 80, height: 25 } }, // Слева (верхняя)
+    { rect: { x: 1100, y: 600, width: 80, height: 25 } }, // Слева (нижняя)
     
     // Левая часть (движение влево-вверх)
     { rect: { x: 100, y: 700, width: 250, height: 25 } },
@@ -415,11 +421,15 @@ export function createLevel3(): LevelData {
     { rect: { x: 200, y: 300, width: 180, height: 25 } },
     { rect: { x: 450, y: 200, width: 250, height: 25 } },
     
-    // Стена 2 - органичная (блокирует прямой путь)
-    { rect: { x: 700, y: 280, width: 50, height: 520 } },
-    { rect: { x: 680, y: 280, width: 90, height: 30 } }, // Верхушка
-    { rect: { x: 600, y: 400, width: 100, height: 25 } },
-    { rect: { x: 760, y: 350, width: 100, height: 25 } },
+    // Стена 2 - органичная (уменьшена)
+    { rect: { x: 700, y: 400, width: 50, height: 400 } },
+    { rect: { x: 680, y: 400, width: 90, height: 30 } }, // Верхушка
+    
+    // Платформы для обхода стены 2
+    { rect: { x: 780, y: 600, width: 80, height: 25 } }, // Справа (нижняя)
+    { rect: { x: 780, y: 450, width: 80, height: 25 } }, // Справа (верхняя)
+    { rect: { x: 600, y: 450, width: 80, height: 25 } }, // Слева (верхняя)
+    { rect: { x: 600, y: 600, width: 80, height: 25 } }, // Слева (нижняя)
     
     // Правая часть (движение вправо-вверх)
     { rect: { x: 1400, y: 700, width: 250, height: 25 } },
@@ -429,11 +439,15 @@ export function createLevel3(): LevelData {
     { rect: { x: 1500, y: 300, width: 180, height: 25 } },
     { rect: { x: 1750, y: 200, width: 250, height: 25 } },
     
-    // Стена 3 - органичная
-    { rect: { x: 2100, y: 230, width: 50, height: 570 } },
-    { rect: { x: 2080, y: 230, width: 90, height: 30 } }, // Верхушка
-    { rect: { x: 2000, y: 350, width: 100, height: 25 } },
-    { rect: { x: 2160, y: 300, width: 100, height: 25 } },
+    // Стена 3 - органичная (уменьшена)
+    { rect: { x: 2100, y: 400, width: 50, height: 400 } },
+    { rect: { x: 2080, y: 400, width: 90, height: 30 } }, // Верхушка
+    
+    // Платформы для обхода стены 3
+    { rect: { x: 2180, y: 600, width: 80, height: 25 } }, // Справа (нижняя)
+    { rect: { x: 2180, y: 450, width: 80, height: 25 } }, // Справа (верхняя)
+    { rect: { x: 2000, y: 450, width: 80, height: 25 } }, // Слева (верхняя)
+    { rect: { x: 2000, y: 600, width: 80, height: 25 } }, // Слева (нижняя)
     
     // Финальная секция
     { rect: { x: 2300, y: 600, width: 250, height: 25 } },
@@ -452,17 +466,29 @@ export function createLevel3(): LevelData {
   ];
 
   const ladders = [
+    // Лестницы для обхода центральной стены
+    { x: 1300, y: 450, width: 30, height: 150 }, // Справа
+    { x: 1120, y: 450, width: 30, height: 150 }, // Слева
+    
     // Левая часть
-    { x: 250, y: 300, width: 30, height: 500 },
-    { x: 500, y: 200, width: 30, height: 600 },
+    { x: 250, y: 300, width: 30, height: 400 },
+    { x: 500, y: 200, width: 30, height: 500 },
+    
+    // Лестницы для обхода стены 2
+    { x: 800, y: 450, width: 30, height: 150 }, // Справа
+    { x: 620, y: 450, width: 30, height: 150 }, // Слева
     
     // Правая часть
-    { x: 1550, y: 300, width: 30, height: 500 },
-    { x: 1800, y: 200, width: 30, height: 600 },
+    { x: 1550, y: 300, width: 30, height: 400 },
+    { x: 1800, y: 200, width: 30, height: 500 },
+    
+    // Лестницы для обхода стены 3
+    { x: 2200, y: 450, width: 30, height: 150 }, // Справа
+    { x: 2020, y: 450, width: 30, height: 150 }, // Слева
     
     // Финальная секция
-    { x: 2350, y: 400, width: 30, height: 400 },
-    { x: 2500, y: 300, width: 30, height: 500 },
+    { x: 2350, y: 400, width: 30, height: 200 },
+    { x: 2500, y: 300, width: 30, height: 300 },
   ];
 
   const enemies: EnemyStats[] = [
