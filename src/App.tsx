@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { GameEngine } from './game/GameEngine';
 import { PlayerState, WeaponType, InventoryItem, ItemType } from './game/types';
 
-type GameScreen = 'menu' | 'playing' | 'dead' | 'victory' | 'shop';
+import { IntroRenderer } from './game/IntroScene';
+
+type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop';
 
 interface ShopItem {
   id: string;
@@ -17,6 +19,7 @@ interface ShopItem {
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
+  const introRendererRef = useRef<IntroRenderer | null>(null);
   const isTransitioningRef = useRef(false);
 
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -81,7 +84,11 @@ export default function App() {
     setKills(0);
     setCurrentLevel(1);
     setInventory([]);
-    setScreen('playing');
+    setScreen('intro');
+  }, []);
+
+  const startIntro = useCallback(() => {
+    setScreen('intro');
   }, []);
 
   const showDoorMessage = (message: string) => {
@@ -190,7 +197,62 @@ export default function App() {
     };
   }, [screen]); // Убираем currentLevel из зависимостей
 
-  // Обработка Escape для паузы
+  // Рендеринг интро сцены
+  useEffect(() => {
+    if (screen !== 'intro') return;
+
+    const timer = setTimeout(() => {
+      if (!canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const introRenderer = new IntroRenderer(ctx, canvas.width, canvas.height);
+      introRenderer.start();
+      introRendererRef.current = introRenderer;
+
+      let lastTime = performance.now();
+      let animFrameId: number;
+
+      const renderLoop = (timestamp: number) => {
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        const isFinished = introRenderer.update(dt);
+        introRenderer.render();
+
+        if (isFinished) {
+          // Интро завершено, переходим к игре
+          setScreen('playing');
+          return;
+        }
+
+        animFrameId = requestAnimationFrame(renderLoop);
+      };
+
+      animFrameId = requestAnimationFrame(renderLoop);
+
+      // Возможность пропустить интро по клику
+      const skipIntro = () => {
+        cancelAnimationFrame(animFrameId);
+        setScreen('playing');
+      };
+
+      canvas.addEventListener('click', skipIntro);
+
+      return () => {
+        cancelAnimationFrame(animFrameId);
+        canvas.removeEventListener('click', skipIntro);
+      };
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [screen]);
+
+  // Обработка Escape для паузы и пропуска интро
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Escape') {
@@ -199,6 +261,10 @@ export default function App() {
         } else if (screen === 'shop') {
           closeShop();
         }
+      }
+      // Пропуск интро по Space или Enter
+      if (screen === 'intro' && (e.code === 'Space' || e.code === 'Enter')) {
+        setScreen('playing');
       }
     };
 
@@ -472,6 +538,26 @@ export default function App() {
             >
               ← Вернуться в игру
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== ИНТРО СЦЕНА ======
+  if (screen === 'intro') {
+    return (
+      <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="border-2 border-gray-700 rounded-lg shadow-2xl block cursor-pointer"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
+            <p className="text-gray-400 text-sm">Нажмите чтобы пропустить</p>
           </div>
         </div>
       </div>
