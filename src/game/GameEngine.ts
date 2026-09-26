@@ -8,6 +8,7 @@ import { Enemy } from './Enemy';
 import { ObjectPool } from './ObjectPool';
 import { Renderer } from './Renderer';
 import { LevelData, getLevel, Door, PickupZone } from './Level';
+import { createPlayerSpriteSheet } from './SpriteConfig';
 
 export interface GameCallbacks {
   onHealthChange: (health: number, maxHealth: number) => void;
@@ -78,6 +79,14 @@ export class GameEngine {
       this.level.playerSpawn.y,
       this.bulletPool
     );
+
+    // Инициализируем спрайт-лист для игрока
+    try {
+      const playerSpriteSheet = createPlayerSpriteSheet();
+      this.player.initSpriteSheet(playerSpriteSheet);
+    } catch (error) {
+      console.warn('Failed to load player sprite sheet, using fallback rendering:', error);
+    }
 
     // На первых 3 уровнях (тюрьма) нет огнестрельного оружия
     this.player.hasRangedWeapon = this.currentLevelNumber > 3;

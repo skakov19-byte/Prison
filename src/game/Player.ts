@@ -5,6 +5,7 @@
 import { PlayerState, WeaponType, InputState, PlayerStats, Vector2, Rect, Particle, Platform, ItemType, InventoryItem } from './types';
 import { StateMachine } from './StateMachine';
 import { ObjectPool } from './ObjectPool';
+import { SpriteSheet, AnimationController } from './SpriteSheet';
 
 const GRAVITY = 980;
 const MAX_FALL_SPEED = 600;
@@ -59,6 +60,10 @@ export class Player {
 
   animTimer: number = 0;
   animFrame: number = 0;
+
+  // Система спрайт-листов
+  spriteSheet: SpriteSheet | null = null;
+  animationController: AnimationController | null = null;
 
   constructor(x: number, y: number, bulletPool: ObjectPool) {
     this.x = x;
@@ -175,6 +180,7 @@ export class Player {
     this.checkReload(dt);
     this.updateParticles(dt);
     this.fsm.update();
+    this.updateAnimation(dt);
 
     const state = this.fsm.getCurrentState();
     this.handleInput(dt, input, state);
@@ -546,9 +552,57 @@ export class Player {
       this.isReloading = true;
     }
   }
-  
-  private checkReload(dt: number): void {
-    if (this.isReloading && this.reloadTimer <= 0) {
+
+  // Инициализация спрайт-листа
+  initSpriteSheet(spriteSheet: SpriteSheet): void {
+    this.spriteSheet = spriteSheet;
+    this.animationController = new AnimationController(spriteSheet);
+  }
+
+  // Обновление анимации на основе состояния
+  updateAnimation(dt: number): void {
+    if (!this.animationController) return;
+
+    const state = this.fsm.getCurrentState();
+    let animationName = 'idle';
+
+    // Выбираем анимацию на основе состояния
+    switch (state) {
+      case PlayerState.IDLE:
+        animationName = 'idle';
+        break;
+      case PlayerState.RUN:
+        animationName = 'run';
+        break;
+      case PlayerState.JUMP:
+        animationName = 'jump';
+        break;
+      case PlayerState.FALL:
+        animationName = 'fall';
+        break;
+      case PlayerState.CLIMB:
+        animationName = 'climb';
+        break;
+      case PlayerState.MELEE_ATTACK:
+        animationName = 'attack_melee';
+        break;
+      case PlayerState.SHOOT:
+        animationName = 'attack_shoot';
+        break;
+      case PlayerState.HURT:
+        animationName = 'hurt';
+        break;
+      case PlayerState.DEAD:
+        animationName = 'death';
+        break;
+    }
+
+    this.animationController.setAnimation(animationName);
+    this.animationController.setScale(this.facingRight ? 1 : -1, 1);
+    this.animationController.update(dt);
+  }
+
+  private checkReload(dt: number): void {    if (this.isReloading && this.reloadTimer <= 0) {
       this.stats.currentAmmo = this.stats.maxAmmo;
       this.isReloading = false;
       if (this.onAmmoChange) this.onAmmoChange(this.stats.currentAmmo, this.stats.maxAmmo);

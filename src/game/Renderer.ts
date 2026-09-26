@@ -737,200 +737,224 @@ export class Renderer {
       ctx.globalAlpha = 0.5;
     }
 
-    // Тень под персонажем
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    ctx.beginPath();
-    ctx.ellipse(x + width / 2, y + height + 3, width / 2, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Тело с детализацией
-    const bodyGradient = ctx.createLinearGradient(x, y, x, y + height);
-    bodyGradient.addColorStop(0, '#ff9933');
-    bodyGradient.addColorStop(0.3, '#ff7700');
-    bodyGradient.addColorStop(0.7, '#cc5500');
-    bodyGradient.addColorStop(1, '#aa4400');
-    ctx.fillStyle = bodyGradient;
-    ctx.beginPath();
-    ctx.roundRect(x + 4, y + 10, width - 8, height - 14, 4);
-    ctx.fill();
-
-    // Складки на робе
-    ctx.strokeStyle = 'rgba(150, 60, 0, 0.5)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x + 8, y + 20);
-    ctx.lineTo(x + 10, y + 35);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x + width - 8, y + 20);
-    ctx.lineTo(x + width - 10, y + 35);
-    ctx.stroke();
-
-    // Полосы на робе
-    ctx.fillStyle = '#aa4400';
-    ctx.fillRect(x + 6, y + 15, width - 12, 3);
-    ctx.fillRect(x + 6, y + 30, width - 12, 3);
-
-    // Номер
-    ctx.fillStyle = '#000000';
-    ctx.font = 'bold 7px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('#247', x + width / 2, y + 24);
-
-    // Голова с объёмом
-    const headGradient = ctx.createRadialGradient(x + width / 2 - 3, y + 3, 2, x + width / 2, y + 5, 10);
-    headGradient.addColorStop(0, '#ffcc99');
-    headGradient.addColorStop(0.7, '#f4a460');
-    headGradient.addColorStop(1, '#cc8844');
-    ctx.fillStyle = headGradient;
-    ctx.beginPath();
-    ctx.arc(x + width / 2, y + 5, 10, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Волосы
-    ctx.fillStyle = '#332211';
-    ctx.beginPath();
-    ctx.arc(x + width / 2, y + 2, 10, Math.PI, 0);
-    ctx.fill();
-
-    // Глаза с деталями
-    const eyeX = facingRight ? x + width - 10 : x + 6;
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(eyeX + 2, y + 5, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#000000';
-    ctx.beginPath();
-    ctx.arc(eyeX + (facingRight ? 3 : 1), y + 5, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Ноги с анимацией
-    const legGradient = ctx.createLinearGradient(x, y + height - 12, x, y + height);
-    legGradient.addColorStop(0, '#554433');
-    legGradient.addColorStop(1, '#332211');
-    ctx.fillStyle = legGradient;
-
-    if (player.fsm.getCurrentState() === PlayerState.RUN) {
-      const legOffset = Math.sin(player.animFrame * Math.PI / 2) * 6;
+    // Если есть спрайт-лист, используем его
+    if (player.animationController && player.spriteSheet) {
+      // Тень под персонажем
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.beginPath();
-      ctx.roundRect(x + 5, y + height - 12, 8, 12 + legOffset, 3);
+      ctx.ellipse(x + width / 2, y + height + 3, width / 2, 5, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.beginPath();
-      ctx.roundRect(x + width - 13, y + height - 12, 8, 12 - legOffset, 3);
-      ctx.fill();
+
+      // Рисуем спрайт
+      ctx.save();
+      
+      // Если персонаж повёрнут влево, зеркалим спрайт
+      if (!facingRight) {
+        ctx.translate(x + width, y);
+        ctx.scale(-1, 1);
+        player.animationController.draw(ctx, 0, 0);
+      } else {
+        player.animationController.draw(ctx, x, y);
+      }
+      
+      ctx.restore();
     } else {
+      // Fallback: процедурная отрисовка (старый код)
+      // Тень под персонажем
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.beginPath();
-      ctx.roundRect(x + 5, y + height - 12, 8, 12, 3);
+      ctx.ellipse(x + width / 2, y + height + 3, width / 2, 5, 0, 0, Math.PI * 2);
       ctx.fill();
+
+      // Тело с детализацией
+      const bodyGradient = ctx.createLinearGradient(x, y, x, y + height);
+      bodyGradient.addColorStop(0, '#ff9933');
+      bodyGradient.addColorStop(0.3, '#ff7700');
+      bodyGradient.addColorStop(0.7, '#cc5500');
+      bodyGradient.addColorStop(1, '#aa4400');
+      ctx.fillStyle = bodyGradient;
       ctx.beginPath();
-      ctx.roundRect(x + width - 13, y + height - 12, 8, 12, 3);
+      ctx.roundRect(x + 4, y + 10, width - 8, height - 14, 4);
       ctx.fill();
-    }
 
-    // Оружие
-    if (player.currentWeapon === WeaponType.MELEE) {
-      const weaponX = facingRight ? x + width : x - 25;
+      // Складки на робе
+      ctx.strokeStyle = 'rgba(150, 60, 0, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x + 8, y + 20);
+      ctx.lineTo(x + 10, y + 35);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + width - 8, y + 20);
+      ctx.lineTo(x + width - 10, y + 35);
+      ctx.stroke();
 
-      if (player.hasBaton) {
-        if (player.isAttacking) {
-          const swingAngle = player.comboCount === 2 ? 0.6 : 0.4;
+      // Полосы на робе
+      ctx.fillStyle = '#aa4400';
+      ctx.fillRect(x + 6, y + 15, width - 12, 3);
+      ctx.fillRect(x + 6, y + 30, width - 12, 3);
+
+      // Номер
+      ctx.fillStyle = '#000000';
+      ctx.font = 'bold 7px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('#247', x + width / 2, y + 24);
+
+      // Голова с объёмом
+      const headGradient = ctx.createRadialGradient(x + width / 2 - 3, y + 3, 2, x + width / 2, y + 5, 10);
+      headGradient.addColorStop(0, '#ffcc99');
+      headGradient.addColorStop(0.7, '#f4a460');
+      headGradient.addColorStop(1, '#cc8844');
+      ctx.fillStyle = headGradient;
+      ctx.beginPath();
+      ctx.arc(x + width / 2, y + 5, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Волосы
+      ctx.fillStyle = '#332211';
+      ctx.beginPath();
+      ctx.arc(x + width / 2, y + 2, 10, Math.PI, 0);
+      ctx.fill();
+
+      // Глаза с деталями
+      const eyeX = facingRight ? x + width - 10 : x + 6;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(eyeX + 2, y + 5, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(eyeX + (facingRight ? 3 : 1), y + 5, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ноги с анимацией
+      const legGradient = ctx.createLinearGradient(x, y + height - 12, x, y + height);
+      legGradient.addColorStop(0, '#554433');
+      legGradient.addColorStop(1, '#332211');
+      ctx.fillStyle = legGradient;
+
+      if (player.fsm.getCurrentState() === PlayerState.RUN) {
+        const legOffset = Math.sin(player.animFrame * Math.PI / 2) * 6;
+        ctx.beginPath();
+        ctx.roundRect(x + 5, y + height - 12, 8, 12 + legOffset, 3);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(x + width - 13, y + height - 12, 8, 12 - legOffset, 3);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.roundRect(x + 5, y + height - 12, 8, 12, 3);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(x + width - 13, y + height - 12, 8, 12, 3);
+        ctx.fill();
+      }
+
+      // Оружие
+      if (player.currentWeapon === WeaponType.MELEE) {
+        const weaponX = facingRight ? x + width : x - 25;
+
+        if (player.hasBaton) {
+          if (player.isAttacking) {
+            const swingAngle = player.comboCount === 2 ? 0.6 : 0.4;
+            ctx.save();
+            ctx.translate(weaponX + 10, y + height / 2);
+            ctx.rotate((facingRight ? 0.8 : -0.8) + swingAngle);
+
+            // Дубинка с градиентом
+            const batonGradient = ctx.createLinearGradient(0, -4, 0, 4);
+            batonGradient.addColorStop(0, '#6b5240');
+            batonGradient.addColorStop(0.5, '#4a3728');
+            batonGradient.addColorStop(1, '#3a2718');
+            ctx.fillStyle = batonGradient;
+            ctx.beginPath();
+            ctx.roundRect(0, -4, 25, 8, 3);
+            ctx.fill();
+
+            // Рукоять
+            ctx.fillStyle = '#2a1f18';
+            ctx.fillRect(-8, -5, 8, 10);
+
+            // Эффект удара
+            if (player.comboCount === 2) {
+              ctx.strokeStyle = 'rgba(255, 150, 0, 0.7)';
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              ctx.arc(12, 0, 15, 0, Math.PI);
+              ctx.stroke();
+            }
+
+            ctx.restore();
+          } else {
+            ctx.fillStyle = '#5a4a38';
+            ctx.fillRect(weaponX, y + height / 2 - 3, 22, 6);
+            ctx.fillStyle = '#3a2a18';
+            ctx.fillRect(weaponX - 6, y + height / 2 - 4, 6, 8);
+          }
+        } else {
+          if (player.isAttacking) {
+            const punchOffset = player.comboCount === 2 ? 10 : 6;
+            ctx.fillStyle = '#ffcc99';
+            const fistX = facingRight ? x + width + punchOffset : x - punchOffset - 10;
+            ctx.beginPath();
+            ctx.roundRect(fistX, y + height / 2 - 6, 10, 12, 4);
+            ctx.fill();
+
+            if (player.comboCount === 2) {
+              ctx.strokeStyle = 'rgba(255, 200, 0, 0.7)';
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              ctx.arc(fistX + 5, y + height / 2, 10, 0, Math.PI);
+              ctx.stroke();
+            }
+          }
+        }
+      } else {
+        if (player.aimingUp) {
+          const gunCenterX = x + width / 2;
+          const gunBaseY = y + 5;
+
           ctx.save();
-          ctx.translate(weaponX + 10, y + height / 2);
-          ctx.rotate((facingRight ? 0.8 : -0.8) + swingAngle);
+          ctx.translate(gunCenterX, gunBaseY);
 
-          // Дубинка с градиентом
-          const batonGradient = ctx.createLinearGradient(0, -4, 0, 4);
-          batonGradient.addColorStop(0, '#6b5240');
-          batonGradient.addColorStop(0.5, '#4a3728');
-          batonGradient.addColorStop(1, '#3a2718');
-          ctx.fillStyle = batonGradient;
+          const gunGradient = ctx.createLinearGradient(-5, 0, 5, 0);
+          gunGradient.addColorStop(0, '#666666');
+          gunGradient.addColorStop(0.5, '#888888');
+          gunGradient.addColorStop(1, '#555555');
+          ctx.fillStyle = gunGradient;
           ctx.beginPath();
-          ctx.roundRect(0, -4, 25, 8, 3);
+          ctx.roundRect(-5, -15, 10, 20, 3);
           ctx.fill();
 
-          // Рукоять
-          ctx.fillStyle = '#2a1f18';
-          ctx.fillRect(-8, -5, 8, 10);
+          ctx.fillStyle = '#444444';
+          ctx.fillRect(-3, -22, 6, 7);
 
-          // Эффект удара
-          if (player.comboCount === 2) {
-            ctx.strokeStyle = 'rgba(255, 150, 0, 0.7)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(12, 0, 15, 0, Math.PI);
-            ctx.stroke();
-          }
+          ctx.fillStyle = '#2a2a2a';
+          ctx.beginPath();
+          ctx.roundRect(-4, 3, 8, 6, 2);
+          ctx.fill();
 
           ctx.restore();
         } else {
-          ctx.fillStyle = '#5a4a38';
-          ctx.fillRect(weaponX, y + height / 2 - 3, 22, 6);
-          ctx.fillStyle = '#3a2a18';
-          ctx.fillRect(weaponX - 6, y + height / 2 - 4, 6, 8);
-        }
-      } else {
-        if (player.isAttacking) {
-          const punchOffset = player.comboCount === 2 ? 10 : 6;
-          ctx.fillStyle = '#ffcc99';
-          const fistX = facingRight ? x + width + punchOffset : x - punchOffset - 10;
+          const gunX = facingRight ? x + width - 2 : x - 16;
+
+          const gunGradient = ctx.createLinearGradient(gunX, y + height / 2 - 5, gunX, y + height / 2 + 5);
+          gunGradient.addColorStop(0, '#777777');
+          gunGradient.addColorStop(0.5, '#555555');
+          gunGradient.addColorStop(1, '#333333');
+          ctx.fillStyle = gunGradient;
           ctx.beginPath();
-          ctx.roundRect(fistX, y + height / 2 - 6, 10, 12, 4);
+          ctx.roundRect(gunX, y + height / 2 - 5, 18, 10, 3);
           ctx.fill();
 
-          if (player.comboCount === 2) {
-            ctx.strokeStyle = 'rgba(255, 200, 0, 0.7)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(fistX + 5, y + height / 2, 10, 0, Math.PI);
-            ctx.stroke();
-          }
+          ctx.fillStyle = '#444444';
+          ctx.fillRect(gunX + (facingRight ? 14 : -6), y + height / 2 - 3, 8, 6);
+
+          ctx.fillStyle = '#2a2a2a';
+          ctx.beginPath();
+          ctx.roundRect(gunX + (facingRight ? 12 : 2), y + height / 2 + 3, 6, 8, 2);
+          ctx.fill();
         }
-      }
-    } else {
-      if (player.aimingUp) {
-        const gunCenterX = x + width / 2;
-        const gunBaseY = y + 5;
-
-        ctx.save();
-        ctx.translate(gunCenterX, gunBaseY);
-
-        const gunGradient = ctx.createLinearGradient(-5, 0, 5, 0);
-        gunGradient.addColorStop(0, '#666666');
-        gunGradient.addColorStop(0.5, '#888888');
-        gunGradient.addColorStop(1, '#555555');
-        ctx.fillStyle = gunGradient;
-        ctx.beginPath();
-        ctx.roundRect(-5, -15, 10, 20, 3);
-        ctx.fill();
-
-        ctx.fillStyle = '#444444';
-        ctx.fillRect(-3, -22, 6, 7);
-
-        ctx.fillStyle = '#2a2a2a';
-        ctx.beginPath();
-        ctx.roundRect(-4, 3, 8, 6, 2);
-        ctx.fill();
-
-        ctx.restore();
-      } else {
-        const gunX = facingRight ? x + width - 2 : x - 16;
-
-        const gunGradient = ctx.createLinearGradient(gunX, y + height / 2 - 5, gunX, y + height / 2 + 5);
-        gunGradient.addColorStop(0, '#777777');
-        gunGradient.addColorStop(0.5, '#555555');
-        gunGradient.addColorStop(1, '#333333');
-        ctx.fillStyle = gunGradient;
-        ctx.beginPath();
-        ctx.roundRect(gunX, y + height / 2 - 5, 18, 10, 3);
-        ctx.fill();
-
-        ctx.fillStyle = '#444444';
-        ctx.fillRect(gunX + (facingRight ? 14 : -6), y + height / 2 - 3, 8, 6);
-
-        ctx.fillStyle = '#2a2a2a';
-        ctx.beginPath();
-        ctx.roundRect(gunX + (facingRight ? 12 : 2), y + height / 2 + 3, 6, 8, 2);
-        ctx.fill();
       }
     }
 
