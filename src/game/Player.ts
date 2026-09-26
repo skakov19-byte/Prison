@@ -279,10 +279,15 @@ export class Player {
       this.canDoubleJump = false; // Больше нельзя прыгать
     }
 
-    if (input.down && this.isGrounded) {
+    if (input.down && this.isGrounded && !this.isDropping) {
       this.isDropping = true;
       this.isGrounded = false;
       this.y += 5;
+    }
+    
+    // Сбрасываем isDropping когда игрок отпускает S
+    if (!input.down && this.isDropping) {
+      this.isDropping = false;
     }
 
     if (!this.isGrounded) {

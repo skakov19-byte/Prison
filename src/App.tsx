@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GameEngine } from './game/GameEngine';
 import { PlayerState, WeaponType, InventoryItem, ItemType } from './game/types';
-
 import { IntroRenderer } from './game/IntroScene';
+import { Act2IntroRenderer } from './game/Act2Intro';
 
-type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop';
+type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro';
 
 interface ShopItem {
   id: string;
@@ -20,6 +20,7 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
   const introRendererRef = useRef<IntroRenderer | null>(null);
+  const act2IntroRendererRef = useRef<Act2IntroRenderer | null>(null);
   const isTransitioningRef = useRef(false);
 
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -164,7 +165,12 @@ export default function App() {
             if (engineRef.current) {
               engineRef.current.pause();
             }
-            setScreen('victory');
+            // После 3 уровня запускаем ролик Акта 2
+            if (currentLevel === 3) {
+              setScreen('act2_intro');
+            } else {
+              setScreen('victory');
+            }
           },
           onEnemyKill: () => setKills(k => k + 1),
           onDoorMessage: (msg: string) => showDoorMessage(msg),
@@ -252,6 +258,63 @@ export default function App() {
     };
   }, [screen]);
 
+  // Рендеринг ролика Акта 2
+  useEffect(() => {
+    if (screen !== 'act2_intro') return;
+
+    const timer = setTimeout(() => {
+      if (!canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const act2Renderer = new Act2IntroRenderer(ctx, canvas.width, canvas.height);
+      act2Renderer.start();
+      act2IntroRendererRef.current = act2Renderer;
+
+      let lastTime = performance.now();
+      let animFrameId: number;
+
+      const renderLoop = (timestamp: number) => {
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        const isFinished = act2Renderer.update(dt);
+        act2Renderer.render();
+
+        if (isFinished) {
+          // Ролик завершён, переходим к 4 уровню
+          setCurrentLevel(4);
+          setScreen('playing');
+          return;
+        }
+
+        animFrameId = requestAnimationFrame(renderLoop);
+      };
+
+      animFrameId = requestAnimationFrame(renderLoop);
+
+      // Возможность пропустить ролик по клику
+      const skipIntro = () => {
+        cancelAnimationFrame(animFrameId);
+        setCurrentLevel(4);
+        setScreen('playing');
+      };
+
+      canvas.addEventListener('click', skipIntro);
+
+      return () => {
+        cancelAnimationFrame(animFrameId);
+        canvas.removeEventListener('click', skipIntro);
+      };
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [screen]);
+
   // Обработка Escape для паузы и пропуска интро
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -264,6 +327,11 @@ export default function App() {
       }
       // Пропуск интро по Space или Enter
       if (screen === 'intro' && (e.code === 'Space' || e.code === 'Enter')) {
+        setScreen('playing');
+      }
+      // Пропуск ролика Акта 2 по Space или Enter
+      if (screen === 'act2_intro' && (e.code === 'Space' || e.code === 'Enter')) {
+        setCurrentLevel(4);
         setScreen('playing');
       }
     };
@@ -355,7 +423,12 @@ export default function App() {
             if (engineRef.current) {
               engineRef.current.pause();
             }
-            setScreen('victory');
+            // После 3 уровня запускаем ролик Акта 2
+            if (nextLevel === 3) {
+              setScreen('act2_intro');
+            } else {
+              setScreen('victory');
+            }
           },
           onEnemyKill: () => setKills(k => k + 1),
           onDoorMessage: (msg: string) => showDoorMessage(msg),
@@ -546,6 +619,26 @@ export default function App() {
 
   // ====== ИНТРО СЦЕНА ======
   if (screen === 'intro') {
+    return (
+      <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="border-2 border-gray-700 rounded-lg shadow-2xl block cursor-pointer"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
+            <p className="text-gray-400 text-sm">Нажмите чтобы пропустить</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== РОЛИК АКТА 2 ======
+  if (screen === 'act2_intro') {
     return (
       <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
         <div className="relative">
