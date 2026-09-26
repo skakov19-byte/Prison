@@ -32,6 +32,8 @@ export default function App() {
   const [levelName, setLevelName] = useState('');
   const [isPaused, setIsPaused] = useState(false);
   const [previousScreen, setPreviousScreen] = useState<GameScreen>('playing');
+  const [doorMessage, setDoorMessage] = useState<string | null>(null);
+  const doorMessageTimerRef = useRef<number | null>(null);
 
   const [shopItems, setShopItems] = useState<ShopItem[]>([
     { id: 'health', name: 'Макс. здоровье', description: '+25 к максимальному здоровью', cost: 30, icon: '❤️', maxLevel: 5, currentLevel: 0 },
@@ -77,6 +79,21 @@ export default function App() {
     setScreen('playing');
   }, []);
 
+  const showDoorMessage = (message: string) => {
+    setDoorMessage(message);
+    
+    // Очищаем предыдущий таймер если есть
+    if (doorMessageTimerRef.current) {
+      clearTimeout(doorMessageTimerRef.current);
+    }
+    
+    // Скрываем сообщение через 3 секунды
+    doorMessageTimerRef.current = window.setTimeout(() => {
+      setDoorMessage(null);
+      doorMessageTimerRef.current = null;
+    }, 3000);
+  };
+
   // Запуск игрового движка когда экран = playing
   useEffect(() => {
     if (screen !== 'playing') return;
@@ -115,6 +132,7 @@ export default function App() {
             setScreen('victory');
           },
           onEnemyKill: () => setKills(k => k + 1),
+          onDoorMessage: (msg: string) => showDoorMessage(msg),
         }, currentLevel);
 
         // Применяем улучшения из магазина
@@ -239,6 +257,7 @@ export default function App() {
             setScreen('victory');
           },
           onEnemyKill: () => setKills(k => k + 1),
+          onDoorMessage: (msg: string) => showDoorMessage(msg),
         }, nextLevel);
 
         // Применяем улучшения из магазина
@@ -334,6 +353,7 @@ export default function App() {
             <p><span className="text-gray-300">WASD / Стрелки</span> — Движение</p>
             <p><span className="text-gray-300">Space</span> — Прыжок (двойной)</p>
             <p><span className="text-gray-300">J / Z</span> — Атака (кулаки/оружие)</p>
+            <p><span className="text-gray-300">E</span> — Взаимодействие (открыть дверь)</p>
             <p><span className="text-gray-300">Q / Tab</span> — Смена оружия (после 3 уровня)</p>
             <p><span className="text-gray-300">R</span> — Перезарядка</p>
             <p><span className="text-gray-300">W</span> — Стрелять вверх (с пистолетом)</p>
@@ -469,6 +489,15 @@ export default function App() {
           </div>
         </div>
 
+        {/* Сообщение двери */}
+        {doorMessage && (
+          <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 pointer-events-none animate-fade-in">
+            <div className="bg-black/90 border-2 border-yellow-500 rounded-lg px-6 py-3 shadow-lg">
+              <p className="text-yellow-400 text-lg font-bold text-center">🔓 {doorMessage}</p>
+            </div>
+          </div>
+        )}
+
         {/* HUD - Нижняя панель */}
         <div className="absolute bottom-0 left-0 right-0 p-3 flex justify-between items-end pointer-events-none">
           {/* Текущее оружие */}
@@ -493,7 +522,10 @@ export default function App() {
                 <p className="text-gray-400 text-xs">[W] Стрелять вверх</p>
               </>
             ) : (
-              <p className="text-orange-400 text-xs">🔒 Огнестрел недоступен</p>
+              <>
+                <p className="text-orange-400 text-xs">🔒 Огнестрел недоступен</p>
+                <p className="text-gray-400 text-xs">[E] Открыть дверь</p>
+              </>
             )}
             <p className="text-gray-400 text-xs">[ESC] Пауза</p>
           </div>

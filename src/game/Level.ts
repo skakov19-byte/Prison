@@ -12,12 +12,23 @@ export interface Pit {
   damage: number;
 }
 
+export interface Door {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  locked: boolean;
+  requiresLockpick: boolean;
+  message?: string;
+}
+
 export interface LevelData {
   platforms: Platform[];
   ladders: { x: number; y: number; width: number; height: number }[];
   enemies: EnemyStats[];
   playerSpawn: Vector2;
   exitDoor?: { x: number; y: number; width: number; height: number };
+  doors?: Door[];
   pits: Pit[];
   width: number;
   height: number;
@@ -73,10 +84,21 @@ export function createLevel1(): LevelData {
   ];
 
   const ladders = [
-    // Лестница в камере (чтобы выбраться)
-    { x: 80, y: 380, width: 30, height: 320 },
     // Лестница к верхнему уровню
     { x: 1650, y: 250, width: 30, height: 450 },
+  ];
+
+  const doors: Door[] = [
+    // Дверь камеры (требует отмычку)
+    {
+      x: 150,
+      y: 500,
+      width: 40,
+      height: 200,
+      locked: true,
+      requiresLockpick: true,
+      message: 'Открыто отмычкой',
+    },
   ];
 
   const enemies: EnemyStats[] = [
@@ -132,6 +154,7 @@ export function createLevel1(): LevelData {
     enemies,
     playerSpawn: { x: 60, y: 650 }, // В камере
     exitDoor: { x: 1850, y: 190, width: 40, height: 60 },
+    doors,
     pits,
     width: 2400,
     height: 740,

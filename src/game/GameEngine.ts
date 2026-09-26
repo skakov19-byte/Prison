@@ -7,7 +7,7 @@ import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { ObjectPool } from './ObjectPool';
 import { Renderer } from './Renderer';
-import { LevelData, getLevel } from './Level';
+import { LevelData, getLevel, Door } from './Level';
 
 export interface GameCallbacks {
   onHealthChange: (health: number, maxHealth: number) => void;
@@ -18,6 +18,7 @@ export interface GameCallbacks {
   onDeath: () => void;
   onLevelComplete: () => void;
   onEnemyKill: () => void;
+  onDoorMessage: (message: string) => void;
 }
 
 export class GameEngine {
@@ -219,6 +220,8 @@ export class GameEngine {
     this.checkCombat();
     this.checkExit();
     this.checkPits();
+    this.checkDoors();
+    this.handleDoorCollisions();
 
     this.callbacks.onStateChange(this.player.fsm.getCurrentState());
     this.callbacks.onWeaponChange(this.player.currentWeapon);
@@ -228,6 +231,69 @@ export class GameEngine {
     }
 
     this.enemies = this.enemies.filter(e => !e.isDead || e.deathTimer > 0);
+  }
+
+  private handleDoorCollisions(): void {
+    if (!this.level.doors || this.level.doors.length === 0) return;
+
+    const playerHitbox = this.player.getHitbox();
+
+    for (const door of this.level.doors) {
+      // Только закрытые двери блокируют
+      if (!door.locked) continue;
+
+      const doorHitbox = { x: door.x, y: door.y, width: door.width, height: door.height };
+
+      if (this.rectsOverlap(playerHitbox, doorHitbox)) {
+        // Определяем сторону коллизии
+        const overlapLeft = (this.player.x + this.player.width) - door.x;
+        const overlapRight = (door.x + door.width) - this.player.x;
+        const overlapTop = (this.player.y + this.player.height) - door.y;
+        const overlapBottom = (door.y + door.height) - this.player.y;
+
+        const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+        if (minOverlap === overlapLeft) {
+          this.player.x = door.x - this.player.width;
+          this.player.vx = 0;
+        } else if (minOverlap === overlapRight) {
+          this.player.x = door.x + door.width;
+          this.player.vx = 0;
+        } else if (minOverlap === overlapTop && this.player.vy >= 0) {
+          this.player.y = door.y - this.player.height;
+          this.player.vy = 0;
+          this.player.isGrounded = true;
+          this.player.canDoubleJump = true;
+        } else if (minOverlap === overlapBottom && this.player.vy < 0) {
+          this.player.y = door.y + door.height;
+          this.player.vy = 0;
+        }
+      }
+    }
+  }
+
+  private checkDoors(): void {
+    if (!this.level.doors || this.level.doors.length === 0) return;
+
+    const playerHitbox = this.player.getHitbox();
+
+    for (const door of this.level.doors) {
+      // Проверяем, находится ли игрок рядом с дверью
+      const doorHitbox = { x: door.x, y: door.y, width: door.width, height: door.height };
+      
+      if (this.rectsOverlap(playerHitbox, doorHitbox)) {
+        // Если дверь заблокирована и игрок нажал E
+        if (door.locked && door.requiresLockpick && this.input.interactPressed) {
+          door.locked = false;
+          if (door.message) {
+            this.callbacks.onDoorMessage(door.message);
+          }
+        }
+        
+        // Если дверь открыта, убираем её как препятствие (не блокирует игрока)
+        // Это реализовано через проверку locked в коллизиях
+      }
+    }
   }
 
   private updateBullets(dt: number): void {

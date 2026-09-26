@@ -5,7 +5,7 @@
 import { Player } from './Player';
 import { Enemy } from './Enemy';
 import { Bullet, Particle, Platform, PlayerState, WeaponType, EnemyType } from './types';
-import { LevelData, Pit } from './Level';
+import { LevelData, Pit, Door } from './Level';
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
@@ -56,6 +56,10 @@ export class Renderer {
     
     if (level.pits) {
       this.renderPits(level.pits);
+    }
+
+    if (level.doors) {
+      this.renderDoors(level.doors);
     }
 
     if (level.exitDoor) {
@@ -435,6 +439,79 @@ export class Renderer {
       ctx.font = 'bold 12px Arial';
       ctx.textAlign = 'center';
       ctx.fillText('⚠', pit.x + pit.width / 2, pit.y - 12);
+    }
+  }
+
+  private renderDoors(doors: Door[]): void {
+    const ctx = this.ctx;
+
+    for (const door of doors) {
+      // Рама двери
+      ctx.fillStyle = '#4a3728';
+      ctx.fillRect(door.x - 3, door.y - 3, door.width + 6, door.height + 6);
+
+      // Дверь
+      if (door.locked) {
+        // Закрытая дверь - тёмная
+        const doorGradient = ctx.createLinearGradient(door.x, door.y, door.x + door.width, door.y);
+        doorGradient.addColorStop(0, '#2a1f18');
+        doorGradient.addColorStop(0.5, '#3d2e22');
+        doorGradient.addColorStop(1, '#2a1f18');
+        ctx.fillStyle = doorGradient;
+        ctx.fillRect(door.x, door.y, door.width, door.height);
+
+        // Решётка на двери
+        ctx.strokeStyle = '#555555';
+        ctx.lineWidth = 2;
+        for (let i = 1; i < 4; i++) {
+          const barX = door.x + (door.width / 4) * i;
+          ctx.beginPath();
+          ctx.moveTo(barX, door.y);
+          ctx.lineTo(barX, door.y + door.height);
+          ctx.stroke();
+        }
+        for (let i = 1; i < 6; i++) {
+          const barY = door.y + (door.height / 6) * i;
+          ctx.beginPath();
+          ctx.moveTo(door.x, barY);
+          ctx.lineTo(door.x + door.width, barY);
+          ctx.stroke();
+        }
+
+        // Замок
+        ctx.fillStyle = '#888888';
+        ctx.fillRect(door.x + door.width / 2 - 5, door.y + door.height / 2 - 8, 10, 16);
+        ctx.fillStyle = '#333333';
+        ctx.beginPath();
+        ctx.arc(door.x + door.width / 2, door.y + door.height / 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Подсказка "Нажмите E"
+        ctx.fillStyle = 'rgba(255, 255, 100, 0.9)';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('[E] Открыть', door.x + door.width / 2, door.y - 8);
+      } else {
+        // Открытая дверь - светлая, открытая
+        const doorGradient = ctx.createLinearGradient(door.x, door.y, door.x + door.width, door.y);
+        doorGradient.addColorStop(0, '#5a4a38');
+        doorGradient.addColorStop(0.5, '#6d5a48');
+        doorGradient.addColorStop(1, '#5a4a38');
+        ctx.fillStyle = doorGradient;
+        ctx.fillRect(door.x, door.y, door.width, door.height);
+
+        // Ручка двери
+        ctx.fillStyle = '#DAA520';
+        ctx.beginPath();
+        ctx.arc(door.x + door.width - 8, door.y + door.height / 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Панели на двери
+        ctx.strokeStyle = '#4a3a28';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(door.x + 5, door.y + 10, door.width - 10, door.height / 3 - 15);
+        ctx.strokeRect(door.x + 5, door.y + door.height / 2 + 5, door.width - 10, door.height / 3 - 15);
+      }
     }
   }
 
