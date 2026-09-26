@@ -283,18 +283,21 @@ export class Player {
     this.vx = 0;
     this.vy = 0;
 
-    if (input.up) this.vy = -150;
-    if (input.down) this.vy = 150;
-    if (input.left) { this.vx = -100; this.facingRight = false; }
-    if (input.right) { this.vx = 100; this.facingRight = true; }
-
+    // Сначала проверяем прыжок (приоритет выше)
     if (input.jumpPressed) {
       this.isOnLadder = false;
       this.currentLadder = null;
       this.vy = -this.stats.jumpForce * 0.7;
       this.vx = this.facingRight ? 100 : -100;
+      this.canDoubleJump = true; // Разрешаем двойной прыжок после прыжка с лестницы
       return;
     }
+
+    // Потом обычное движение по лестнице
+    if (input.up) this.vy = -150;
+    if (input.down) this.vy = 150;
+    if (input.left) { this.vx = -100; this.facingRight = false; }
+    if (input.right) { this.vx = 100; this.facingRight = true; }
 
     if (this.currentLadder) {
       const ladder = this.currentLadder;
@@ -367,6 +370,9 @@ export class Player {
 
   private checkLadders(ladders: { x: number; y: number; width: number; height: number }[], input: InputState): void {
     if (this.isOnLadder) return;
+    
+    // Не входим на лестницу если прыгаем (vy < 0)
+    if (this.vy < -50) return;
 
     for (const ladder of ladders) {
       const playerCenterX = this.x + this.width / 2;
