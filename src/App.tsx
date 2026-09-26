@@ -4,8 +4,9 @@ import { PlayerState, WeaponType, InventoryItem, ItemType } from './game/types';
 import { IntroRenderer } from './game/IntroScene';
 import { Act2IntroRenderer } from './game/Act2Intro';
 import { Act3IntroRenderer } from './game/Act3Intro';
+import { ChaseScene } from './game/ChaseScene';
 
-type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro' | 'act3_intro';
+type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro' | 'act3_intro' | 'chase_scene';
 
 interface ShopItem {
   id: string;
@@ -23,6 +24,7 @@ export default function App() {
   const introRendererRef = useRef<IntroRenderer | null>(null);
   const act2IntroRendererRef = useRef<Act2IntroRenderer | null>(null);
   const act3IntroRendererRef = useRef<Act3IntroRenderer | null>(null);
+  const chaseSceneRef = useRef<ChaseScene | null>(null);
   const isTransitioningRef = useRef(false);
 
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -284,12 +286,16 @@ export default function App() {
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        const isFinished = act2Renderer.update(dt);
+        const result = act2Renderer.update(dt);
         act2Renderer.render();
 
-        if (isFinished) {
+        if (result === 'start_chase') {
+          // Переходим к мини-игре погони
+          cancelAnimationFrame(animFrameId);
+          setScreen('chase_scene');
+          return;
+        } else if (result === 'finish') {
           // Ролик завершён, переходим к 4 уровню
-          // Сохраняем текущий инвентарь
           const savedInventory = inventory;
           setCurrentLevel(4);
           setInventory(savedInventory);
@@ -314,6 +320,61 @@ export default function App() {
       return () => {
         cancelAnimationFrame(animFrameId);
         canvas.removeEventListener('click', skipIntro);
+      };
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [screen]);
+
+  // Рендеринг мини-игры погони
+  useEffect(() => {
+    if (screen !== 'chase_scene') return;
+
+    const timer = setTimeout(() => {
+      if (!canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const chaseScene = new ChaseScene(ctx, canvas.width, canvas.height);
+      chaseSceneRef.current = chaseScene;
+
+      let lastTime = performance.now();
+      let animFrameId: number;
+
+      const renderLoop = (timestamp: number) => {
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        const isFinished = chaseScene.update(dt);
+        chaseScene.render();
+
+        if (isFinished) {
+          // Мини-игра завершена, возвращаемся к ролику
+          cancelAnimationFrame(animFrameId);
+          
+          // Возвращаемся к сцене crash в ролике
+          if (act2IntroRendererRef.current) {
+            act2IntroRendererRef.current.startCrashScene();
+            setScreen('act2_intro');
+          } else {
+            // Если рендерер недоступен, просто переходим к 4 уровню
+            setCurrentLevel(4);
+            setScreen('playing');
+          }
+          return;
+        }
+
+        animFrameId = requestAnimationFrame(renderLoop);
+      };
+
+      animFrameId = requestAnimationFrame(renderLoop);
+
+      return () => {
+        cancelAnimationFrame(animFrameId);
       };
     }, 100);
 
@@ -747,6 +808,27 @@ export default function App() {
           />
           <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
             <p className="text-gray-400 text-sm">Нажмите чтобы пропустить</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== МИНИ-ИГРА ПОГОНИ ======
+  if (screen === 'chase_scene') {
+    return (
+      <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="border-2 border-red-700 rounded-lg shadow-2xl block"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-3 py-2">
+            <p className="text-red-400 text-xs font-bold">🚗 ПОГОНЯ!</p>
+            <p className="text-gray-400 text-xs">Уклоняйтесь и выживите!</p>
           </div>
         </div>
       </div>

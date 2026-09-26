@@ -36,7 +36,7 @@ export class Act2IntroRenderer {
     this.state.animationProgress = 0;
   }
 
-  update(dt: number): boolean {
+  update(dt: number): 'continue' | 'start_chase' | 'finish' {
     this.state.sceneTimer += dt;
     this.state.animationProgress += dt;
 
@@ -54,19 +54,23 @@ export class Act2IntroRenderer {
       if (this.state.currentScene === 'escape') {
         this.state.currentScene = 'chase';
         this.state.sceneTimer = 0;
-        return false;
+        return 'continue';
       } else if (this.state.currentScene === 'chase') {
-        this.state.currentScene = 'crash';
-        this.state.sceneTimer = 0;
-        return false;
+        // После сцены погони запускаем мини-игру
+        return 'start_chase';
       } else if (this.state.currentScene === 'crash') {
         if (this.state.sceneTimer > 8) {
-          return true; // Ролик завершён
+          return 'finish'; // Ролик завершён
         }
       }
     }
 
-    return false;
+    return 'continue';
+  }
+
+  startCrashScene(): void {
+    this.state.currentScene = 'crash';
+    this.state.sceneTimer = 0;
   }
 
   render(): void {

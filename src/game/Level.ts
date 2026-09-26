@@ -682,6 +682,9 @@ export function createLevel4(): LevelData {
     height: 740,
     bgColor: '#0a1a2a',
     name: 'Небесная Крепость',
+    decorations: [
+      { type: 'burning_car', x: 100, y: 650 }
+    ],
   };
 }
 
@@ -827,9 +830,6 @@ export function createLevel5(): LevelData {
     height: 840,
     bgColor: '#2a0a0a',
     name: 'Адская Бездна',
-    decorations: [
-      { type: 'burning_car', x: 100, y: 700 }
-    ]
   };
 }
 
@@ -844,21 +844,21 @@ export function createLevel6(): LevelData {
     { rect: { x: 2960, y: 0, width: 40, height: 740 } },
     { rect: { x: 0, y: 0, width: 3000, height: 30 } },
     
-    // Здания (препятствия)
-    { rect: { x: 300, y: 500, width: 150, height: 200 } },
-    { rect: { x: 600, y: 450, width: 200, height: 250 } },
-    { rect: { x: 1000, y: 500, width: 150, height: 200 } },
-    { rect: { x: 1400, y: 400, width: 200, height: 300 } },
-    { rect: { x: 1800, y: 500, width: 150, height: 200 } },
-    { rect: { x: 2200, y: 450, width: 200, height: 250 } },
+    // Здания (препятствия) - уменьшена высота
+    { rect: { x: 300, y: 600, width: 150, height: 100 } },
+    { rect: { x: 600, y: 580, width: 200, height: 120 } },
+    { rect: { x: 1000, y: 600, width: 150, height: 100 } },
+    { rect: { x: 1400, y: 560, width: 200, height: 140 } },
+    { rect: { x: 1800, y: 600, width: 150, height: 100 } },
+    { rect: { x: 2200, y: 580, width: 200, height: 120 } },
     
-    // Платформы на крышах зданий
-    { rect: { x: 300, y: 480, width: 150, height: 20 } },
-    { rect: { x: 600, y: 430, width: 200, height: 20 } },
-    { rect: { x: 1000, y: 480, width: 150, height: 20 } },
-    { rect: { x: 1400, y: 380, width: 200, height: 20 } },
-    { rect: { x: 1800, y: 480, width: 150, height: 20 } },
-    { rect: { x: 2200, y: 430, width: 200, height: 20 } },
+    // Платформы на крышах зданий (соответствуют новой высоте)
+    { rect: { x: 300, y: 580, width: 150, height: 20 } },
+    { rect: { x: 600, y: 560, width: 200, height: 20 } },
+    { rect: { x: 1000, y: 580, width: 150, height: 20 } },
+    { rect: { x: 1400, y: 540, width: 200, height: 20 } },
+    { rect: { x: 1800, y: 580, width: 150, height: 20 } },
+    { rect: { x: 2200, y: 560, width: 200, height: 20 } },
     
     // Проходные платформы
     { rect: { x: 450, y: 600, width: 80, height: 15 }, isPassThrough: true },
@@ -869,13 +869,13 @@ export function createLevel6(): LevelData {
   ];
 
   const ladders = [
-    // Лестницы на здания
-    { x: 350, y: 480, width: 30, height: 220 },
-    { x: 650, y: 430, width: 30, height: 270 },
-    { x: 1050, y: 480, width: 30, height: 220 },
-    { x: 1450, y: 380, width: 30, height: 320 },
-    { x: 1850, y: 480, width: 30, height: 220 },
-    { x: 2250, y: 430, width: 30, height: 270 },
+    // Лестницы на здания (соответствуют новой высоте)
+    { x: 350, y: 580, width: 30, height: 120 },
+    { x: 650, y: 560, width: 30, height: 140 },
+    { x: 1050, y: 580, width: 30, height: 120 },
+    { x: 1450, y: 540, width: 30, height: 160 },
+    { x: 1850, y: 580, width: 30, height: 120 },
+    { x: 2250, y: 560, width: 30, height: 140 },
   ];
 
   const enemies: EnemyStats[] = [
