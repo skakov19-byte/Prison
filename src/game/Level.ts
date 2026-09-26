@@ -73,9 +73,6 @@ export function createLevel1(): LevelData {
     { rect: { x: 150, y: 700, width: 40, height: 40 } }, // Правая стена камеры (после двери)
     { rect: { x: 150, y: 620, width: 40, height: 28 } }, // Перегородка над дверью (чуть выше верха двери)
     
-    // Правая стена (сплошная, триггер для перехода)
-    { rect: { x: 2360, y: 0, width: 40, height: 740 } },
-    
     // Коридор после камеры - подъём 45° (убраны нижние 2 платформы)
     { rect: { x: 370, y: 550, width: 60, height: 20 } },
     { rect: { x: 430, y: 500, width: 60, height: 20 } },
@@ -291,7 +288,6 @@ export function createLevel2(): LevelData {
     { rect: { x: 100, y: 500, width: 120, height: 25 } },
     
     // Стены
-    { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена (сплошная, триггер для выхода)
     { rect: { x: 0, y: 0, width: 2400, height: 30 } }, // Потолок
     
     // Проходные платформы
@@ -447,8 +443,7 @@ export function createLevel3(): LevelData {
     
     // Стены
     { rect: { x: 0, y: 0, width: 40, height: 840 } }, // Левая стена (сплошная)
-    { rect: { x: 2760, y: 0, width: 40, height: 840 } }, // Правая стена (сплошная, триггер для выхода)
-    { rect: { x: 0, y: 0, width: 2800, height: 30 } },
+    { rect: { x: 0, y: 0, width: 2800, height: 30 } }, // Потолок
     
     // Проходные платформы
     { rect: { x: 550, y: 750, width: 80, height: 15 }, isPassThrough: true },
@@ -604,7 +599,6 @@ export function createLevel4(): LevelData {
     
     // Стены
     { rect: { x: 0, y: 0, width: 20, height: 740 } }, // Левая стена (сплошная)
-    { rect: { x: 1980, y: 0, width: 20, height: 740 } }, // Правая стена (сплошная, триггер для выхода)
     
     // Проходные платформы
     { rect: { x: 450, y: 600, width: 80, height: 15 }, isPassThrough: true },
@@ -709,7 +703,6 @@ export function createLevel5(): LevelData {
     
     // Стены
     { rect: { x: 0, y: 0, width: 20, height: 840 } }, // Левая стена (сплошная)
-    { rect: { x: 2280, y: 0, width: 20, height: 840 } }, // Правая стена (сплошная, триггер для выхода)
     
     // Проходные платформы
     { rect: { x: 200, y: 750, width: 80, height: 15 }, isPassThrough: true },
@@ -834,8 +827,7 @@ export function createLevel6(): LevelData {
     
     // Здания на заднем плане (декоративные стены)
     { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Левая стена (сплошная)
-    { rect: { x: 2960, y: 0, width: 40, height: 740 } }, // Правая стена (сплошная, триггер для выхода)
-    { rect: { x: 0, y: 0, width: 3000, height: 30 } },
+    { rect: { x: 0, y: 0, width: 3000, height: 30 } }, // Потолок
     
     // Здания (препятствия) - уменьшена высота
     { rect: { x: 300, y: 600, width: 150, height: 100 } },
