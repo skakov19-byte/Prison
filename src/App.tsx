@@ -436,7 +436,7 @@ export default function App() {
         <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start pointer-events-none">
           {/* Здоровье и название уровня */}
           <div className="bg-black/70 rounded-lg p-2">
-            <p className="text-emerald-400 text-xs font-bold mb-1">Уровень {currentLevel}: {levelName}</p>
+            <p className="text-orange-400 text-xs font-bold mb-1">Уровень {currentLevel}: {levelName}</p>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-red-400 text-sm">❤️</span>
               <div className="w-32 h-3 bg-gray-800 rounded-full overflow-hidden">
@@ -447,17 +447,19 @@ export default function App() {
               </div>
               <span className="text-red-300 text-xs font-mono">{health}/{maxHealth}</span>
             </div>
-            {/* Патроны */}
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-400 text-sm">🔫</span>
-              <div className="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-200"
-                  style={{ width: `${(ammo / maxAmmo) * 100}%` }}
-                />
+            {/* Патроны (только для уровней 4+) */}
+            {currentLevel > 3 && (
+              <div className="flex items-center gap-2">
+                <span className="text-yellow-400 text-sm">🔫</span>
+                <div className="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-200"
+                    style={{ width: `${(ammo / maxAmmo) * 100}%` }}
+                  />
+                </div>
+                <span className="text-yellow-300 text-xs font-mono">{ammo}/{maxAmmo}</span>
               </div>
-              <span className="text-yellow-300 text-xs font-mono">{ammo}/{maxAmmo}</span>
-            </div>
+            )}
           </div>
 
           {/* Золото и убийства */}

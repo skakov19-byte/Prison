@@ -67,6 +67,7 @@ export class GameEngine {
       this.level.width,
       this.level.height
     );
+    this.renderer.setLevelNumber(this.currentLevelNumber);
 
     this.player = new Player(
       this.level.playerSpawn.x,
@@ -396,6 +397,7 @@ export class GameEngine {
   reset(): void {
     this.bulletPool.releaseAll();
     this.level = getLevel(this.currentLevelNumber);
+    this.renderer.setLevelNumber(this.currentLevelNumber);
     this.player = new Player(
       this.level.playerSpawn.x,
       this.level.playerSpawn.y,
@@ -417,6 +419,7 @@ export class GameEngine {
     this.currentLevelNumber++;
     this.bulletPool.releaseAll();
     this.level = getLevel(this.currentLevelNumber);
+    this.renderer.setLevelNumber(this.currentLevelNumber);
     this.player = new Player(
       this.level.playerSpawn.x,
       this.level.playerSpawn.y,

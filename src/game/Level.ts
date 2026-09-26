@@ -31,50 +31,52 @@ export function createLevel1(): LevelData {
     // Пол тюрьмы
     { rect: { x: 0, y: 700, width: 2400, height: 40 } },
     
-    // Тюремная камера (старт)
-    { rect: { x: 0, y: 0, width: 20, height: 740 } }, // Левая стена
-    { rect: { x: 150, y: 400, width: 20, height: 300 } }, // Правая стена камеры (с проёмом сверху)
-    { rect: { x: 0, y: 400, width: 150, height: 20 } }, // Потолок камеры
+    // Тюремная камера (старт) - органичные стены
+    { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена
+    { rect: { x: 150, y: 350, width: 40, height: 350 } }, // Правая стена камеры с проёмом
+    { rect: { x: 0, y: 350, width: 150, height: 30 } }, // Потолок камеры
     
-    // Коридор после камеры
-    { rect: { x: 300, y: 600, width: 100, height: 20 } }, // Подъём 45° (ступеньки)
-    { rect: { x: 350, y: 550, width: 100, height: 20 } },
-    { rect: { x: 400, y: 500, width: 100, height: 20 } },
+    // Коридор после камеры - подъём 45°
+    { rect: { x: 250, y: 650, width: 60, height: 20 } },
+    { rect: { x: 310, y: 600, width: 60, height: 20 } },
+    { rect: { x: 370, y: 550, width: 60, height: 20 } },
+    { rect: { x: 430, y: 500, width: 60, height: 20 } },
     
-    // Стена-препятствие (нужно обходить через верх)
-    { rect: { x: 600, y: 300, width: 20, height: 400 } },
+    // Стена-препятствие (органичная, с деталями)
+    { rect: { x: 600, y: 250, width: 50, height: 450 } },
+    { rect: { x: 580, y: 250, width: 90, height: 30 } }, // Верхушка стены
     
     // Платформы для обхода стены
-    { rect: { x: 500, y: 400, width: 80, height: 20 } },
-    { rect: { x: 650, y: 350, width: 80, height: 20 } },
-    { rect: { x: 750, y: 400, width: 80, height: 20 } },
+    { rect: { x: 480, y: 400, width: 100, height: 25 } },
+    { rect: { x: 680, y: 350, width: 100, height: 25 } },
+    { rect: { x: 780, y: 400, width: 100, height: 25 } },
     
     // Продолжение коридора
-    { rect: { x: 850, y: 700, width: 200, height: 40 } },
-    { rect: { x: 900, y: 600, width: 100, height: 20 } },
+    { rect: { x: 900, y: 700, width: 300, height: 40 } },
+    { rect: { x: 950, y: 600, width: 120, height: 25 } },
     
-    // Лестница вверх
-    { rect: { x: 1100, y: 500, width: 100, height: 20 } },
-    { rect: { x: 1250, y: 400, width: 100, height: 20 } },
-    { rect: { x: 1400, y: 300, width: 100, height: 20 } },
+    // Лестница вверх - платформы
+    { rect: { x: 1150, y: 500, width: 120, height: 25 } },
+    { rect: { x: 1300, y: 400, width: 120, height: 25 } },
+    { rect: { x: 1450, y: 300, width: 120, height: 25 } },
     
     // Верхний уровень
-    { rect: { x: 1550, y: 250, width: 300, height: 20 } },
+    { rect: { x: 1600, y: 250, width: 350, height: 25 } },
     
     // Стены
-    { rect: { x: 2380, y: 0, width: 20, height: 740 } }, // Правая стена
-    { rect: { x: 0, y: 0, width: 2400, height: 20 } }, // Потолок
+    { rect: { x: 2360, y: 0, width: 40, height: 740 } }, // Толстая правая стена
+    { rect: { x: 0, y: 0, width: 2400, height: 30 } }, // Потолок
     
     // Проходные платформы
     { rect: { x: 200, y: 650, width: 80, height: 15 }, isPassThrough: true },
-    { rect: { x: 1050, y: 650, width: 80, height: 15 }, isPassThrough: true },
+    { rect: { x: 1100, y: 650, width: 80, height: 15 }, isPassThrough: true },
   ];
 
   const ladders = [
     // Лестница в камере (чтобы выбраться)
-    { x: 80, y: 420, width: 30, height: 280 },
+    { x: 80, y: 380, width: 30, height: 320 },
     // Лестница к верхнему уровню
-    { x: 1600, y: 250, width: 30, height: 450 },
+    { x: 1650, y: 250, width: 30, height: 450 },
   ];
 
   const enemies: EnemyStats[] = [
@@ -113,7 +115,7 @@ export function createLevel1(): LevelData {
       detectionRange: 250,
       attackRange: 50,
       attackCooldown: 0.8,
-      patrolPoints: [{ x: 1600, y: 206 }, { x: 1800, y: 206 }],
+      patrolPoints: [{ x: 1650, y: 206 }, { x: 1850, y: 206 }],
       type: EnemyType.MELEE,
       goldDrop: 15,
     },
@@ -121,19 +123,19 @@ export function createLevel1(): LevelData {
 
   const pits: Pit[] = [
     { x: 500, y: 700, width: 80, height: 40, damage: 40 },
-    { x: 1050, y: 700, width: 100, height: 40, damage: 40 },
+    { x: 1100, y: 700, width: 100, height: 40, damage: 40 },
   ];
 
   return {
     platforms,
     ladders,
     enemies,
-    playerSpawn: { x: 50, y: 650 }, // В камере
-    exitDoor: { x: 1800, y: 190, width: 40, height: 60 },
+    playerSpawn: { x: 60, y: 650 }, // В камере
+    exitDoor: { x: 1850, y: 190, width: 40, height: 60 },
     pits,
     width: 2400,
     height: 740,
-    bgColor: '#1a1a1a', // Тёмно-серый (тюремные стены)
+    bgColor: '#1a1a1a', // Тюремный фон
     name: 'Тюремная Камера',
   };
 }
@@ -144,51 +146,54 @@ export function createLevel2(): LevelData {
     // Пол
     { rect: { x: 0, y: 700, width: 2400, height: 40 } },
     
-    // Старт справа
-    { rect: { x: 2380, y: 0, width: 20, height: 740 } }, // Правая стена
+    // Старт справа - органичная стена
+    { rect: { x: 2360, y: 0, width: 40, height: 740 } },
     
-    // Коридоры с препятствиями
-    // Стена 1 (нужно обходить через верх)
-    { rect: { x: 2100, y: 300, width: 20, height: 400 } },
-    { rect: { x: 2000, y: 400, width: 80, height: 20 } },
-    { rect: { x: 2150, y: 350, width: 80, height: 20 } },
+    // Стена 1 - органичная с деталями
+    { rect: { x: 2100, y: 250, width: 50, height: 450 } },
+    { rect: { x: 2080, y: 250, width: 90, height: 30 } }, // Верхушка
+    { rect: { x: 2000, y: 400, width: 100, height: 25 } }, // Платформа для обхода
+    { rect: { x: 2160, y: 350, width: 100, height: 25 } },
     
     // Подъём 45° (ступеньки)
-    { rect: { x: 1800, y: 650, width: 80, height: 20 } },
-    { rect: { x: 1750, y: 600, width: 80, height: 20 } },
-    { rect: { x: 1700, y: 550, width: 80, height: 20 } },
-    { rect: { x: 1650, y: 500, width: 80, height: 20 } },
+    { rect: { x: 1800, y: 650, width: 70, height: 20 } },
+    { rect: { x: 1740, y: 600, width: 70, height: 20 } },
+    { rect: { x: 1680, y: 550, width: 70, height: 20 } },
+    { rect: { x: 1620, y: 500, width: 70, height: 20 } },
     
-    // Стена 2
-    { rect: { x: 1500, y: 200, width: 20, height: 500 } },
-    { rect: { x: 1350, y: 300, width: 100, height: 20 } },
-    { rect: { x: 1550, y: 250, width: 100, height: 20 } },
+    // Стена 2 - органичная
+    { rect: { x: 1500, y: 180, width: 50, height: 520 } },
+    { rect: { x: 1480, y: 180, width: 90, height: 30 } }, // Верхушка
+    { rect: { x: 1350, y: 300, width: 120, height: 25 } },
+    { rect: { x: 1560, y: 250, width: 120, height: 25 } },
     
     // Средний коридор
-    { rect: { x: 1100, y: 600, width: 200, height: 20 } },
-    { rect: { x: 1200, y: 500, width: 100, height: 20 } },
+    { rect: { x: 1100, y: 600, width: 250, height: 25 } },
+    { rect: { x: 1200, y: 500, width: 120, height: 25 } },
     
-    // Стена 3
-    { rect: { x: 900, y: 350, width: 20, height: 350 } },
-    { rect: { x: 800, y: 450, width: 80, height: 20 } },
-    { rect: { x: 950, y: 400, width: 80, height: 20 } },
+    // Стена 3 - органичная
+    { rect: { x: 900, y: 300, width: 50, height: 400 } },
+    { rect: { x: 880, y: 300, width: 90, height: 30 } }, // Верхушка
+    { rect: { x: 800, y: 450, width: 100, height: 25 } },
+    { rect: { x: 960, y: 400, width: 100, height: 25 } },
     
     // Нижний коридор
-    { rect: { x: 500, y: 650, width: 300, height: 20 } },
-    { rect: { x: 600, y: 550, width: 100, height: 20 } },
+    { rect: { x: 500, y: 650, width: 350, height: 25 } },
+    { rect: { x: 600, y: 550, width: 120, height: 25 } },
     
-    // Стена 4 (последняя)
-    { rect: { x: 350, y: 250, width: 20, height: 450 } },
-    { rect: { x: 250, y: 350, width: 80, height: 20 } },
-    { rect: { x: 400, y: 300, width: 80, height: 20 } },
+    // Стена 4 - органичная (последняя)
+    { rect: { x: 350, y: 220, width: 50, height: 480 } },
+    { rect: { x: 330, y: 220, width: 90, height: 30 } }, // Верхушка
+    { rect: { x: 250, y: 350, width: 100, height: 25 } },
+    { rect: { x: 410, y: 300, width: 100, height: 25 } },
     
     // Финальная секция (выход слева)
-    { rect: { x: 50, y: 600, width: 200, height: 20 } },
-    { rect: { x: 100, y: 500, width: 100, height: 20 } },
+    { rect: { x: 50, y: 600, width: 250, height: 25 } },
+    { rect: { x: 100, y: 500, width: 120, height: 25 } },
     
     // Стены
-    { rect: { x: 0, y: 0, width: 20, height: 740 } }, // Левая стена
-    { rect: { x: 0, y: 0, width: 2400, height: 20 } }, // Потолок
+    { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена
+    { rect: { x: 0, y: 0, width: 2400, height: 30 } }, // Потолок
     
     // Проходные платформы
     { rect: { x: 2250, y: 650, width: 80, height: 15 }, isPassThrough: true },
@@ -197,10 +202,10 @@ export function createLevel2(): LevelData {
 
   const ladders = [
     // Лестницы для обхода стен
-    { x: 2050, y: 350, width: 30, height: 350 },
-    { x: 1400, y: 250, width: 30, height: 450 },
-    { x: 850, y: 400, width: 30, height: 300 },
-    { x: 300, y: 300, width: 30, height: 400 },
+    { x: 2050, y: 300, width: 30, height: 400 },
+    { x: 1400, y: 220, width: 30, height: 480 },
+    { x: 850, y: 350, width: 30, height: 350 },
+    { x: 300, y: 270, width: 30, height: 430 },
   ];
 
   const enemies: EnemyStats[] = [
@@ -293,45 +298,47 @@ export function createLevel3(): LevelData {
     // Пол
     { rect: { x: 0, y: 800, width: 2800, height: 40 } },
     
-    // Старт в центре
-    // Стена 1 (разделяет уровень)
-    { rect: { x: 1200, y: 200, width: 20, height: 600 } },
+    // Старт в центре - органичная центральная стена
+    { rect: { x: 1200, y: 180, width: 60, height: 620 } },
+    { rect: { x: 1180, y: 180, width: 100, height: 30 } }, // Верхушка
     
     // Левая часть (движение влево-вверх)
-    { rect: { x: 100, y: 700, width: 200, height: 20 } },
-    { rect: { x: 350, y: 600, width: 150, height: 20 } },
-    { rect: { x: 150, y: 500, width: 150, height: 20 } },
-    { rect: { x: 400, y: 400, width: 150, height: 20 } },
-    { rect: { x: 200, y: 300, width: 150, height: 20 } },
-    { rect: { x: 450, y: 200, width: 200, height: 20 } },
+    { rect: { x: 100, y: 700, width: 250, height: 25 } },
+    { rect: { x: 350, y: 600, width: 180, height: 25 } },
+    { rect: { x: 150, y: 500, width: 180, height: 25 } },
+    { rect: { x: 400, y: 400, width: 180, height: 25 } },
+    { rect: { x: 200, y: 300, width: 180, height: 25 } },
+    { rect: { x: 450, y: 200, width: 250, height: 25 } },
     
-    // Стена 2 (блокирует прямой путь)
-    { rect: { x: 700, y: 300, width: 20, height: 500 } },
-    { rect: { x: 600, y: 400, width: 80, height: 20 } },
-    { rect: { x: 750, y: 350, width: 80, height: 20 } },
+    // Стена 2 - органичная (блокирует прямой путь)
+    { rect: { x: 700, y: 280, width: 50, height: 520 } },
+    { rect: { x: 680, y: 280, width: 90, height: 30 } }, // Верхушка
+    { rect: { x: 600, y: 400, width: 100, height: 25 } },
+    { rect: { x: 760, y: 350, width: 100, height: 25 } },
     
     // Правая часть (движение вправо-вверх)
-    { rect: { x: 1400, y: 700, width: 200, height: 20 } },
-    { rect: { x: 1650, y: 600, width: 150, height: 20 } },
-    { rect: { x: 1450, y: 500, width: 150, height: 20 } },
-    { rect: { x: 1700, y: 400, width: 150, height: 20 } },
-    { rect: { x: 1500, y: 300, width: 150, height: 20 } },
-    { rect: { x: 1750, y: 200, width: 200, height: 20 } },
+    { rect: { x: 1400, y: 700, width: 250, height: 25 } },
+    { rect: { x: 1650, y: 600, width: 180, height: 25 } },
+    { rect: { x: 1450, y: 500, width: 180, height: 25 } },
+    { rect: { x: 1700, y: 400, width: 180, height: 25 } },
+    { rect: { x: 1500, y: 300, width: 180, height: 25 } },
+    { rect: { x: 1750, y: 200, width: 250, height: 25 } },
     
-    // Стена 3
-    { rect: { x: 2100, y: 250, width: 20, height: 550 } },
-    { rect: { x: 2000, y: 350, width: 80, height: 20 } },
-    { rect: { x: 2150, y: 300, width: 80, height: 20 } },
+    // Стена 3 - органичная
+    { rect: { x: 2100, y: 230, width: 50, height: 570 } },
+    { rect: { x: 2080, y: 230, width: 90, height: 30 } }, // Верхушка
+    { rect: { x: 2000, y: 350, width: 100, height: 25 } },
+    { rect: { x: 2160, y: 300, width: 100, height: 25 } },
     
     // Финальная секция
-    { rect: { x: 2300, y: 600, width: 200, height: 20 } },
-    { rect: { x: 2450, y: 500, width: 150, height: 20 } },
-    { rect: { x: 2600, y: 400, width: 150, height: 20 } },
+    { rect: { x: 2300, y: 600, width: 250, height: 25 } },
+    { rect: { x: 2450, y: 500, width: 180, height: 25 } },
+    { rect: { x: 2600, y: 400, width: 180, height: 25 } },
     
     // Стены
-    { rect: { x: 0, y: 0, width: 20, height: 840 } },
-    { rect: { x: 2780, y: 0, width: 20, height: 840 } },
-    { rect: { x: 0, y: 0, width: 2800, height: 20 } },
+    { rect: { x: 0, y: 0, width: 40, height: 840 } },
+    { rect: { x: 2760, y: 0, width: 40, height: 840 } },
+    { rect: { x: 0, y: 0, width: 2800, height: 30 } },
     
     // Проходные платформы
     { rect: { x: 550, y: 750, width: 80, height: 15 }, isPassThrough: true },

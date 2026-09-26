@@ -15,6 +15,7 @@ export class Renderer {
   private canvasHeight: number;
   private levelWidth: number;
   private levelHeight: number;
+  private levelNumber: number = 1;
 
   constructor(ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number, levelWidth: number, levelHeight: number) {
     this.ctx = ctx;
@@ -22,6 +23,10 @@ export class Renderer {
     this.canvasHeight = canvasHeight;
     this.levelWidth = levelWidth;
     this.levelHeight = levelHeight;
+  }
+  
+  setLevelNumber(levelNumber: number): void {
+    this.levelNumber = levelNumber;
   }
 
   updateCamera(targetX: number, targetY: number): void {
@@ -42,7 +47,7 @@ export class Renderer {
     ctx.fillStyle = level.bgColor;
     ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    this.renderBackground();
+    this.renderBackground(this.levelNumber);
 
     ctx.translate(-this.cameraX, -this.cameraY);
 
@@ -72,10 +77,53 @@ export class Renderer {
     ctx.restore();
   }
 
-  private renderBackground(): void {
+  private renderBackground(levelNumber: number): void {
     const ctx = this.ctx;
     
-    // Градиентный фон неба
+    // Тюремный фон для первых 3 уровней
+    if (levelNumber <= 3) {
+      // Тёмно-серый тюремный фон
+      const prisonGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
+      prisonGradient.addColorStop(0, '#1a1a1a');
+      prisonGradient.addColorStop(0.5, '#2a2a2a');
+      prisonGradient.addColorStop(1, '#1a1a1a');
+      ctx.fillStyle = prisonGradient;
+      ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+      
+      // Кирпичная текстура на фоне
+      ctx.fillStyle = 'rgba(40, 40, 40, 0.5)';
+      for (let y = 0; y < this.canvasHeight; y += 30) {
+        for (let x = 0; x < this.canvasWidth; x += 60) {
+          const offset = (Math.floor(y / 30) % 2) * 30;
+          ctx.fillRect(x + offset, y, 58, 28);
+        }
+      }
+      
+      // Решётки на фоне (параллакс)
+      ctx.strokeStyle = 'rgba(60, 60, 60, 0.3)';
+      ctx.lineWidth = 3;
+      for (let x = 100; x < this.canvasWidth; x += 200) {
+        const parallaxX = x - this.cameraX * 0.1;
+        ctx.beginPath();
+        ctx.moveTo(parallaxX, 0);
+        ctx.lineTo(parallaxX, this.canvasHeight);
+        ctx.stroke();
+      }
+      
+      // Тусклый свет сверху
+      const lightGradient = ctx.createRadialGradient(
+        this.canvasWidth / 2, 0, 0,
+        this.canvasWidth / 2, 0, this.canvasHeight
+      );
+      lightGradient.addColorStop(0, 'rgba(100, 100, 80, 0.15)');
+      lightGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = lightGradient;
+      ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+      
+      return;
+    }
+    
+    // Градиентный фон неба (для уровней 4-5)
     const skyGradient = ctx.createLinearGradient(0, 0, 0, this.canvasHeight);
     skyGradient.addColorStop(0, '#0a0a2a');
     skyGradient.addColorStop(0.5, '#1a1a3a');
