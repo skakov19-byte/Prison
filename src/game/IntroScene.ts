@@ -240,14 +240,32 @@ export class IntroRenderer {
       ctx.translate(mayorX, mayorY + 25);
       ctx.rotate((time - 4) * 0.5);
       
-      // Тело
-      ctx.fillStyle = '#2c3e50';
+      // Тело (костюм)
+      const suitGradient = ctx.createLinearGradient(-15, 0, -15, 50);
+      suitGradient.addColorStop(0, '#2c3e50');
+      suitGradient.addColorStop(1, '#1a252f');
+      ctx.fillStyle = suitGradient;
       ctx.fillRect(-15, 0, 30, 50);
+      
+      // Галстук
+      ctx.fillStyle = '#c0392b';
+      ctx.beginPath();
+      ctx.moveTo(0, 5);
+      ctx.lineTo(-5, 25);
+      ctx.lineTo(5, 25);
+      ctx.closePath();
+      ctx.fill();
       
       // Голова
       ctx.fillStyle = '#f4a460';
       ctx.beginPath();
       ctx.arc(0, -10, 15, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Волосы
+      ctx.fillStyle = '#2c2c2c';
+      ctx.beginPath();
+      ctx.arc(0, -15, 15, Math.PI, 0);
       ctx.fill();
       
       ctx.restore();
@@ -438,27 +456,23 @@ export class IntroRenderer {
     ctx.fillRect(620, 380, 60, 80);
     ctx.fillRect(620, 460, 60, 40);
 
-    // Главный герой (оранжевая роба)
+    // Главный герой (в обычной одежде - до ареста)
     const heroX = 400;
     const heroY = 400;
     
-    // Тело
-    const robeGradient = ctx.createLinearGradient(heroX - 15, heroY, heroX - 15, heroY + 50);
-    robeGradient.addColorStop(0, '#ff9933');
-    robeGradient.addColorStop(1, '#cc5500');
-    ctx.fillStyle = robeGradient;
-    ctx.fillRect(heroX - 15, heroY, 30, 50);
+    // Тело (обычная одежда - футболка и джинсы)
+    const shirtGradient = ctx.createLinearGradient(heroX - 15, heroY, heroX - 15, heroY + 25);
+    shirtGradient.addColorStop(0, '#4a90d9');
+    shirtGradient.addColorStop(1, '#2c5f8d');
+    ctx.fillStyle = shirtGradient;
+    ctx.fillRect(heroX - 15, heroY, 30, 25);
     
-    // Полосы на робе
-    ctx.fillStyle = '#cc5500';
-    ctx.fillRect(heroX - 15, heroY + 15, 30, 3);
-    ctx.fillRect(heroX - 15, heroY + 30, 30, 3);
-    
-    // Номер на робе
-    ctx.fillStyle = '#000000';
-    ctx.font = 'bold 8px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('#247', heroX, heroY + 25);
+    // Джинсы
+    const pantsGradient = ctx.createLinearGradient(heroX - 15, heroY + 25, heroX - 15, heroY + 50);
+    pantsGradient.addColorStop(0, '#2c3e50');
+    pantsGradient.addColorStop(1, '#1a252f');
+    ctx.fillStyle = pantsGradient;
+    ctx.fillRect(heroX - 15, heroY + 25, 30, 25);
     
     // Голова
     const headGradient = ctx.createRadialGradient(heroX, heroY - 10, 2, heroX, heroY - 10, 15);
@@ -669,53 +683,55 @@ export class IntroRenderer {
       ctx.stroke();
     }
 
-    // Два полицейских заводят героя
-    const cop1X = this.canvasWidth - 180;
-    const cop2X = this.canvasWidth - 270;
-    const copY = 450;
-    
-    // Полицейский 1 (справа от героя)
-    const uniformGradient = ctx.createLinearGradient(cop1X - 15, copY, cop1X - 15, copY + 60);
-    uniformGradient.addColorStop(0, '#1a1a2e');
-    uniformGradient.addColorStop(1, '#0a0a1e');
-    ctx.fillStyle = uniformGradient;
-    ctx.fillRect(cop1X - 15, copY, 30, 60);
-    
-    // Ремень
-    ctx.fillStyle = '#2a2a2a';
-    ctx.fillRect(cop1X - 15, copY + 35, 30, 5);
-    
-    // Голова
-    ctx.fillStyle = '#f4a460';
-    ctx.beginPath();
-    ctx.arc(cop1X, copY - 10, 15, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Кепка
-    ctx.fillStyle = '#0a0a1e';
-    ctx.fillRect(cop1X - 18, copY - 25, 36, 12);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(cop1X - 20, copY - 15, 40, 3);
-    
-    // Рука держит героя
-    ctx.fillStyle = '#f4a460';
-    ctx.fillRect(cop1X - 25, copY + 10, 10, 20);
-    
-    // Полицейский 2 (слева от героя)
-    ctx.fillStyle = uniformGradient;
-    ctx.fillRect(cop2X - 15, copY, 30, 60);
-    ctx.fillStyle = '#2a2a2a';
-    ctx.fillRect(cop2X - 15, copY + 35, 30, 5);
-    ctx.fillStyle = '#f4a460';
-    ctx.beginPath();
-    ctx.arc(cop2X, copY - 10, 15, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#0a0a1e';
-    ctx.fillRect(cop2X - 18, copY - 25, 36, 12);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(cop2X - 20, copY - 15, 40, 3);
-    ctx.fillStyle = '#f4a460';
-    ctx.fillRect(cop2X + 15, copY + 10, 10, 20);
+    // Два полицейских заводят героя (исчезают после 3 секунд)
+    if (time < 3) {
+      const cop1X = this.canvasWidth - 180;
+      const cop2X = this.canvasWidth - 270;
+      const copY = 450;
+      
+      // Полицейский 1 (справа от героя)
+      const uniformGradient = ctx.createLinearGradient(cop1X - 15, copY, cop1X - 15, copY + 60);
+      uniformGradient.addColorStop(0, '#1a1a2e');
+      uniformGradient.addColorStop(1, '#0a0a1e');
+      ctx.fillStyle = uniformGradient;
+      ctx.fillRect(cop1X - 15, copY, 30, 60);
+      
+      // Ремень
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(cop1X - 15, copY + 35, 30, 5);
+      
+      // Голова
+      ctx.fillStyle = '#f4a460';
+      ctx.beginPath();
+      ctx.arc(cop1X, copY - 10, 15, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Кепка
+      ctx.fillStyle = '#0a0a1e';
+      ctx.fillRect(cop1X - 18, copY - 25, 36, 12);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(cop1X - 20, copY - 15, 40, 3);
+      
+      // Рука держит героя
+      ctx.fillStyle = '#f4a460';
+      ctx.fillRect(cop1X - 25, copY + 10, 10, 20);
+      
+      // Полицейский 2 (слева от героя)
+      ctx.fillStyle = uniformGradient;
+      ctx.fillRect(cop2X - 15, copY, 30, 60);
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(cop2X - 15, copY + 35, 30, 5);
+      ctx.fillStyle = '#f4a460';
+      ctx.beginPath();
+      ctx.arc(cop2X, copY - 10, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0a0a1e';
+      ctx.fillRect(cop2X - 18, copY - 25, 36, 12);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(cop2X - 20, copY - 15, 40, 3);
+      ctx.fillStyle = '#f4a460';
+      ctx.fillRect(cop2X + 15, copY + 10, 10, 20);
+    }
 
     // Главный герой (между полицейскими)
     const heroX = this.canvasWidth - 225;

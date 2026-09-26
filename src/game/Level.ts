@@ -63,7 +63,6 @@ export function createLevel1(): LevelData {
     { rect: { x: 0, y: 0, width: 40, height: 740 } }, // Толстая левая стена
     { rect: { x: 150, y: 0, width: 40, height: 648 } }, // Правая стена камеры (до двери)
     { rect: { x: 150, y: 700, width: 40, height: 40 } }, // Правая стена камеры (после двери)
-    { rect: { x: 0, y: 0, width: 190, height: 30 } }, // Потолок камеры
     
     // Коридор после камеры - подъём 45° (убраны нижние 2 платформы)
     { rect: { x: 370, y: 550, width: 60, height: 20 } },

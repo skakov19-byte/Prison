@@ -450,12 +450,12 @@ export class Renderer {
     const ctx = this.ctx;
 
     for (const door of doors) {
-      // Рама двери
-      ctx.fillStyle = '#4a3728';
-      ctx.fillRect(door.x - 3, door.y - 3, door.width + 6, door.height + 6);
-
       // Дверь
       if (door.locked) {
+        // Рама двери (только для закрытой двери)
+        ctx.fillStyle = '#4a3728';
+        ctx.fillRect(door.x - 3, door.y - 3, door.width + 6, door.height + 6);
+        
         // Закрытая дверь - тёмная
         const doorGradient = ctx.createLinearGradient(door.x, door.y, door.x + door.width, door.y);
         doorGradient.addColorStop(0, '#2a1f18');
@@ -499,29 +499,8 @@ export class Renderer {
         ctx.font = 'bold 10px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('[E]', door.x + door.width / 2, door.y - 8);
-      } else {
-        // Открытая дверь - светлая
-        const doorGradient = ctx.createLinearGradient(door.x, door.y, door.x + door.width, door.y);
-        doorGradient.addColorStop(0, '#5a4a38');
-        doorGradient.addColorStop(0.5, '#6d5a48');
-        doorGradient.addColorStop(1, '#5a4a38');
-        ctx.fillStyle = doorGradient;
-        ctx.fillRect(door.x, door.y, door.width, door.height);
-
-        // Ручка двери
-        ctx.fillStyle = '#DAA520';
-        ctx.beginPath();
-        ctx.arc(door.x + door.width - 8, door.y + door.height / 2, 3, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Панели на двери (адаптивные)
-        ctx.strokeStyle = '#4a3a28';
-        ctx.lineWidth = 1;
-        if (door.height > 30) {
-          ctx.strokeRect(door.x + 5, door.y + 5, door.width - 10, door.height / 2 - 8);
-          ctx.strokeRect(door.x + 5, door.y + door.height / 2 + 3, door.width - 10, door.height / 2 - 8);
-        }
       }
+      // Открытая дверь не рисуется вообще (проход свободен)
     }
   }
 
