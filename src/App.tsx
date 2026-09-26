@@ -611,7 +611,7 @@ export default function App() {
             <p><span className="text-gray-300">W</span> — Стрелять вверх (с пистолетом)</p>
             <p><span className="text-gray-300">S</span> — Падение сквозь платформу</p>
             <p><span className="text-gray-300">ESC</span> — Пауза</p>
-            <p className="mt-4 text-orange-400">🎮 6 уровней: 3 уровня тюрьмы + 3 уровня свободы!</p>
+            <p className="mt-4 text-orange-400">🎮 7 уровней: Побег из тюрьмы → Полёт на небоскрёб!</p>
             <p className="text-xs text-gray-600">Первые 3 уровня - только ближний бой. Огнестрел найдёте позже!</p>
           </div>
         </div>
@@ -715,6 +715,26 @@ export default function App() {
 
   // ====== РОЛИК АКТА 2 ======
   if (screen === 'act2_intro') {
+    return (
+      <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="border-2 border-gray-700 rounded-lg shadow-2xl block cursor-pointer"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
+            <p className="text-gray-400 text-sm">Нажмите чтобы пропустить</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== РОЛИК АКТА 3 ======
+  if (screen === 'act3_intro') {
     return (
       <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
         <div className="relative">
@@ -908,7 +928,7 @@ export default function App() {
                   🛒 Магазин
                 </button>
               )}
-              {currentLevel < 6 ? (
+              {currentLevel < 7 ? (
                 <button
                   onClick={goToNextLevel}
                   className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg transition-all cursor-pointer"
