@@ -21,6 +21,7 @@ export interface GameCallbacks {
   onDoorMessage: (message: string) => void;
   onItemPickup: (item: InventoryItem) => void;
   onInventoryChange: (inventory: InventoryItem[]) => void;
+  onLockpickStart: () => void;
 }
 
 export class GameEngine {
@@ -372,11 +373,8 @@ export class GameEngine {
         if (door.locked && door.requiresLockpick && this.input.interactPressed) {
           // Проверяем наличие отмычки в инвентаре
           if (this.player.hasItem(ItemType.LOCKPICK)) {
-            door.locked = false;
-            this.player.removeItem(ItemType.LOCKPICK); // Отмычка исчезает
-            if (door.message) {
-              this.callbacks.onDoorMessage(door.message);
-            }
+            // Запускаем мини-игру с отмычкой
+            this.callbacks.onLockpickStart();
           } else {
             this.callbacks.onDoorMessage('Нужна отмычка!');
           }
@@ -670,6 +668,21 @@ export class GameEngine {
     this.player.y = y;
     this.player.vx = 0;
     this.player.vy = 0;
+  }
+
+  unlockDoor(): void {
+    // Открываем все двери которые требуют отмычку
+    if (this.level.doors) {
+      for (const door of this.level.doors) {
+        if (door.locked && door.requiresLockpick) {
+          door.locked = false;
+          this.player.removeItem(ItemType.LOCKPICK); // Отмычка исчезает
+          if (door.message) {
+            this.callbacks.onDoorMessage(door.message);
+          }
+        }
+      }
+    }
   }
 
   applyUpgrades(upgrades: {

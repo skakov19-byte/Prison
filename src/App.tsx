@@ -6,8 +6,9 @@ import { Act2IntroRenderer } from './game/Act2Intro';
 import { Act3IntroRenderer } from './game/Act3Intro';
 import { ChaseScene } from './game/ChaseScene';
 import { JetpackScene } from './game/JetpackScene';
+import { LockpickScene } from './game/LockpickScene';
 
-type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro' | 'act3_intro' | 'chase_scene' | 'jetpack_scene';
+type GameScreen = 'menu' | 'intro' | 'playing' | 'dead' | 'victory' | 'shop' | 'act2_intro' | 'act3_intro' | 'chase_scene' | 'jetpack_scene' | 'lockpick_scene';
 
 interface ShopItem {
   id: string;
@@ -27,6 +28,7 @@ export default function App() {
   const act3IntroRendererRef = useRef<Act3IntroRenderer | null>(null);
   const chaseSceneRef = useRef<ChaseScene | null>(null);
   const jetpackSceneRef = useRef<JetpackScene | null>(null);
+  const lockpickSceneRef = useRef<LockpickScene | null>(null);
   const isTransitioningRef = useRef(false);
 
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -187,6 +189,12 @@ export default function App() {
           onDoorMessage: (msg: string) => showDoorMessage(msg),
           onItemPickup: (item: InventoryItem) => handleItemPickup(item),
           onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
+          onLockpickStart: () => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            setScreen('lockpick_scene');
+          },
         }, currentLevel, inventory, gold);
 
         // Применяем улучшения из магазина
@@ -481,6 +489,58 @@ export default function App() {
     };
   }, [screen]);
 
+  // Рендеринг мини-игры с отмычкой
+  useEffect(() => {
+    if (screen !== 'lockpick_scene') return;
+
+    const timer = setTimeout(() => {
+      if (!canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const lockpickScene = new LockpickScene(ctx, canvas.width, canvas.height);
+      lockpickSceneRef.current = lockpickScene;
+
+      let lastTime = performance.now();
+      let animFrameId: number;
+
+      const renderLoop = (timestamp: number) => {
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        const isFinished = lockpickScene.update(dt);
+        lockpickScene.render();
+
+        if (isFinished) {
+          // Мини-игра завершена успешно
+          cancelAnimationFrame(animFrameId);
+          
+          // Открываем дверь
+          if (engineRef.current) {
+            engineRef.current.unlockDoor();
+            engineRef.current.resume();
+          }
+          setScreen('playing');
+          return;
+        }
+
+        animFrameId = requestAnimationFrame(renderLoop);
+      };
+
+      animFrameId = requestAnimationFrame(renderLoop);
+
+      return () => {
+        cancelAnimationFrame(animFrameId);
+      };
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [screen]);
+
   // Обработка Escape для паузы и пропуска интро
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -600,6 +660,12 @@ export default function App() {
           onDoorMessage: (msg: string) => showDoorMessage(msg),
           onItemPickup: (item: InventoryItem) => handleItemPickup(item),
           onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
+          onLockpickStart: () => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            setScreen('lockpick_scene');
+          },
         }, nextLevel, savedInventory, savedGold);
 
         // Применяем улучшения из магазина
@@ -683,6 +749,12 @@ export default function App() {
           onDoorMessage: (msg: string) => showDoorMessage(msg),
           onItemPickup: (item: InventoryItem) => handleItemPickup(item),
           onInventoryChange: (inv: InventoryItem[]) => handleInventoryChange(inv),
+          onLockpickStart: () => {
+            if (engineRef.current) {
+              engineRef.current.pause();
+            }
+            setScreen('lockpick_scene');
+          },
         }, nextLevel, savedInventory, savedGold);
 
         // Применяем улучшения из магазина
@@ -973,6 +1045,27 @@ export default function App() {
           <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-3 py-2">
             <p className="text-cyan-400 text-xs font-bold">🚀 ПОЛЁТ!</p>
             <p className="text-gray-400 text-xs">Долетите до крыши!</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== МИНИ-ИГРА С ОТМЫЧКОЙ ======
+  if (screen === 'lockpick_scene') {
+    return (
+      <div className="w-full h-screen bg-black flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="border-2 border-yellow-700 rounded-lg shadow-2xl block"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          <div className="absolute top-4 right-4 bg-black/70 rounded-lg px-3 py-2">
+            <p className="text-yellow-400 text-xs font-bold">🔑 ВЗЛОМ!</p>
+            <p className="text-gray-400 text-xs">Попадите в зелёную зону!</p>
           </div>
         </div>
       </div>
